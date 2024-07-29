@@ -23,8 +23,7 @@ void UMultiplayerSessionsSubsystem::CreateSession(int32 NumPublicConnections, FS
 		return;
 	}
 
-	auto ExistingSession = SessionInterface->GetNamedSession(NAME_GameSession);
-	if (ExistingSession != nullptr)
+	if (const auto ExistingSession = SessionInterface->GetNamedSession(NAME_GameSession); ExistingSession != nullptr)
 	{
 		GEngine->AddOnScreenDebugMessage(-1,15.f,FColor::Red, TEXT("found existing session wtf..."));
 		bCreateSessionOnDestroy = true;
@@ -34,7 +33,6 @@ void UMultiplayerSessionsSubsystem::CreateSession(int32 NumPublicConnections, FS
 		DestroySession();
 	}
 
-	// Store the delegate in a FDelegateHandle so we can later remove it from the delegate list
 	CreateSessionCompleteDelegateHandle = SessionInterface->AddOnCreateSessionCompleteDelegate_Handle(CreateSessionCompleteDelegate);
 
 	LastSessionSettings = MakeShareable(new FOnlineSessionSettings());
@@ -56,7 +54,6 @@ void UMultiplayerSessionsSubsystem::CreateSession(int32 NumPublicConnections, FS
 	{
 		SessionInterface->ClearOnCreateSessionCompleteDelegate_Handle(CreateSessionCompleteDelegateHandle);
 
-		// Broadcast our own custom delegate
 		MultiplayerOnCreateSessionComplete.Broadcast(false);
 	}
 }
@@ -77,31 +74,13 @@ void UMultiplayerSessionsSubsystem::FindSessions(int32 MaxSearchResults)
 	LastSessionSearch->QuerySettings.Set(SEARCH_PRESENCE, true, EOnlineComparisonOp::Equals);
 	LastSessionSearch->TimeoutInSeconds = 1000.f;
 
-	// GEngine->AddOnScreenDebugMessage(-1,15.f,FColor::Red,IOnlineSubsystem::Get()->GetSubsystemName().ToString());
-
 	const ULocalPlayer* LocalPlayer = GetWorld()->GetFirstLocalPlayerFromController();
-	// if (LocalPlayer)
-	// {
-	// 	GEngine->AddOnScreenDebugMessage(-1,15.f,FColor::Red, LocalPlayer->GetPreferredUniqueNetId().ToString());
-	// }
-	// else
-	// {
-	// 	GEngine->AddOnScreenDebugMessage(-1,15.f,FColor::Red, TEXT("NO PLAYER"));
-	// }
 	
 	if (!SessionInterface->FindSessions(*LocalPlayer->GetPreferredUniqueNetId(), LastSessionSearch.ToSharedRef()))
 	{
-		// GEngine->AddOnScreenDebugMessage(-1,15.f,FColor::Red, TEXT("NO SESSIONS"));
-		// UE_LOG(LogTemp, Warning, TEXT("NO SESSIONS!"));
-		
 		SessionInterface->ClearOnFindSessionsCompleteDelegate_Handle(FindSessionsCompleteDelegateHandle);
 
 		MultiplayerOnFindSessionsComplete.Broadcast(TArray<FOnlineSessionSearchResult>(), false);
-	}
-	else
-	{
-		// GEngine->AddOnScreenDebugMessage(-1,15.f,FColor::Red, TEXT("Found sessions, but..."));
-		// UE_LOG(LogTemp, Warning, TEXT("Found sessions, but...!"));
 	}
 }
 
