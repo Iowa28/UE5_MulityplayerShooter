@@ -25,7 +25,6 @@ void UMultiplayerSessionsSubsystem::CreateSession(int32 NumPublicConnections, FS
 
 	if (const auto ExistingSession = SessionInterface->GetNamedSession(NAME_GameSession); ExistingSession != nullptr)
 	{
-		GEngine->AddOnScreenDebugMessage(-1,15.f,FColor::Red, TEXT("found existing session wtf..."));
 		bCreateSessionOnDestroy = true;
 		LastNumPublicConnections = NumPublicConnections;
 		LastMatchType = MatchType;
@@ -46,8 +45,6 @@ void UMultiplayerSessionsSubsystem::CreateSession(int32 NumPublicConnections, FS
 	LastSessionSettings->Set(FName("MatchType"), MatchType, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
 	LastSessionSettings->BuildUniqueId = 1;
 	LastSessionSettings->bUseLobbiesIfAvailable = true;
-
-	GEngine->AddOnScreenDebugMessage(-1,15.f,FColor::Yellow, FString::Printf(TEXT("Creating session with match type: %s"), *MatchType));
 
 	const ULocalPlayer* LocalPlayer = GetWorld()->GetFirstLocalPlayerFromController();
 	if (!SessionInterface->CreateSession(*LocalPlayer->GetPreferredUniqueNetId(), NAME_GameSession, *LastSessionSettings))
