@@ -17,11 +17,13 @@ class MULTIPLAYERSHOOTER_API ABaseCharacter : public ACharacter
 
 public:
 	ABaseCharacter();
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	
 	virtual void Tick(float DeltaTime) override;
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-	
+
 protected:
 	virtual void BeginPlay() override;
 	
@@ -50,6 +52,13 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "HUD", meta = (AllowPrivateAccess))
 	class UWidgetComponent* OverheadWidget;
+
+	UPROPERTY(ReplicatedUsing = OnRep_OverlappingWeapon)
+	class AWeapon* OverlappingWeapon;
+
+	UFUNCTION()
+	void OnRep_OverlappingWeapon(AWeapon* LastWeapon);
+
 public:
-	
+	void SetOverlappingWeapon(AWeapon* Weapon);
 };
