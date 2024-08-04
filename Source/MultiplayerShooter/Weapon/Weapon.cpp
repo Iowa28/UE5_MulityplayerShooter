@@ -5,6 +5,7 @@
 #include "Components/SphereComponent.h"
 #include "Components/WidgetComponent.h"
 #include "MultiplayerShooter/Character/BaseCharacter.h"
+#include "Net/UnrealNetwork.h"
 
 AWeapon::AWeapon()
 {
@@ -27,12 +28,11 @@ AWeapon::AWeapon()
 	PickupWidget->SetupAttachment(RootComponent);
 }
 
-void AWeapon::ShowPickupWidget(bool bShowWidget)
+void AWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
-	if (PickupWidget)
-	{
-		PickupWidget->SetVisibility(bShowWidget);
-	}
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AWeapon, WeaponState);
 }
 
 void AWeapon::BeginPlay()
@@ -54,7 +54,7 @@ void AWeapon::BeginPlay()
 }
 
 void AWeapon::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+                              UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	if (ABaseCharacter* Character = Cast<ABaseCharacter>(OtherActor))
 	{
@@ -63,10 +63,41 @@ void AWeapon::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* 
 }
 
 void AWeapon::OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+                                 UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
 	if (ABaseCharacter* Character = Cast<ABaseCharacter>(OtherActor))
 	{
 		Character->SetOverlappingWeapon(nullptr);
+	}
+}
+
+void AWeapon::SetWeaponState(EWeaponState State)
+{
+	WeaponState = State;
+
+	switch (WeaponState)
+	{
+	case EWeaponState::EWS_Equipped:
+		ShowPickupWidget(false);
+		AreaSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		break;
+	}
+}
+
+void AWeapon::OnRep_WeaponState()
+{
+	switch (WeaponState)
+	{
+	case EWeaponState::EWS_Equipped:
+		ShowPickupWidget(false);
+		break;
+	}
+}
+
+void AWeapon::ShowPickupWidget(bool bShowWidget)
+{
+	if (PickupWidget)
+	{
+		PickupWidget->SetVisibility(bShowWidget);
 	}
 }

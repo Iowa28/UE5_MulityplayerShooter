@@ -116,7 +116,22 @@ void ABaseCharacter::Look(const FInputActionValue& Value)
 
 void ABaseCharacter::EquipButtonPressed()
 {
-	if (CombatComponent && HasAuthority())
+	if (CombatComponent)
+	{
+		if (HasAuthority())
+		{
+			CombatComponent->EquipWeapon(OverlappingWeapon);
+		}
+		else
+		{
+			ServerEquipButtonPressed();
+		}
+	}
+}
+
+void ABaseCharacter::ServerEquipButtonPressed_Implementation()
+{
+	if (CombatComponent)
 	{
 		CombatComponent->EquipWeapon(OverlappingWeapon);
 	}
