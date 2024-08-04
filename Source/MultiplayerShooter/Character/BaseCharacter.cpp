@@ -9,6 +9,7 @@
 #include "Components/WidgetComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "MultiplayerShooter/Components/CombatComponent.h"
 #include "MultiplayerShooter/Weapon/Weapon.h"
 #include "Net/UnrealNetwork.h"
 
@@ -30,6 +31,9 @@ ABaseCharacter::ABaseCharacter()
 
 	OverheadWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("OverheadWidget"));
 	OverheadWidget->SetupAttachment(RootComponent);
+
+	CombatComponent = CreateDefaultSubobject<UCombatComponent>(TEXT("CombatComponent"));
+	CombatComponent->SetIsReplicated(true);
 }
 
 void ABaseCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -67,6 +71,18 @@ void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ThisClass::Move);
 
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ThisClass::Look);
+		
+		EnhancedInputComponent->BindAction(EquipAction, ETriggerEvent::Started, this, &ThisClass::EquipButtonPressed);
+	}
+}
+
+void ABaseCharacter::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+
+	if (CombatComponent)
+	{
+		CombatComponent->Character = this;
 	}
 }
 
@@ -95,6 +111,14 @@ void ABaseCharacter::Look(const FInputActionValue& Value)
 	{
 		AddControllerYawInput(LookAxisVector.X);
 		AddControllerPitchInput(LookAxisVector.Y);
+	}
+}
+
+void ABaseCharacter::EquipButtonPressed()
+{
+	if (CombatComponent && HasAuthority())
+	{
+		CombatComponent->EquipWeapon(OverlappingWeapon);
 	}
 }
 

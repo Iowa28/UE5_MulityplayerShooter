@@ -24,12 +24,16 @@ public:
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	virtual void PostInitializeComponents() override;
+
 protected:
 	virtual void BeginPlay() override;
 	
 	void Move(const FInputActionValue& Value);
 
 	void Look(const FInputActionValue& Value);
+
+	void EquipButtonPressed();
 
 private:
 	UPROPERTY(VisibleAnywhere, Category = "Camera")
@@ -50,6 +54,9 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
 	UInputAction* LookAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
+	UInputAction* EquipAction;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "HUD", meta = (AllowPrivateAccess))
 	class UWidgetComponent* OverheadWidget;
 
@@ -58,6 +65,9 @@ private:
 
 	UFUNCTION()
 	void OnRep_OverlappingWeapon(AWeapon* LastWeapon);
+
+	UPROPERTY(VisibleAnywhere)
+	class UCombatComponent* CombatComponent;
 
 public:
 	void SetOverlappingWeapon(AWeapon* Weapon);
