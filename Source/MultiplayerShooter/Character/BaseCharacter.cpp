@@ -164,3 +164,8 @@ void ABaseCharacter::SetOverlappingWeapon(AWeapon* Weapon)
 		}
 	}
 }
+
+bool ABaseCharacter::IsWeaponEquipped() const
+{
+	return CombatComponent && CombatComponent->EquippedWeapon;
+}
