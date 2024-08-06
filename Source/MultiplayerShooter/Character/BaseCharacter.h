@@ -34,6 +34,9 @@ protected:
 	void Look(const FInputActionValue& Value);
 
 	void EquipButtonPressed();
+	
+	void DuckButtonPressed();
+	void DuckButtonReleased();
 
 private:
 	UPROPERTY(VisibleAnywhere, Category = "Camera")
@@ -56,6 +59,9 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
 	UInputAction* EquipAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
+	UInputAction* DuckAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "HUD", meta = (AllowPrivateAccess))
 	class UWidgetComponent* OverheadWidget;

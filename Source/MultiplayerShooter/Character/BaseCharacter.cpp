@@ -34,6 +34,8 @@ ABaseCharacter::ABaseCharacter()
 
 	CombatComponent = CreateDefaultSubobject<UCombatComponent>(TEXT("CombatComponent"));
 	CombatComponent->SetIsReplicated(true);
+
+	GetCharacterMovement()->NavAgentProps.bCanCrouch = true;
 }
 
 void ABaseCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -73,6 +75,9 @@ void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ThisClass::Look);
 		
 		EnhancedInputComponent->BindAction(EquipAction, ETriggerEvent::Started, this, &ThisClass::EquipButtonPressed);
+
+		EnhancedInputComponent->BindAction(DuckAction, ETriggerEvent::Started, this, &ThisClass::DuckButtonPressed);
+		EnhancedInputComponent->BindAction(DuckAction, ETriggerEvent::Completed, this, &ThisClass::DuckButtonReleased);
 	}
 }
 
@@ -127,6 +132,16 @@ void ABaseCharacter::EquipButtonPressed()
 			ServerEquipButtonPressed();
 		}
 	}
+}
+
+void ABaseCharacter::DuckButtonPressed()
+{
+	Crouch();
+}
+
+void ABaseCharacter::DuckButtonReleased()
+{
+	UnCrouch();
 }
 
 void ABaseCharacter::ServerEquipButtonPressed_Implementation()
