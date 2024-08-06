@@ -78,6 +78,9 @@ void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 		EnhancedInputComponent->BindAction(DuckAction, ETriggerEvent::Started, this, &ThisClass::DuckButtonPressed);
 		EnhancedInputComponent->BindAction(DuckAction, ETriggerEvent::Completed, this, &ThisClass::DuckButtonReleased);
+
+		EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Started, this, &ThisClass::AimButtonPressed);
+		EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Completed, this, &ThisClass::AimButtonReleased);
 	}
 }
 
@@ -144,6 +147,22 @@ void ABaseCharacter::DuckButtonReleased()
 	UnCrouch();
 }
 
+void ABaseCharacter::AimButtonPressed()
+{
+	if (CombatComponent)
+	{
+		CombatComponent->SetAiming(true);
+	}
+}
+
+void ABaseCharacter::AimButtonReleased()
+{
+	if (CombatComponent)
+	{
+		CombatComponent->SetAiming(false);
+	}
+}
+
 void ABaseCharacter::ServerEquipButtonPressed_Implementation()
 {
 	if (CombatComponent)
@@ -183,4 +202,9 @@ void ABaseCharacter::SetOverlappingWeapon(AWeapon* Weapon)
 bool ABaseCharacter::IsWeaponEquipped() const
 {
 	return CombatComponent && CombatComponent->EquippedWeapon;
+}
+
+bool ABaseCharacter::IsAiming() const
+{
+	return CombatComponent && CombatComponent->bAiming;
 }

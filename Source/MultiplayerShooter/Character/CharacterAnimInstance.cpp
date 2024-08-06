@@ -34,4 +34,5 @@ void UCharacterAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	bIsAccelerating = Character->GetCharacterMovement()->GetCurrentAcceleration().Size() > 0.f;
 	bWeaponEquipped = Character->IsWeaponEquipped();
 	bIsCrouched = Character->bIsCrouched;
+	bAiming = Character->IsAiming();
 }
