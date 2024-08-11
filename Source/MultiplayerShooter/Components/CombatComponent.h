@@ -42,4 +42,9 @@ private:
 
 	UPROPERTY(Replicated)
 	bool bAiming;
+
+	UPROPERTY(EditDefaultsOnly)
+	float AimWalkSpeed;
+	
+	float BaseWalkSpeed;
 };
