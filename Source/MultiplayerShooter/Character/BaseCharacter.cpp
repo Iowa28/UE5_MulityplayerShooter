@@ -181,7 +181,7 @@ void ABaseCharacter::AimOffset(float DeltaTime)
 	if (FMath::IsNearlyEqual(Speed, 0.f) && !bIsInAir)
 	{
 		const FRotator CurrentAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
-		FRotator DeltaAimRotation = UKismetMathLibrary::NormalizedDeltaRotator(CurrentAimRotation, StartingAimRotation);
+		const FRotator DeltaAimRotation = UKismetMathLibrary::NormalizedDeltaRotator(CurrentAimRotation, StartingAimRotation);
 		AimOffsetYaw = DeltaAimRotation.Yaw;
 		bUseControllerRotationYaw = false;
 	}
@@ -193,6 +193,12 @@ void ABaseCharacter::AimOffset(float DeltaTime)
 	}
 
 	AimOffsetPitch = GetBaseAimRotation().Pitch;
+	if (!IsLocallyControlled() && AimOffsetPitch > 90.f)
+	{
+		const FVector2D InRange = FVector2D(270.f, 360.f);
+		const FVector2D OutRange = FVector2D(-90.f, 0.f);
+		AimOffsetPitch = FMath::GetMappedRangeValueClamped(InRange, OutRange, AimOffsetPitch);
+	}
 }
 
 void ABaseCharacter::ServerEquipButtonPressed_Implementation()
