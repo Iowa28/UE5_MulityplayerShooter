@@ -99,4 +99,6 @@ public:
 
 	FORCEINLINE float GetAimOffsetYaw() const { return AimOffsetYaw; }
 	FORCEINLINE float GetAimOffsetPitch() const { return AimOffsetPitch; }
+
+	AWeapon* GetEquippedWeapon() const;
 };

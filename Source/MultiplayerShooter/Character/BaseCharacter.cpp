@@ -246,3 +246,8 @@ bool ABaseCharacter::IsAiming() const
 {
 	return CombatComponent && CombatComponent->bAiming;
 }
+
+AWeapon* ABaseCharacter::GetEquippedWeapon() const
+{
+	return CombatComponent ? CombatComponent->EquippedWeapon : nullptr;
+}
