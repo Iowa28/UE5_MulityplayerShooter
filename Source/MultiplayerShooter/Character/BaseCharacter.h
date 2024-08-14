@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "MultiplayerShooter/Types/TurningInPlace.h"
 #include "BaseCharacter.generated.h"
 
 class UInputMappingContext;
@@ -90,6 +91,10 @@ private:
 	float AimOffsetPitch;
 	FRotator StartingAimRotation;
 
+	ETurningInPlace TurningInPlace;
+
+	void TurnInPlace(float DeltaTime);
+
 public:
 	void SetOverlappingWeapon(AWeapon* Weapon);
 
@@ -101,4 +106,6 @@ public:
 	FORCEINLINE float GetAimOffsetPitch() const { return AimOffsetPitch; }
 
 	AWeapon* GetEquippedWeapon() const;
+
+	FORCEINLINE ETurningInPlace GetTurningInPlace() const { return TurningInPlace; }
 };

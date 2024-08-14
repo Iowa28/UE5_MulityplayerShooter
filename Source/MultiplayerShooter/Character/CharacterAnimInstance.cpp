@@ -35,6 +35,7 @@ void UCharacterAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	EquippedWeapon = Character->GetEquippedWeapon();
 	bIsCrouched = Character->bIsCrouched;
 	bAiming = Character->IsAiming();
+	TurningInPlace = Character->GetTurningInPlace();
 
 	const FRotator AimRotation = Character->GetBaseAimRotation();
 	const FRotator MovementRotation = UKismetMathLibrary::MakeRotFromX(Character->GetVelocity());
