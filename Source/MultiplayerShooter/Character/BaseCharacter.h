@@ -44,6 +44,9 @@ protected:
 
 	void AimOffset(float DeltaTime);
 
+public:
+	virtual void Jump() override;
+
 private:
 	UPROPERTY(VisibleAnywhere, Category = "Camera")
 	class USpringArmComponent* CameraBoom;
