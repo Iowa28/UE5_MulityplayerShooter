@@ -89,7 +89,6 @@ void UMenu::OnFindSessions(const TArray<FOnlineSessionSearchResult>& SessionResu
 {
 	if (MultiplayerSessionsSubsystem == nullptr)
 	{
-		GEngine->AddOnScreenDebugMessage(-1,15.f,FColor::Red, TEXT("MultiplayerSessionsSubsystem is nullptr"));
 		JoinButton->SetIsEnabled(true);
 		return;
 	}

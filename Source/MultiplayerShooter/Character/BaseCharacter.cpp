@@ -185,7 +185,11 @@ void ABaseCharacter::AimOffset(float DeltaTime)
 		const FRotator CurrentAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
 		const FRotator DeltaAimRotation = UKismetMathLibrary::NormalizedDeltaRotator(CurrentAimRotation, StartingAimRotation);
 		AimOffsetYaw = DeltaAimRotation.Yaw;
-		bUseControllerRotationYaw = false;
+		if (TurningInPlace == ETurningInPlace::ETIP_NotTurning)
+		{
+			InterpAimOffsetYaw = AimOffsetYaw;
+		}
+		bUseControllerRotationYaw = true;
 		TurnInPlace(DeltaTime);
 	}
 	else if (Speed > 0.f || bIsInAir)
@@ -214,6 +218,17 @@ void ABaseCharacter::TurnInPlace(float DeltaTime)
 	else if (AimOffsetYaw < -90.f)
 	{
 		TurningInPlace = ETurningInPlace::ETIP_Left;
+	}
+
+	if (TurningInPlace != ETurningInPlace::ETIP_NotTurning)
+	{
+		InterpAimOffsetYaw = FMath::FInterpTo(InterpAimOffsetYaw, 0.f, DeltaTime, 5.f);
+		AimOffsetYaw = InterpAimOffsetYaw;
+		if (FMath::Abs(AimOffsetYaw) < 15.f)
+		{
+			TurningInPlace = ETurningInPlace::ETIP_NotTurning;
+			StartingAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
+		}
 	}
 }
 

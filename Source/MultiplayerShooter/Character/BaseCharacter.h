@@ -88,6 +88,7 @@ private:
 	void ServerEquipButtonPressed();
 
 	float AimOffsetYaw;
+	float InterpAimOffsetYaw;
 	float AimOffsetPitch;
 	FRotator StartingAimRotation;
 
