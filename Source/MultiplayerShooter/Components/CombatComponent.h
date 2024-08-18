@@ -34,7 +34,10 @@ protected:
 	UFUNCTION()
 	void OnRep_EquippedWeapon();
 
+	void Fire(bool bPressed);
+
 private:
+	UPROPERTY()
 	ABaseCharacter* Character;
 
 	UPROPERTY(ReplicatedUsing = OnRep_EquippedWeapon)
@@ -47,4 +50,6 @@ private:
 	float AimWalkSpeed;
 	
 	float BaseWalkSpeed;
+
+	bool bFireButtonPressed;
 };

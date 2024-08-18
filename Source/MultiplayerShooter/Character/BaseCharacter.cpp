@@ -92,6 +92,9 @@ void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 		EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Started, this, &ThisClass::AimButtonPressed);
 		EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Completed, this, &ThisClass::AimButtonReleased);
+
+		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &ThisClass::FireButtonPressed);
+		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Completed, this, &ThisClass::FireButtonReleased);
 	}
 }
 
@@ -212,6 +215,22 @@ void ABaseCharacter::AimOffset(float DeltaTime)
 	}
 }
 
+void ABaseCharacter::FireButtonPressed()
+{
+	if (CombatComponent)
+	{
+		CombatComponent->Fire(true);
+	}
+}
+
+void ABaseCharacter::FireButtonReleased()
+{
+	if (CombatComponent)
+	{
+		CombatComponent->Fire(false);
+	}
+}
+
 void ABaseCharacter::Jump()
 {
 	if (bIsCrouched)
@@ -220,6 +239,19 @@ void ABaseCharacter::Jump()
 	}
 	
 	Super::Jump();
+}
+
+void ABaseCharacter::PlayFireMontage(bool bAiming)
+{
+	if (!CombatComponent || !CombatComponent->EquippedWeapon) { return; }
+
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && FireMontage)
+	{
+		AnimInstance->Montage_Play(FireMontage);
+		const FName SectionName = bAiming ? FName("RifleAim") : FName("RifleHip");
+		AnimInstance->Montage_JumpToSection(SectionName);
+	}
 }
 
 void ABaseCharacter::TurnInPlace(float DeltaTime)
