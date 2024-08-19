@@ -61,4 +61,6 @@ private:
 	float BaseWalkSpeed;
 
 	bool bFireButtonPressed;
+
+	FVector HitTarget;
 };
