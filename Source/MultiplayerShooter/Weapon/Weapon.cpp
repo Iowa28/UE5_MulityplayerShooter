@@ -101,3 +101,11 @@ void AWeapon::ShowPickupWidget(bool bShowWidget)
 		PickupWidget->SetVisibility(bShowWidget);
 	}
 }
+
+void AWeapon::Fire()
+{
+	if (FireAnimation)
+	{
+		WeaponMesh->PlayAnimation(FireAnimation, false);
+	}
+}

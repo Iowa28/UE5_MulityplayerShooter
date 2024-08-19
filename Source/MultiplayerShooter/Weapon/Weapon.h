@@ -24,9 +24,11 @@ class MULTIPLAYERSHOOTER_API AWeapon : public AActor
 public:	
 	AWeapon();
 
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	
 	void ShowPickupWidget(bool bShowWidget);
 
-	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	void Fire();
 
 protected:
 	virtual void BeginPlay() override;
@@ -64,6 +66,9 @@ private:
 
 	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
 	class UWidgetComponent* PickupWidget;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon Properties")
+	UAnimationAsset* FireAnimation;
 
 public:
 	void SetWeaponState(EWeaponState State);
