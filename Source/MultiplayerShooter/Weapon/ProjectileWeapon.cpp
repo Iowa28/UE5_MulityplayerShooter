@@ -10,10 +10,8 @@ void AProjectileWeapon::Fire(const FVector& HitTarget)
 	Super::Fire(HitTarget);
 
 	APawn* InstigatorPawn = Cast<APawn>(GetOwner());
-	if (!ProjectileClass || !InstigatorPawn) { return; }
-
 	const USkeletalMeshSocket* MuzzleFlashSocket = GetWeaponMesh()->GetSocketByName(FName("MuzzleFlash"));
-	if (!MuzzleFlashSocket) { return; }
+	if (!ProjectileClass || !InstigatorPawn || !MuzzleFlashSocket || !HasAuthority()) { return; }
 	
 	const FTransform SocketTransform = MuzzleFlashSocket->GetSocketTransform(GetWeaponMesh());
 	const FVector ToTarget = HitTarget - SocketTransform.GetLocation();

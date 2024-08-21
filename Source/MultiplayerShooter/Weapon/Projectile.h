@@ -25,6 +25,10 @@ private:
 
 	UPROPERTY(VisibleAnywhere)
 	class UProjectileMovementComponent* ProjectileMovementComponent;
-	
-public:	
+
+	UPROPERTY(EditDefaultsOnly)
+	UParticleSystem* Tracer;
+
+	UPROPERTY()
+	UParticleSystemComponent* TracerComponent;
 };
