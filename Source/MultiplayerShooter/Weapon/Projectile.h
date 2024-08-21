@@ -16,8 +16,13 @@ public:
 	
 	virtual void Tick(float DeltaTime) override;
 
+	virtual void Destroyed() override;
+
 protected:
 	virtual void BeginPlay() override;
+
+	UFUNCTION()
+	virtual void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
 private:
 	UPROPERTY(EditAnywhere)
@@ -31,4 +36,10 @@ private:
 
 	UPROPERTY()
 	UParticleSystemComponent* TracerComponent;
+
+	UPROPERTY(EditDefaultsOnly)
+	UParticleSystem* ImpactParticles;
+
+	UPROPERTY(EditDefaultsOnly)
+	class USoundCue* ImpactSound;
 };
