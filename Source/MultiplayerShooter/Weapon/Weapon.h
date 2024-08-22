@@ -70,6 +70,9 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon Properties")
 	UAnimationAsset* FireAnimation;
 
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<class ACasing> CasingClass;
+
 public:
 	void SetWeaponState(EWeaponState State);
 
