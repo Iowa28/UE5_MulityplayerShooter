@@ -70,12 +70,33 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon Properties")
 	UAnimationAsset* FireAnimation;
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon Properties")
 	TSubclassOf<class ACasing> CasingClass;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Crosshair")
+	UTexture2D* CrosshairCenter;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Crosshair")
+	UTexture2D* CrosshairLeft;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Crosshair")
+	UTexture2D* CrosshairRight;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Crosshair")
+	UTexture2D* CrosshairTop;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Crosshair")
+	UTexture2D* CrosshairBottom;
 
 public:
 	void SetWeaponState(EWeaponState State);
 
 	FORCEINLINE USphereComponent* GerAreaSphere() const { return AreaSphere; }
 	FORCEINLINE USkeletalMeshComponent* GetWeaponMesh() const { return WeaponMesh; }
+	
+	FORCEINLINE UTexture2D* GetCrosshairCenter() const { return CrosshairCenter; }
+	FORCEINLINE UTexture2D* GetCrosshairLeft() const { return CrosshairLeft; }
+	FORCEINLINE UTexture2D* GetCrosshairRight() const { return CrosshairRight; }
+	FORCEINLINE UTexture2D* GetCrosshairTop() const { return CrosshairTop; }
+	FORCEINLINE UTexture2D* GetCrosshairBottom() const { return CrosshairBottom; }
 };

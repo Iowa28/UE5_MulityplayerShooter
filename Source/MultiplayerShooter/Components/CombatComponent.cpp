@@ -6,6 +6,8 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "MultiplayerShooter/Character/BaseCharacter.h"
+#include "MultiplayerShooter/Controller/BasePlayerController.h"
+#include "MultiplayerShooter/HUD/BaseHUD.h"
 #include "MultiplayerShooter/Weapon/Weapon.h"
 #include "Net/UnrealNetwork.h"
 
@@ -27,6 +29,30 @@ void UCombatComponent::BeginPlay()
 void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	SetHUDCrosshairs(DeltaTime);
+}
+
+void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
+{
+	if (!Character || !Character->GetController()) { return; }
+
+	Controller = !Controller ? Cast<ABasePlayerController>(Character->GetController()) : Controller;
+	if (!Controller) { return; }
+
+	HUD = !HUD ? Cast<ABaseHUD>(Controller->GetHUD()) : HUD;
+	if (!HUD) { return; }
+
+	FHUDPackage HUDPackage = FHUDPackage();
+	if (EquippedWeapon)
+	{
+		HUDPackage.CrosshairCenter = EquippedWeapon->GetCrosshairCenter();
+		HUDPackage.CrosshairLeft = EquippedWeapon->GetCrosshairLeft();
+		HUDPackage.CrosshairRight = EquippedWeapon->GetCrosshairRight();
+		HUDPackage.CrosshairTop = EquippedWeapon->GetCrosshairTop();
+		HUDPackage.CrosshairBottom = EquippedWeapon->GetCrosshairBottom();
+	}
+	HUD->SetHUDPackage(HUDPackage);
 }
 
 void UCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -108,10 +134,6 @@ void UCombatComponent::TraceUnderCrosshair(FHitResult& TraceHitResult)
 		if (!TraceHitResult.bBlockingHit)
 		{
 			TraceHitResult.ImpactPoint = End;
-		}
-		else
-		{
-			// DrawDebugSphere(GetWorld(), TraceHitResult.ImpactPoint, 12.f, 12, FColor::Red);
 		}
 	}
 }
