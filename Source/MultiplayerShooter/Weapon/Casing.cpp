@@ -32,12 +32,14 @@ void ACasing::BeginPlay()
 void ACasing::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp,
 	FVector NormalImpulse, const FHitResult& Hit)
 {
+	CasingMesh->OnComponentHit.RemoveDynamic(this, &ThisClass::OnHit);
+	
 	if (ShellSound)
 	{
 		UGameplayStatics::PlaySoundAtLocation(this, ShellSound, GetActorLocation());
 	}
 
-	if (UWorld* World = GetWorld())
+	if (const UWorld* World = GetWorld())
 	{
 		FTimerHandle TimerHandle;
 		FTimerDelegate Delegate;
