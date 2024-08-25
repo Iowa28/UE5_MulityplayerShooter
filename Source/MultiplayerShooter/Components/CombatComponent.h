@@ -68,12 +68,19 @@ private:
 
 	bool bFireButtonPressed;
 
-	float CrosshairVelocityFactor;
-	float CrosshairInAirFactor;
-
 	FVector HitTarget;
 
-	//  Field of view settings
+	/*
+	* HUD and crosshairs
+	*/
+	float CrosshairVelocityFactor;
+	float CrosshairInAirFactor;
+	float CrosshairAimFactor;
+	float CrosshairShootFactor;
+
+	/*
+	* Field of view settings
+	*/
 	float DefaultFOV;
 	float CurrentFOV;
 
