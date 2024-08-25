@@ -43,6 +43,6 @@ void ABaseHUD::DrawCrosshair(UTexture2D* Crosshair, const FVector2D ViewportCent
 		0,
 		1,
 		1,
-		FLinearColor::White
+		HUDPackage.CrosshairColor
 	);
 }

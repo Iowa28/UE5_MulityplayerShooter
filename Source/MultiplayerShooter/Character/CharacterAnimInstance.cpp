@@ -72,10 +72,11 @@ void UCharacterAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		{
 			bLocallyControlled = true;
 			const FTransform RightHandTransform = EquippedWeapon->GetWeaponMesh()->GetSocketTransform(FName("Hand_R"));
-			RightHandRotation = UKismetMathLibrary::FindLookAtRotation(
+			FRotator LookAitRotation = UKismetMathLibrary::FindLookAtRotation(
 				RightHandTransform.GetLocation(),
 				RightHandTransform.GetLocation() + (RightHandTransform.GetLocation() - Character->GetHitTarget())
 			);
+			RightHandRotation = FMath::RInterpTo(RightHandRotation, LookAitRotation, DeltaSeconds, 30.f);
 		}
 	}
 }

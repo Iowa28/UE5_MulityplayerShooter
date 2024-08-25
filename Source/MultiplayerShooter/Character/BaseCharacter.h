@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "MultiplayerShooter/Interfaces/CrosshairInteractInterface.h"
 #include "MultiplayerShooter/Types/TurningInPlace.h"
 #include "BaseCharacter.generated.h"
 
@@ -12,7 +13,7 @@ class UInputAction;
 struct FInputActionValue;
 
 UCLASS()
-class MULTIPLAYERSHOOTER_API ABaseCharacter : public ACharacter
+class MULTIPLAYERSHOOTER_API ABaseCharacter : public ACharacter, public ICrosshairInteractInterface
 {
 	GENERATED_BODY()
 

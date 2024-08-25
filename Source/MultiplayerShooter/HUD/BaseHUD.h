@@ -17,6 +17,7 @@ struct FHUDPackage
 	UTexture2D* CrosshairTop;
 	UTexture2D* CrosshairBottom;
 	float CrosshairSpread;
+	FLinearColor CrosshairColor;
 };
 
 UCLASS()

@@ -8,7 +8,6 @@
 #include "Kismet/GameplayStatics.h"
 #include "MultiplayerShooter/Character/BaseCharacter.h"
 #include "MultiplayerShooter/Controller/BasePlayerController.h"
-#include "MultiplayerShooter/HUD/BaseHUD.h"
 #include "MultiplayerShooter/Weapon/Weapon.h"
 #include "Net/UnrealNetwork.h"
 
@@ -58,7 +57,7 @@ void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
 	HUD = !HUD ? Cast<ABaseHUD>(Controller->GetHUD()) : HUD;
 	if (!HUD) { return; }
 
-	FHUDPackage HUDPackage = FHUDPackage();
+	// FHUDPackage HUDPackage;
 	if (EquippedWeapon)
 	{
 		HUDPackage.CrosshairCenter = EquippedWeapon->GetCrosshairCenter();
@@ -66,6 +65,10 @@ void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
 		HUDPackage.CrosshairRight = EquippedWeapon->GetCrosshairRight();
 		HUDPackage.CrosshairTop = EquippedWeapon->GetCrosshairTop();
 		HUDPackage.CrosshairBottom = EquippedWeapon->GetCrosshairBottom();
+	}
+	else
+	{
+		HUDPackage = FHUDPackage();
 	}
 
 	const FVector2D WalkSpeedRange = FVector2D(0, Character->GetCharacterMovement()->MaxWalkSpeed);
@@ -185,6 +188,15 @@ void UCombatComponent::TraceUnderCrosshair(FHitResult& TraceHitResult)
 		if (!TraceHitResult.bBlockingHit)
 		{
 			TraceHitResult.ImpactPoint = End;
+		}
+
+		if (TraceHitResult.GetActor() && TraceHitResult.GetActor()->Implements<UCrosshairInteractInterface>())
+		{
+			HUDPackage.CrosshairColor = FLinearColor::Red;
+		}
+		else
+		{
+			HUDPackage.CrosshairColor = FLinearColor::White;
 		}
 	}
 }
