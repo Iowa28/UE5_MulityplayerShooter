@@ -68,13 +68,6 @@ void ABaseCharacter::BeginPlay()
 	}
 }
 
-void ABaseCharacter::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-	AimOffset(DeltaTime);
-}
-
 void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent)) {
@@ -97,6 +90,15 @@ void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &ThisClass::FireButtonPressed);
 		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Completed, this, &ThisClass::FireButtonReleased);
 	}
+}
+
+void ABaseCharacter::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	AimOffset(DeltaTime);
+
+	HideCameraIfCharacterClose();
 }
 
 void ABaseCharacter::PostInitializeComponents()
@@ -295,6 +297,28 @@ void ABaseCharacter::OnRep_OverlappingWeapon(AWeapon* LastWeapon)
 	if (LastWeapon)
 	{
 		LastWeapon->ShowPickupWidget(false);
+	}
+}
+
+void ABaseCharacter::HideCameraIfCharacterClose()
+{
+	if (!IsLocallyControlled()) { return; }
+
+	if ((FollowCamera->GetComponentLocation() - GetActorLocation()).Size() < CameraThreshold)
+	{
+		GetMesh()->SetVisibility(false);
+		if (CombatComponent && CombatComponent->EquippedWeapon && CombatComponent->EquippedWeapon->GetWeaponMesh())
+		{
+			CombatComponent->EquippedWeapon->GetWeaponMesh()->bOwnerNoSee = true;
+		}
+	}
+	else
+	{
+		GetMesh()->SetVisibility(true);
+		if (CombatComponent && CombatComponent->EquippedWeapon && CombatComponent->EquippedWeapon->GetWeaponMesh())
+		{
+			CombatComponent->EquippedWeapon->GetWeaponMesh()->bOwnerNoSee = false;
+		}
 	}
 }
 

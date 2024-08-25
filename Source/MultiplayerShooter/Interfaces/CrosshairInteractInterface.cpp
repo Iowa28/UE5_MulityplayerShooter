@@ -3,4 +3,3 @@
 
 #include "CrosshairInteractInterface.h"
 
-// Add default functionality here for any ICrosshairInteractInterface functions that are not pure virtual.

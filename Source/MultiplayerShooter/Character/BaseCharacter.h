@@ -110,6 +110,11 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Combat")
 	UAnimMontage* FireMontage;
 
+	UPROPERTY(EditDefaultsOnly)
+	float CameraThreshold = 200.f;
+	
+	void HideCameraIfCharacterClose();
+
 public:
 	void SetOverlappingWeapon(AWeapon* Weapon);
 
