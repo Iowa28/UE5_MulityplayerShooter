@@ -11,6 +11,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "MultiplayerShooter/MultiplayerShooter.h"
 #include "MultiplayerShooter/Components/CombatComponent.h"
 #include "MultiplayerShooter/Weapon/Weapon.h"
 #include "Net/UnrealNetwork.h"
@@ -39,8 +40,9 @@ ABaseCharacter::ABaseCharacter()
 
 	GetCharacterMovement()->NavAgentProps.bCanCrouch = true;
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
-	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
+	GetMesh()->SetCollisionObjectType(ECC_SkeletalMesh);
 	GetMesh()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
+	GetMesh()->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
 	GetCharacterMovement()->RotationRate = FRotator(0.f, 0.f, 720.f);
 
 	TurningInPlace = ETurningInPlace::ETIP_NotTurning;
@@ -257,6 +259,19 @@ void ABaseCharacter::PlayFireMontage(bool bAiming)
 	}
 }
 
+void ABaseCharacter::PlayHitReactMontage()
+{
+	if (!CombatComponent || !CombatComponent->EquippedWeapon) { return; }
+
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && HitReactMontage)
+	{
+		AnimInstance->Montage_Play(HitReactMontage);
+		const FName SectionName =FName("FromFront");
+		AnimInstance->Montage_JumpToSection(SectionName);
+	}
+}
+
 void ABaseCharacter::TurnInPlace(float DeltaTime)
 {
 	if (AimOffsetYaw > 90.f)
@@ -298,6 +313,11 @@ void ABaseCharacter::OnRep_OverlappingWeapon(AWeapon* LastWeapon)
 	{
 		LastWeapon->ShowPickupWidget(false);
 	}
+}
+
+void ABaseCharacter::MulticastHit_Implementation()
+{
+	PlayHitReactMontage();
 }
 
 void ABaseCharacter::HideCameraIfCharacterClose()

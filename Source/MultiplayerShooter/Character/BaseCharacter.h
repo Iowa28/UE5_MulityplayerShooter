@@ -31,6 +31,9 @@ public:
 	virtual void Jump() override;
 
 	void PlayFireMontage(bool bAiming);
+	
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastHit();
 
 protected:
 	virtual void BeginPlay() override;
@@ -109,6 +112,11 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Combat")
 	UAnimMontage* FireMontage;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Combat")
+	UAnimMontage* HitReactMontage;
+
+	void PlayHitReactMontage();
 
 	UPROPERTY(EditDefaultsOnly)
 	float CameraThreshold = 200.f;
