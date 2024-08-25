@@ -327,3 +327,8 @@ AWeapon* ABaseCharacter::GetEquippedWeapon() const
 {
 	return CombatComponent ? CombatComponent->EquippedWeapon : nullptr;
 }
+
+FVector ABaseCharacter::GetHitTarget() const
+{
+	return CombatComponent ? CombatComponent->HitTarget : FVector();
+}
