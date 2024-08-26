@@ -136,6 +136,19 @@ private:
 
 	float CalculateSpeed() const;
 
+	/**
+	* Player health
+	*/
+
+	UPROPERTY(EditDefaultsOnly, Category = "Player Stats")
+	float MaxHealth = 100.f;
+
+	UPROPERTY(VisibleAnywhere, ReplicatedUsing = OnRep_Health, Category = "Player Stats")
+	float Health;
+
+	UFUNCTION()
+	void OnRep_Health();
+
 public:
 	void SetOverlappingWeapon(AWeapon* Weapon);
 

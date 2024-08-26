@@ -2,6 +2,7 @@
 
 
 #include "BaseHUD.h"
+#include "CharacterOverlay.h"
 
 void ABaseHUD::DrawHUD()
 {
@@ -19,6 +20,22 @@ void ABaseHUD::DrawHUD()
 		DrawCrosshair(HUDPackage.CrosshairRight, ViewportCenter, FVector2D(SpreadScaled, 0));
 		DrawCrosshair(HUDPackage.CrosshairTop, ViewportCenter, FVector2D(0, -SpreadScaled));
 		DrawCrosshair(HUDPackage.CrosshairBottom, ViewportCenter, FVector2D(0, SpreadScaled));
+	}
+}
+
+void ABaseHUD::BeginPlay()
+{
+	Super::BeginPlay();
+
+	AddCharacterOverlay();
+}
+
+void ABaseHUD::AddCharacterOverlay()
+{
+	if (CharacterOverlayClass)
+	{
+		CharacterOverlay = CreateWidget<UCharacterOverlay>(GetWorld(), CharacterOverlayClass);
+		CharacterOverlay->AddToViewport();
 	}
 }
 

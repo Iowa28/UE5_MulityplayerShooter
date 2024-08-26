@@ -55,6 +55,7 @@ void ABaseCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME_CONDITION(ABaseCharacter, OverlappingWeapon, COND_OwnerOnly);
+	DOREPLIFETIME(ABaseCharacter, Health);
 }
 
 void ABaseCharacter::BeginPlay()
@@ -403,6 +404,11 @@ void ABaseCharacter::HideCameraIfCharacterClose()
 			CombatComponent->EquippedWeapon->GetWeaponMesh()->bOwnerNoSee = false;
 		}
 	}
+}
+
+void ABaseCharacter::OnRep_Health()
+{
+	
 }
 
 void ABaseCharacter::SetOverlappingWeapon(AWeapon* Weapon)
