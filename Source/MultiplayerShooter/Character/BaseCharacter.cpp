@@ -98,9 +98,29 @@ void ABaseCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	AimOffset(DeltaTime);
-
+	if (GetLocalRole() > ROLE_SimulatedProxy && IsLocallyControlled())
+	{
+		AimOffset(DeltaTime);
+	}
+	else
+	{
+		TimeSinceLastMovementReplication += DeltaTime;
+		if (TimeSinceLastMovementReplication > .25f)
+		{
+			OnRep_ReplicatedMovement();
+		}
+		CalculateAimOffsetPitch();
+	}
+	
 	HideCameraIfCharacterClose();
+}
+
+void ABaseCharacter::OnRep_ReplicatedMovement()
+{
+	Super::OnRep_ReplicatedMovement();
+
+	SimProxiesTurn();
+	TimeSinceLastMovementReplication = 0;
 }
 
 void ABaseCharacter::PostInitializeComponents()
@@ -186,13 +206,12 @@ void ABaseCharacter::AimOffset(float DeltaTime)
 {
 	if (!CombatComponent || !CombatComponent->EquippedWeapon) { return; }
 	
-	FVector Velocity = GetVelocity();
-	Velocity.Z = 0.f;
-	const float Speed = Velocity.Size();
+	const float Speed = CalculateSpeed();
 	const bool bIsInAir = GetCharacterMovement()->IsFalling();
 
 	if (FMath::IsNearlyEqual(Speed, 0.f) && !bIsInAir)
 	{
+		bRotateRootBone = true;
 		const FRotator CurrentAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
 		const FRotator DeltaAimRotation = UKismetMathLibrary::NormalizedDeltaRotator(CurrentAimRotation, StartingAimRotation);
 		AimOffsetYaw = DeltaAimRotation.Yaw;
@@ -205,18 +224,62 @@ void ABaseCharacter::AimOffset(float DeltaTime)
 	}
 	else if (Speed > 0.f || bIsInAir)
 	{
+		bRotateRootBone = false;
 		StartingAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
 		AimOffsetYaw = 0.f;
 		bUseControllerRotationYaw = true;
 		TurningInPlace = ETurningInPlace::ETIP_NotTurning;
 	}
 
+	CalculateAimOffsetPitch();
+}
+
+float ABaseCharacter::CalculateSpeed() const
+{
+	FVector Velocity = GetVelocity();
+	Velocity.Z = 0.f;
+	return  Velocity.Size();
+}
+
+void ABaseCharacter::CalculateAimOffsetPitch()
+{
 	AimOffsetPitch = GetBaseAimRotation().Pitch;
 	if (!IsLocallyControlled() && AimOffsetPitch > 90.f)
 	{
 		const FVector2D InRange = FVector2D(270.f, 360.f);
 		const FVector2D OutRange = FVector2D(-90.f, 0.f);
 		AimOffsetPitch = FMath::GetMappedRangeValueClamped(InRange, OutRange, AimOffsetPitch);
+	}
+}
+
+void ABaseCharacter::SimProxiesTurn()
+{
+	if (!CombatComponent || !CombatComponent->EquippedWeapon) { return; }
+
+	bRotateRootBone = false;
+	
+	const float Speed = CalculateSpeed();
+	if (Speed > 0.f)
+	{
+		TurningInPlace = ETurningInPlace::ETIP_NotTurning;
+		return;
+	}
+
+	ProxyRotationLastFrame = ProxyRotation;
+	ProxyRotation = GetActorRotation();
+	ProxyYaw = UKismetMathLibrary::NormalizedDeltaRotator(ProxyRotation, ProxyRotationLastFrame).Yaw;
+
+	if (ProxyYaw > TurnThreshold)
+	{
+		TurningInPlace = ETurningInPlace::ETIP_Right;
+	}
+	else if (ProxyYaw < -TurnThreshold)
+	{
+		TurningInPlace = ETurningInPlace::ETIP_Left;
+	}
+	else
+	{
+		TurningInPlace = ETurningInPlace::ETIP_NotTurning;
 	}
 }
 
