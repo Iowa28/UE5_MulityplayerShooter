@@ -16,6 +16,14 @@ UCombatComponent::UCombatComponent()
 	PrimaryComponentTick.bCanEverTick = true;
 }
 
+void UCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(UCombatComponent, EquippedWeapon);
+	DOREPLIFETIME(UCombatComponent, bAiming);
+}
+
 void UCombatComponent::BeginPlay()
 {
 	Super::BeginPlay();
@@ -57,7 +65,6 @@ void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
 	HUD = !HUD ? Cast<ABaseHUD>(Controller->GetHUD()) : HUD;
 	if (!HUD) { return; }
 
-	// FHUDPackage HUDPackage;
 	if (EquippedWeapon)
 	{
 		HUDPackage.CrosshairCenter = EquippedWeapon->GetCrosshairCenter();
@@ -104,14 +111,48 @@ void UCombatComponent::InterpFOV(float DeltaTime)
 	}
 }
 
-void UCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+void UCombatComponent::TraceUnderCrosshair(FHitResult& TraceHitResult)
 {
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	FVector2D ViewportSize;
+	if (GEngine && GEngine->GameViewport)
+	{
+		GEngine->GameViewport->GetViewportSize(ViewportSize);
+	}
+	const FVector2D CrosshairLocation = FVector2D(ViewportSize.X / 2, ViewportSize.Y / 2);
+	FVector CrosshairWorldPosition, CrosshairWorldDirection;
+	const bool bScreenToWorld = UGameplayStatics::DeprojectScreenToWorld(
+		UGameplayStatics::GetPlayerController(this, 0),
+		CrosshairLocation,
+		CrosshairWorldPosition,
+		CrosshairWorldDirection
+	);
 
-	DOREPLIFETIME(UCombatComponent, EquippedWeapon);
-	DOREPLIFETIME(UCombatComponent, bAiming);
+	if (!bScreenToWorld) { return; }
+	
+	FVector Start = CrosshairWorldPosition;
+	if (Character)
+	{
+		const float DistanceToCharacter = (Character->GetActorLocation() - Start).Size();
+		Start += CrosshairWorldDirection * (DistanceToCharacter + 100.f);
+	}
+	const FVector End = Start + CrosshairWorldDirection * TRACE_LENGTH;
+
+	GetWorld()->LineTraceSingleByChannel(
+		TraceHitResult,
+		Start,
+		End,
+		ECC_Visibility
+	);
+
+	if (!TraceHitResult.bBlockingHit)
+	{
+		TraceHitResult.ImpactPoint = End;
+	}
+
+	HUDPackage.CrosshairColor = TraceHitResult.GetActor() && TraceHitResult.GetActor()->Implements<UCrosshairInteractInterface>() ? FLinearColor::Red : FLinearColor::White;
 }
 
+#pragma region Aiming
 void UCombatComponent::SetAiming(bool bIsAiming)
 {
 	bAiming = bIsAiming;
@@ -130,6 +171,23 @@ void UCombatComponent::ServerSetAiming_Implementation(bool bIsAiming)
 		Character->GetCharacterMovement()->MaxWalkSpeed = bIsAiming ? AimWalkSpeed : BaseWalkSpeed;
 	}
 }
+#pragma endregion Aiming
+
+#pragma region Equipping
+void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
+{
+	if (!Character || !WeaponToEquip) { return; }
+	
+	EquippedWeapon = WeaponToEquip;
+	EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
+	if (const USkeletalMeshSocket* HandSocket = Character->GetMesh()->GetSocketByName(FName("RightHandSocket")))
+	{
+		HandSocket->AttachActor(EquippedWeapon, Character->GetMesh());
+	}
+	EquippedWeapon->SetOwner(Character);
+	Character->GetCharacterMovement()->bOrientRotationToMovement = false;
+	Character->bUseControllerRotationYaw = true;
+}
 
 void UCombatComponent::OnRep_EquippedWeapon()
 {
@@ -139,71 +197,45 @@ void UCombatComponent::OnRep_EquippedWeapon()
 		Character->bUseControllerRotationYaw = true;
 	}
 }
+#pragma endregion Equipping
 
-void UCombatComponent::Fire(bool bPressed)
+#pragma region Fire
+void UCombatComponent::FireButtonPressed(bool bPressed)
 {
 	bFireButtonPressed = bPressed;
 	if (bFireButtonPressed)
 	{
-		FHitResult HitResult;
-		TraceUnderCrosshair(HitResult);
-		ServerFire(HitResult.ImpactPoint);
+		Fire();
+	}
+}
 
+void UCombatComponent::Fire()
+{
+	if (bCanFire)
+	{
+		bCanFire = false;
+		ServerFire(HitTarget);
 		if (EquippedWeapon)
 		{
 			CrosshairShootFactor = 1.f;
 		}
+		StartFireTimer();
 	}
 }
 
-void UCombatComponent::TraceUnderCrosshair(FHitResult& TraceHitResult)
+void UCombatComponent::StartFireTimer()
 {
-	FVector2D ViewportSize;
-	if (GEngine && GEngine->GameViewport)
+	if (!EquippedWeapon || !Character) { return; }
+
+	Character->GetWorldTimerManager().SetTimer(FireTimer, this, &ThisClass::FireTimerFinished, EquippedWeapon->GetFireDelay());
+}
+
+void UCombatComponent::FireTimerFinished()
+{
+	bCanFire = true;
+	if (bFireButtonPressed && EquippedWeapon && EquippedWeapon->IsAutomatic())
 	{
-		GEngine->GameViewport->GetViewportSize(ViewportSize);
-	}
-
-	const FVector2D CrosshairLocation = FVector2D(ViewportSize.X / 2, ViewportSize.Y / 2);
-	FVector CrosshairWorldPosition, CrosshairWorldDirection;
-	const bool bScreenToWorld = UGameplayStatics::DeprojectScreenToWorld(
-		UGameplayStatics::GetPlayerController(this, 0),
-		CrosshairLocation,
-		CrosshairWorldPosition,
-		CrosshairWorldDirection
-	);
-
-	if (!bScreenToWorld) { return; }
-	
-	FVector Start = CrosshairWorldPosition;
-
-	if (Character)
-	{
-		const float DistanceToCharacter = (Character->GetActorLocation() - Start).Size();
-		Start += CrosshairWorldDirection * (DistanceToCharacter + 100.f);
-	}
-	
-	const FVector End = Start + CrosshairWorldDirection * TRACE_LENGTH;
-
-	GetWorld()->LineTraceSingleByChannel(
-		TraceHitResult,
-		Start,
-		End,
-		ECC_Visibility
-	);
-
-	if (!TraceHitResult.bBlockingHit)
-	{
-		TraceHitResult.ImpactPoint = End;
-	}
-
-	if (TraceHitResult.GetActor() && TraceHitResult.GetActor()->Implements<UCrosshairInteractInterface>())
-	{
-		HUDPackage.CrosshairColor = FLinearColor::Red;
-	}
-	else
-	{
-		HUDPackage.CrosshairColor = FLinearColor::White;
+		Fire();
 	}
 }
 
@@ -222,18 +254,4 @@ void UCombatComponent::MulticastFire_Implementation(const FVector_NetQuantize& T
 		EquippedWeapon->Fire(TraceHitTarget);
 	}
 }
-
-void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
-{
-	if (!Character || !WeaponToEquip) { return; }
-	
-	EquippedWeapon = WeaponToEquip;
-	EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
-	if (const USkeletalMeshSocket* HandSocket = Character->GetMesh()->GetSocketByName(FName("RightHandSocket")))
-	{
-		HandSocket->AttachActor(EquippedWeapon, Character->GetMesh());
-	}
-	EquippedWeapon->SetOwner(Character);
-	Character->GetCharacterMovement()->bOrientRotationToMovement = false;
-	Character->bUseControllerRotationYaw = true;
-}
+#pragma endregion Fire

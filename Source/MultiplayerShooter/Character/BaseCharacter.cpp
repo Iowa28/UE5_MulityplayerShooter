@@ -287,7 +287,7 @@ void ABaseCharacter::FireButtonPressed()
 {
 	if (CombatComponent)
 	{
-		CombatComponent->Fire(true);
+		CombatComponent->FireButtonPressed(true);
 	}
 }
 
@@ -295,7 +295,7 @@ void ABaseCharacter::FireButtonReleased()
 {
 	if (CombatComponent)
 	{
-		CombatComponent->Fire(false);
+		CombatComponent->FireButtonPressed(false);
 	}
 }
 

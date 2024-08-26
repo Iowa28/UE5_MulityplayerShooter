@@ -94,6 +94,12 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Zoom")
 	float ZoomInterpSpeed = 20.f;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Fire")
+	float FireDelay = .15f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Fire")
+	bool bAutomatic = true;
+
 public:
 	void SetWeaponState(EWeaponState State);
 
@@ -108,4 +114,7 @@ public:
 
 	FORCEINLINE float GetZoomedFOV() const { return ZoomedFOV; }
 	FORCEINLINE float GetZoomInterpSpeed() const { return ZoomInterpSpeed; }
+	
+	FORCEINLINE float GetFireDelay() const { return FireDelay; }
+	FORCEINLINE bool IsAutomatic() const { return bAutomatic; }
 };

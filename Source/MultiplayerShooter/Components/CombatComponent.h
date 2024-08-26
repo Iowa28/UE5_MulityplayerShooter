@@ -35,8 +35,9 @@ protected:
 
 	UFUNCTION()
 	void OnRep_EquippedWeapon();
+	void Fire();
 
-	void Fire(bool bPressed);
+	void FireButtonPressed(bool bPressed);
 
 	UFUNCTION(Server, Reliable)
 	void ServerFire(const FVector_NetQuantize& TraceHitTarget);
@@ -54,7 +55,7 @@ private:
 	UPROPERTY()
 	class ABasePlayerController* Controller;
 	UPROPERTY()
-	class ABaseHUD* HUD;
+	ABaseHUD* HUD;
 
 	UPROPERTY(ReplicatedUsing = OnRep_EquippedWeapon)
 	AWeapon* EquippedWeapon;
@@ -74,6 +75,7 @@ private:
 	/*
 	* HUD and crosshairs
 	*/
+	
 	float CrosshairVelocityFactor;
 	float CrosshairInAirFactor;
 	float CrosshairAimFactor;
@@ -84,6 +86,7 @@ private:
 	/*
 	* Field of view settings
 	*/
+	
 	float DefaultFOV;
 	float CurrentFOV;
 
@@ -94,4 +97,15 @@ private:
 	float ZoomInterpSpeed = 20.f;
 
 	void InterpFOV(float DeltaTime);
+
+	/*
+	* Weapon fire
+	*/
+	
+	bool bCanFire = true;
+
+	FTimerHandle FireTimer;
+
+	void StartFireTimer();
+	void FireTimerFinished();
 };
