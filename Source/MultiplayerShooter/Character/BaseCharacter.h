@@ -34,7 +34,10 @@ public:
 	
 	virtual void OnRep_ReplicatedMovement() override;
 
+	UFUNCTION(NetMulticast, Reliable)
 	void Eliminate();
+	
+	void PlayEliminationMontage();
 
 protected:
 	virtual void BeginPlay() override;
@@ -124,6 +127,9 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Combat")
 	UAnimMontage* HitReactMontage;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Combat")
+	UAnimMontage* EliminationMontage;
+
 	void PlayHitReactMontage();
 
 	UPROPERTY(EditDefaultsOnly)
@@ -145,6 +151,8 @@ private:
 
 	UPROPERTY(VisibleAnywhere, ReplicatedUsing = OnRep_Health, Category = "Player Stats")
 	float Health;
+
+	bool bEliminated;
 
 	UFUNCTION()
 	void OnRep_Health();
@@ -173,4 +181,6 @@ public:
 	FORCEINLINE UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 
 	FORCEINLINE bool ShouldRotateRootBone() const { return bRotateRootBone; }
+	
+	FORCEINLINE bool IsEliminated() const { return bEliminated; }
 };

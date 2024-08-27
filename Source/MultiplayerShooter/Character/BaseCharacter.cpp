@@ -377,7 +377,7 @@ void ABaseCharacter::UpdateHUDHealth()
 
 void ABaseCharacter::PlayHitReactMontage()
 {
-	if (!CombatComponent || !CombatComponent->EquippedWeapon) { return; }
+	if (!CombatComponent || !CombatComponent->EquippedWeapon || bEliminated) { return; }
 
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	if (AnimInstance && HitReactMontage)
@@ -388,9 +388,21 @@ void ABaseCharacter::PlayHitReactMontage()
 	}
 }
 
-void ABaseCharacter::Eliminate()
+void ABaseCharacter::PlayEliminationMontage()
 {
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && EliminationMontage)
+	{
+		AnimInstance->Montage_Play(EliminationMontage);
+	}
+}
+
+void ABaseCharacter::Eliminate_Implementation()
+{
+	if (bEliminated) { return; }
 	
+	bEliminated = true;
+	PlayEliminationMontage();
 }
 #pragma endregion Health/Damage
 

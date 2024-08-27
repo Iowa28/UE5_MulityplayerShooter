@@ -3,8 +3,13 @@
 
 #include "ShooterGameMode.h"
 
+#include "MultiplayerShooter/Character/BaseCharacter.h"
+
 void AShooterGameMode::PlayerEliminated(ABaseCharacter* EliminatedCharacter, ABasePlayerController* VictimController,
-	ABasePlayerController* AttackerController)
+                                        ABasePlayerController* AttackerController)
 {
-	
+	if (EliminatedCharacter)
+	{
+		EliminatedCharacter->Eliminate();
+	}
 }
