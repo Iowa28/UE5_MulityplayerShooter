@@ -13,6 +13,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "MultiplayerShooter/MultiplayerShooter.h"
 #include "MultiplayerShooter/Components/CombatComponent.h"
+#include "MultiplayerShooter/Controller/BasePlayerController.h"
 #include "MultiplayerShooter/Weapon/Weapon.h"
 #include "Net/UnrealNetwork.h"
 
@@ -68,6 +69,13 @@ void ABaseCharacter::BeginPlay()
 		{
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
+	}
+
+	Health = MaxHealth;
+	BasePlayerController = Cast<ABasePlayerController>(GetController());
+	if (BasePlayerController)
+	{
+		BasePlayerController->SetHUDHealth(Health, MaxHealth);
 	}
 }
 

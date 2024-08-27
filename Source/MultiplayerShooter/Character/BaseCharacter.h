@@ -149,6 +149,9 @@ private:
 	UFUNCTION()
 	void OnRep_Health();
 
+	UPROPERTY()
+	class ABasePlayerController* BasePlayerController;
+
 public:
 	void SetOverlappingWeapon(AWeapon* Weapon);
 

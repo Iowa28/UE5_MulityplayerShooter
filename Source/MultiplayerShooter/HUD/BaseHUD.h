@@ -28,11 +28,10 @@ class MULTIPLAYERSHOOTER_API ABaseHUD : public AHUD
 public:
 	virtual void DrawHUD() override;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Player Stats")
-	TSubclassOf<class UUserWidget> CharacterOverlayClass;
-
 	UPROPERTY()
 	class UCharacterOverlay* CharacterOverlay;
+
+	bool IsCharacterOverlayValid() const;
 
 protected:
 	virtual void BeginPlay() override;
@@ -40,6 +39,9 @@ protected:
 	void AddCharacterOverlay();
 
 private:
+	UPROPERTY(EditDefaultsOnly, Category = "Player Stats")
+	TSubclassOf<UUserWidget> CharacterOverlayClass;
+	
 	UPROPERTY(EditDefaultsOnly)
 	float CrosshairSpreadMax = 16.f;
 	

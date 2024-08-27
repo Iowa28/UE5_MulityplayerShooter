@@ -2,4 +2,25 @@
 
 
 #include "BasePlayerController.h"
+#include "Components/ProgressBar.h"
+#include "Components/TextBlock.h"
+#include "MultiplayerShooter/HUD/BaseHUD.h"
+#include "MultiplayerShooter/HUD/CharacterOverlay.h"
 
+void ABasePlayerController::BeginPlay()
+{
+	Super::BeginPlay();
+
+	BaseHUD = Cast<ABaseHUD>(GetHUD());
+}
+
+void ABasePlayerController::SetHUDHealth(float Health, float MaxHealth)
+{
+	BaseHUD = BaseHUD ? BaseHUD : Cast<ABaseHUD>(GetHUD());
+	if (!BaseHUD || !BaseHUD->IsCharacterOverlayValid()) { return; }
+
+	const float HealthPercent = Health / MaxHealth;
+	BaseHUD->CharacterOverlay->HealthBar->SetPercent(HealthPercent);
+	const FString HealthText = FString::Printf(TEXT("%d/%d"), FMath::CeilToInt(Health), FMath::CeilToInt(MaxHealth));
+	BaseHUD->CharacterOverlay->HealthText->SetText(FText::FromString(HealthText));
+}

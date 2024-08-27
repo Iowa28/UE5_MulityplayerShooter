@@ -4,6 +4,13 @@
 #include "BaseHUD.h"
 #include "CharacterOverlay.h"
 
+void ABaseHUD::BeginPlay()
+{
+	Super::BeginPlay();
+
+	AddCharacterOverlay();
+}
+
 void ABaseHUD::DrawHUD()
 {
 	Super::DrawHUD();
@@ -23,13 +30,6 @@ void ABaseHUD::DrawHUD()
 	}
 }
 
-void ABaseHUD::BeginPlay()
-{
-	Super::BeginPlay();
-
-	AddCharacterOverlay();
-}
-
 void ABaseHUD::AddCharacterOverlay()
 {
 	if (CharacterOverlayClass)
@@ -37,6 +37,11 @@ void ABaseHUD::AddCharacterOverlay()
 		CharacterOverlay = CreateWidget<UCharacterOverlay>(GetWorld(), CharacterOverlayClass);
 		CharacterOverlay->AddToViewport();
 	}
+}
+
+bool ABaseHUD::IsCharacterOverlayValid() const
+{
+	return CharacterOverlay && CharacterOverlay->HealthBar && CharacterOverlay->HealthText;
 }
 
 void ABaseHUD::DrawCrosshair(UTexture2D* Crosshair, const FVector2D ViewportCenter, const FVector2D Spread)
