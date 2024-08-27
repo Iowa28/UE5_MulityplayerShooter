@@ -21,10 +21,10 @@ public:
 	ABaseCharacter();
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
-	
+
 	virtual void Tick(float DeltaTime) override;
 
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 
 	virtual void PostInitializeComponents() override;
 
@@ -32,9 +32,6 @@ public:
 
 	void PlayFireMontage(bool bAiming);
 	
-	UFUNCTION(NetMulticast, Unreliable)
-	void MulticastHit();
-
 	virtual void OnRep_ReplicatedMovement() override;
 
 protected:
@@ -59,6 +56,9 @@ protected:
 	void FireButtonPressed();
 	void FireButtonReleased();
 
+	UFUNCTION()
+	void ReceiveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatorController, AActor* DamageCauser);
+
 private:
 	UPROPERTY(VisibleAnywhere, Category = "Camera")
 	class USpringArmComponent* CameraBoom;
@@ -66,6 +66,7 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "Camera")
 	class UCameraComponent* FollowCamera;
 
+#pragma region Actions
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
 	UInputMappingContext* DefaultMappingContext;
 
@@ -89,6 +90,7 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
 	UInputAction* FireAction;
+#pragma endregion Actions
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "HUD", meta = (AllowPrivateAccess))
 	class UWidgetComponent* OverheadWidget;
@@ -137,7 +139,7 @@ private:
 	float CalculateSpeed() const;
 
 	/**
-	* Player health
+	* Health
 	*/
 
 	UPROPERTY(EditDefaultsOnly, Category = "Player Stats")
@@ -151,6 +153,8 @@ private:
 
 	UPROPERTY()
 	class ABasePlayerController* BasePlayerController;
+
+	void UpdateHUDHealth();
 
 public:
 	void SetOverlappingWeapon(AWeapon* Weapon);

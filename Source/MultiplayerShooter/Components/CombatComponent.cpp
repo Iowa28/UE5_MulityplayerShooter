@@ -55,6 +55,25 @@ void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 	}
 }
 
+void UCombatComponent::InterpFOV(float DeltaTime)
+{
+	if (EquippedWeapon == nullptr) { return; }
+
+	if (bAiming)
+	{
+		CurrentFOV = FMath::FInterpTo(CurrentFOV, EquippedWeapon->GetZoomedFOV(), DeltaTime, EquippedWeapon->GetZoomInterpSpeed());
+	}
+	else
+	{
+		CurrentFOV = FMath::FInterpTo(CurrentFOV, DefaultFOV, DeltaTime, ZoomInterpSpeed);
+	}
+	if (Character && Character->GetFollowCamera())
+	{
+		Character->GetFollowCamera()->SetFieldOfView(CurrentFOV);
+	}
+}
+
+#pragma region Crosshair
 void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
 {
 	if (!Character || !Character->GetController()) { return; }
@@ -91,24 +110,6 @@ void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
 	HUDPackage.CrosshairSpread = .5f + CrosshairVelocityFactor + CrosshairInAirFactor - CrosshairAimFactor + CrosshairShootFactor;
 	
 	HUD->SetHUDPackage(HUDPackage);
-}
-
-void UCombatComponent::InterpFOV(float DeltaTime)
-{
-	if (EquippedWeapon == nullptr) { return; }
-
-	if (bAiming)
-	{
-		CurrentFOV = FMath::FInterpTo(CurrentFOV, EquippedWeapon->GetZoomedFOV(), DeltaTime, EquippedWeapon->GetZoomInterpSpeed());
-	}
-	else
-	{
-		CurrentFOV = FMath::FInterpTo(CurrentFOV, DefaultFOV, DeltaTime, ZoomInterpSpeed);
-	}
-	if (Character && Character->GetFollowCamera())
-	{
-		Character->GetFollowCamera()->SetFieldOfView(CurrentFOV);
-	}
 }
 
 void UCombatComponent::TraceUnderCrosshair(FHitResult& TraceHitResult)
@@ -151,6 +152,7 @@ void UCombatComponent::TraceUnderCrosshair(FHitResult& TraceHitResult)
 
 	HUDPackage.CrosshairColor = TraceHitResult.GetActor() && TraceHitResult.GetActor()->Implements<UCrosshairInteractInterface>() ? FLinearColor::Red : FLinearColor::White;
 }
+#pragma endregion Crosshair
 
 #pragma region Aiming
 void UCombatComponent::SetAiming(bool bIsAiming)

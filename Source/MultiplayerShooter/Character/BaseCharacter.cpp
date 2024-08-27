@@ -72,10 +72,10 @@ void ABaseCharacter::BeginPlay()
 	}
 
 	Health = MaxHealth;
-	BasePlayerController = Cast<ABasePlayerController>(GetController());
-	if (BasePlayerController)
+	UpdateHUDHealth();
+	if (HasAuthority())
 	{
-		BasePlayerController->SetHUDHealth(Health, MaxHealth);
+		OnTakeAnyDamage.AddDynamic(this, &ThisClass::ReceiveDamage);
 	}
 }
 
@@ -124,14 +124,6 @@ void ABaseCharacter::Tick(float DeltaTime)
 	HideCameraIfCharacterClose();
 }
 
-void ABaseCharacter::OnRep_ReplicatedMovement()
-{
-	Super::OnRep_ReplicatedMovement();
-
-	SimProxiesTurn();
-	TimeSinceLastMovementReplication = 0;
-}
-
 void ABaseCharacter::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
@@ -140,6 +132,15 @@ void ABaseCharacter::PostInitializeComponents()
 	{
 		CombatComponent->Character = this;
 	}
+}
+
+#pragma region Movement
+void ABaseCharacter::OnRep_ReplicatedMovement()
+{
+	Super::OnRep_ReplicatedMovement();
+
+	SimProxiesTurn();
+	TimeSinceLastMovementReplication = 0;
 }
 
 void ABaseCharacter::Move(const FInputActionValue& Value)
@@ -170,21 +171,40 @@ void ABaseCharacter::Look(const FInputActionValue& Value)
 	}
 }
 
-void ABaseCharacter::EquipButtonPressed()
+void ABaseCharacter::Jump()
 {
-	if (CombatComponent)
+	if (bIsCrouched)
 	{
-		if (HasAuthority())
+		UnCrouch();
+	}
+	
+	Super::Jump();
+}
+
+void ABaseCharacter::HideCameraIfCharacterClose()
+{
+	if (!IsLocallyControlled()) { return; }
+
+	if ((FollowCamera->GetComponentLocation() - GetActorLocation()).Size() < CameraThreshold)
+	{
+		GetMesh()->SetVisibility(false);
+		if (CombatComponent && CombatComponent->EquippedWeapon && CombatComponent->EquippedWeapon->GetWeaponMesh())
 		{
-			CombatComponent->EquipWeapon(OverlappingWeapon);
+			CombatComponent->EquippedWeapon->GetWeaponMesh()->bOwnerNoSee = true;
 		}
-		else
+	}
+	else
+	{
+		GetMesh()->SetVisibility(true);
+		if (CombatComponent && CombatComponent->EquippedWeapon && CombatComponent->EquippedWeapon->GetWeaponMesh())
 		{
-			ServerEquipButtonPressed();
+			CombatComponent->EquippedWeapon->GetWeaponMesh()->bOwnerNoSee = false;
 		}
 	}
 }
+#pragma endregion Movement
 
+#pragma region Duck
 void ABaseCharacter::DuckButtonPressed()
 {
 	Crouch();
@@ -194,7 +214,9 @@ void ABaseCharacter::DuckButtonReleased()
 {
 	UnCrouch();
 }
+#pragma endregion Duck
 
+#pragma region Aiming
 void ABaseCharacter::AimButtonPressed()
 {
 	if (CombatComponent)
@@ -210,7 +232,9 @@ void ABaseCharacter::AimButtonReleased()
 		CombatComponent->SetAiming(false);
 	}
 }
+#pragma endregion Aiming
 
+#pragma region AimOffset
 void ABaseCharacter::AimOffset(float DeltaTime)
 {
 	if (!CombatComponent || !CombatComponent->EquippedWeapon) { return; }
@@ -292,58 +316,6 @@ void ABaseCharacter::SimProxiesTurn()
 	}
 }
 
-void ABaseCharacter::FireButtonPressed()
-{
-	if (CombatComponent)
-	{
-		CombatComponent->FireButtonPressed(true);
-	}
-}
-
-void ABaseCharacter::FireButtonReleased()
-{
-	if (CombatComponent)
-	{
-		CombatComponent->FireButtonPressed(false);
-	}
-}
-
-void ABaseCharacter::Jump()
-{
-	if (bIsCrouched)
-	{
-		UnCrouch();
-	}
-	
-	Super::Jump();
-}
-
-void ABaseCharacter::PlayFireMontage(bool bAiming)
-{
-	if (!CombatComponent || !CombatComponent->EquippedWeapon) { return; }
-
-	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	if (AnimInstance && FireMontage)
-	{
-		AnimInstance->Montage_Play(FireMontage);
-		const FName SectionName = bAiming ? FName("RifleAim") : FName("RifleHip");
-		AnimInstance->Montage_JumpToSection(SectionName);
-	}
-}
-
-void ABaseCharacter::PlayHitReactMontage()
-{
-	if (!CombatComponent || !CombatComponent->EquippedWeapon) { return; }
-
-	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	if (AnimInstance && HitReactMontage)
-	{
-		AnimInstance->Montage_Play(HitReactMontage);
-		const FName SectionName =FName("FromFront");
-		AnimInstance->Montage_JumpToSection(SectionName);
-	}
-}
-
 void ABaseCharacter::TurnInPlace(float DeltaTime)
 {
 	if (AimOffsetYaw > 90.f)
@@ -366,6 +338,93 @@ void ABaseCharacter::TurnInPlace(float DeltaTime)
 		}
 	}
 }
+#pragma endregion AimOffset
+
+#pragma region Health/Damage
+void ABaseCharacter::ReceiveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType,
+                                   AController* InstigatorController, AActor* DamageCauser)
+{
+	// Health = FMathf::Clamp(Health - Damage, 0, MaxHealth);
+	Health = FMathf::Max(0, Health - Damage);
+	UpdateHUDHealth();
+	PlayHitReactMontage();
+}
+
+void ABaseCharacter::OnRep_Health()
+{
+	UpdateHUDHealth();
+	PlayHitReactMontage();
+}
+
+void ABaseCharacter::UpdateHUDHealth()
+{
+	BasePlayerController = BasePlayerController ? BasePlayerController : Cast<ABasePlayerController>(GetController());
+	if (BasePlayerController)
+	{
+		BasePlayerController->SetHUDHealth(Health, MaxHealth);
+	}
+}
+
+void ABaseCharacter::PlayHitReactMontage()
+{
+	if (!CombatComponent || !CombatComponent->EquippedWeapon) { return; }
+
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && HitReactMontage)
+	{
+		AnimInstance->Montage_Play(HitReactMontage);
+		const FName SectionName =FName("FromFront");
+		AnimInstance->Montage_JumpToSection(SectionName);
+	}
+}
+#pragma endregion Health/Damage
+
+#pragma region Fire
+void ABaseCharacter::FireButtonPressed()
+{
+	if (CombatComponent)
+	{
+		CombatComponent->FireButtonPressed(true);
+	}
+}
+
+void ABaseCharacter::FireButtonReleased()
+{
+	if (CombatComponent)
+	{
+		CombatComponent->FireButtonPressed(false);
+	}
+}
+
+void ABaseCharacter::PlayFireMontage(bool bAiming)
+{
+	if (!CombatComponent || !CombatComponent->EquippedWeapon) { return; }
+
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && FireMontage)
+	{
+		AnimInstance->Montage_Play(FireMontage);
+		const FName SectionName = bAiming ? FName("RifleAim") : FName("RifleHip");
+		AnimInstance->Montage_JumpToSection(SectionName);
+	}
+}
+#pragma endregion Fire
+
+#pragma region Equipment
+void ABaseCharacter::EquipButtonPressed()
+{
+	if (CombatComponent)
+	{
+		if (HasAuthority())
+		{
+			CombatComponent->EquipWeapon(OverlappingWeapon);
+		}
+		else
+		{
+			ServerEquipButtonPressed();
+		}
+	}
+}
 
 void ABaseCharacter::ServerEquipButtonPressed_Implementation()
 {
@@ -374,7 +433,9 @@ void ABaseCharacter::ServerEquipButtonPressed_Implementation()
 		CombatComponent->EquipWeapon(OverlappingWeapon);
 	}
 }
+#pragma endregion Equipment
 
+#pragma region OverlappingWeapon
 void ABaseCharacter::OnRep_OverlappingWeapon(AWeapon* LastWeapon)
 {
 	if (OverlappingWeapon)
@@ -387,37 +448,6 @@ void ABaseCharacter::OnRep_OverlappingWeapon(AWeapon* LastWeapon)
 	}
 }
 
-void ABaseCharacter::MulticastHit_Implementation()
-{
-	PlayHitReactMontage();
-}
-
-void ABaseCharacter::HideCameraIfCharacterClose()
-{
-	if (!IsLocallyControlled()) { return; }
-
-	if ((FollowCamera->GetComponentLocation() - GetActorLocation()).Size() < CameraThreshold)
-	{
-		GetMesh()->SetVisibility(false);
-		if (CombatComponent && CombatComponent->EquippedWeapon && CombatComponent->EquippedWeapon->GetWeaponMesh())
-		{
-			CombatComponent->EquippedWeapon->GetWeaponMesh()->bOwnerNoSee = true;
-		}
-	}
-	else
-	{
-		GetMesh()->SetVisibility(true);
-		if (CombatComponent && CombatComponent->EquippedWeapon && CombatComponent->EquippedWeapon->GetWeaponMesh())
-		{
-			CombatComponent->EquippedWeapon->GetWeaponMesh()->bOwnerNoSee = false;
-		}
-	}
-}
-
-void ABaseCharacter::OnRep_Health()
-{
-	
-}
 
 void ABaseCharacter::SetOverlappingWeapon(AWeapon* Weapon)
 {
@@ -434,7 +464,9 @@ void ABaseCharacter::SetOverlappingWeapon(AWeapon* Weapon)
 		}
 	}
 }
+#pragma endregion OverlappingWeapon
 
+#pragma region Getters
 bool ABaseCharacter::IsWeaponEquipped() const
 {
 	return CombatComponent && CombatComponent->EquippedWeapon;
@@ -454,3 +486,4 @@ FVector ABaseCharacter::GetHitTarget() const
 {
 	return CombatComponent ? CombatComponent->HitTarget : FVector();
 }
+#pragma endregion Getters
