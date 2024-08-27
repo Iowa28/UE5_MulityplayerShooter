@@ -14,6 +14,7 @@
 #include "MultiplayerShooter/MultiplayerShooter.h"
 #include "MultiplayerShooter/Components/CombatComponent.h"
 #include "MultiplayerShooter/Controller/BasePlayerController.h"
+#include "MultiplayerShooter/GameMode/ShooterGameMode.h"
 #include "MultiplayerShooter/Weapon/Weapon.h"
 #include "Net/UnrealNetwork.h"
 
@@ -344,10 +345,19 @@ void ABaseCharacter::TurnInPlace(float DeltaTime)
 void ABaseCharacter::ReceiveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType,
                                    AController* InstigatorController, AActor* DamageCauser)
 {
-	// Health = FMathf::Clamp(Health - Damage, 0, MaxHealth);
 	Health = FMathf::Max(0, Health - Damage);
 	UpdateHUDHealth();
 	PlayHitReactMontage();
+
+	if (FMath::IsNearlyEqual(Health, 0))
+	{
+		if (AShooterGameMode* ShooterGameMode = GetWorld()->GetAuthGameMode<AShooterGameMode>())
+		{
+			BasePlayerController = BasePlayerController ? BasePlayerController : Cast<ABasePlayerController>(GetController());
+			ABasePlayerController* AttackerController = Cast<ABasePlayerController>(InstigatorController);
+			ShooterGameMode->PlayerEliminated(this, BasePlayerController, AttackerController);
+		}
+	}
 }
 
 void ABaseCharacter::OnRep_Health()
@@ -376,6 +386,11 @@ void ABaseCharacter::PlayHitReactMontage()
 		const FName SectionName =FName("FromFront");
 		AnimInstance->Montage_JumpToSection(SectionName);
 	}
+}
+
+void ABaseCharacter::Eliminate()
+{
+	
 }
 #pragma endregion Health/Damage
 

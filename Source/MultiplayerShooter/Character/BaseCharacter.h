@@ -34,6 +34,8 @@ public:
 	
 	virtual void OnRep_ReplicatedMovement() override;
 
+	void Eliminate();
+
 protected:
 	virtual void BeginPlay() override;
 	
@@ -137,10 +139,6 @@ private:
 	float TimeSinceLastMovementReplication;
 
 	float CalculateSpeed() const;
-
-	/**
-	* Health
-	*/
 
 	UPROPERTY(EditDefaultsOnly, Category = "Player Stats")
 	float MaxHealth = 100.f;
