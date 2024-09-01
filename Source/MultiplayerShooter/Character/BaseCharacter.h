@@ -34,8 +34,11 @@ public:
 	
 	virtual void OnRep_ReplicatedMovement() override;
 
-	UFUNCTION(NetMulticast, Reliable)
+	UFUNCTION()
 	void Eliminate();
+	
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastEliminate();
 	
 	void PlayEliminationMontage();
 
@@ -161,6 +164,13 @@ private:
 	class ABasePlayerController* BasePlayerController;
 
 	void UpdateHUDHealth();
+
+	UPROPERTY(EditDefaultsOnly, Category = "Player Stats")
+	float EliminationDelay = 3.f;
+	
+	FTimerHandle EliminationTimer;
+
+	void EliminationTimerFinished();
 
 public:
 	void SetOverlappingWeapon(AWeapon* Weapon);

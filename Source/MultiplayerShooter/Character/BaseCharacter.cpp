@@ -46,6 +46,7 @@ ABaseCharacter::ABaseCharacter()
 	GetMesh()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
 	GetMesh()->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
 	GetCharacterMovement()->RotationRate = FRotator(0.f, 0.f, 720.f);
+	SpawnCollisionHandlingMethod = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 
 	TurningInPlace = ETurningInPlace::ETIP_NotTurning;
 	NetUpdateFrequency = 66.f;
@@ -397,12 +398,31 @@ void ABaseCharacter::PlayEliminationMontage()
 	}
 }
 
-void ABaseCharacter::Eliminate_Implementation()
+void ABaseCharacter::Eliminate()
+{
+	MulticastEliminate();
+	GetWorldTimerManager().SetTimer(
+		EliminationTimer,
+		this,
+		&ThisClass::EliminationTimerFinished,
+		EliminationDelay
+	);
+}
+
+void ABaseCharacter::MulticastEliminate_Implementation()
 {
 	if (bEliminated) { return; }
 	
 	bEliminated = true;
 	PlayEliminationMontage();
+}
+
+void ABaseCharacter::EliminationTimerFinished()
+{
+	if (AShooterGameMode* ShooterGameMode = GetWorld()->GetAuthGameMode<AShooterGameMode>())
+	{
+		ShooterGameMode->RequestRespawn(this, GetController());
+	}
 }
 #pragma endregion Health/Damage
 
