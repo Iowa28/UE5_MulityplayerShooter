@@ -30,6 +30,8 @@ public:
 
 	virtual void Fire(const FVector& HitTarget);
 
+	void Dropped();
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -58,7 +60,7 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
 	class USphereComponent* AreaSphere;
 
-	UPROPERTY(Replicated = OnRep_WeaponState, VisibleAnywhere, Category = "Weapon Properties")
+	UPROPERTY(ReplicatedUsing = OnRep_WeaponState, VisibleAnywhere, Category = "Weapon Properties")
 	EWeaponState WeaponState;
 
 	UFUNCTION()

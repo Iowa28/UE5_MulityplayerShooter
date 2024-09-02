@@ -404,6 +404,10 @@ void ABaseCharacter::PlayEliminationMontage()
 
 void ABaseCharacter::Eliminate()
 {
+	if (CombatComponent && CombatComponent->EquippedWeapon)
+	{
+		CombatComponent->EquippedWeapon->Dropped();
+	}
 	MulticastEliminate();
 	GetWorldTimerManager().SetTimer(
 		EliminationTimer,
@@ -428,6 +432,16 @@ void ABaseCharacter::MulticastEliminate_Implementation()
 		DynamicDissolveMaterialInstance->SetScalarParameterValue(TEXT("Glow"), 200.f);
 		StartDissolve();
 	}
+
+	GetCharacterMovement()->DisableMovement();
+	GetCharacterMovement()->StopMovementImmediately();
+	if (BasePlayerController)
+	{
+		DisableInput(BasePlayerController);
+	}
+
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 void ABaseCharacter::EliminationTimerFinished()
