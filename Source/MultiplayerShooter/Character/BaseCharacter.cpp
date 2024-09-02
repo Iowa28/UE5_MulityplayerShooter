@@ -51,6 +51,8 @@ ABaseCharacter::ABaseCharacter()
 	TurningInPlace = ETurningInPlace::ETIP_NotTurning;
 	NetUpdateFrequency = 66.f;
 	MinNetUpdateFrequency = 33.f;
+
+	DissolveTimeline = CreateDefaultSubobject<UTimelineComponent>(TEXT("DissolveTimelineComponent"));
 }
 
 void ABaseCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -388,7 +390,9 @@ void ABaseCharacter::PlayHitReactMontage()
 		AnimInstance->Montage_JumpToSection(SectionName);
 	}
 }
+#pragma endregion Health/Damage
 
+#pragma region Elimination
 void ABaseCharacter::PlayEliminationMontage()
 {
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
@@ -415,6 +419,15 @@ void ABaseCharacter::MulticastEliminate_Implementation()
 	
 	bEliminated = true;
 	PlayEliminationMontage();
+
+	if (DissolveMaterialInstance)
+	{
+		DynamicDissolveMaterialInstance = UMaterialInstanceDynamic::Create(DissolveMaterialInstance, this);
+		GetMesh()->SetMaterial(0, DynamicDissolveMaterialInstance);
+		DynamicDissolveMaterialInstance->SetScalarParameterValue(TEXT("Dissolve"), .55f);
+		DynamicDissolveMaterialInstance->SetScalarParameterValue(TEXT("Glow"), 200.f);
+		StartDissolve();
+	}
 }
 
 void ABaseCharacter::EliminationTimerFinished()
@@ -424,7 +437,25 @@ void ABaseCharacter::EliminationTimerFinished()
 		ShooterGameMode->RequestRespawn(this, GetController());
 	}
 }
-#pragma endregion Health/Damage
+
+void ABaseCharacter::UpdateDissolveMaterial(float DissolveValue)
+{
+	if (DynamicDissolveMaterialInstance)
+	{
+		DynamicDissolveMaterialInstance->SetScalarParameterValue(TEXT("Dissolve"), DissolveValue);
+	}
+}
+
+void ABaseCharacter::StartDissolve()
+{
+	DissolveTrack.BindDynamic(this, &ThisClass::UpdateDissolveMaterial);
+	if (DissolveCurve && DissolveTimeline)
+	{
+		DissolveTimeline->AddInterpFloat(DissolveCurve, DissolveTrack);
+		DissolveTimeline->Play();
+	}
+}
+#pragma endregion Elimination
 
 #pragma region Fire
 void ABaseCharacter::FireButtonPressed()

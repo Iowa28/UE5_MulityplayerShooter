@@ -3,11 +3,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Components/TimelineComponent.h"
 #include "GameFramework/Character.h"
 #include "MultiplayerShooter/Interfaces/CrosshairInteractInterface.h"
 #include "MultiplayerShooter/Types/TurningInPlace.h"
 #include "BaseCharacter.generated.h"
 
+class AWeapon;
 class UInputMappingContext;
 class UInputAction;
 struct FInputActionValue;
@@ -130,9 +132,6 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Combat")
 	UAnimMontage* HitReactMontage;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Combat")
-	UAnimMontage* EliminationMontage;
-
 	void PlayHitReactMontage();
 
 	UPROPERTY(EditDefaultsOnly)
@@ -165,12 +164,33 @@ private:
 
 	void UpdateHUDHealth();
 
-	UPROPERTY(EditDefaultsOnly, Category = "Player Stats")
-	float EliminationDelay = 3.f;
+#pragma region Elimination
+	UPROPERTY(EditDefaultsOnly, Category = "Elimination")
+	UAnimMontage* EliminationMontage;
 	
+	UPROPERTY(EditDefaultsOnly, Category = "Elimination")
+	float EliminationDelay = 3.f;
 	FTimerHandle EliminationTimer;
 
 	void EliminationTimerFinished();
+
+	UPROPERTY(VisibleAnywhere, Category = "Elimination")
+	UTimelineComponent* DissolveTimeline;
+	FOnTimelineFloat DissolveTrack;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Elimination")
+	UCurveFloat* DissolveCurve;
+
+	UPROPERTY(VisibleAnywhere, Category = "Elimination")
+	UMaterialInstanceDynamic* DynamicDissolveMaterialInstance;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Elimination")
+	UMaterialInstance* DissolveMaterialInstance;
+
+	UFUNCTION()
+	void UpdateDissolveMaterial(float DissolveValue);
+	void StartDissolve();
+#pragma endregion Elimination
 
 public:
 	void SetOverlappingWeapon(AWeapon* Weapon);
