@@ -44,6 +44,8 @@ public:
 	
 	void PlayEliminationMontage();
 
+	virtual void Destroyed() override;
+
 protected:
 	virtual void BeginPlay() override;
 	
@@ -148,6 +150,10 @@ private:
 
 	float CalculateSpeed() const;
 
+	UPROPERTY()
+	class ABasePlayerController* BasePlayerController;
+
+#pragma region Health
 	UPROPERTY(EditDefaultsOnly, Category = "Player Stats")
 	float MaxHealth = 100.f;
 
@@ -159,10 +165,8 @@ private:
 	UFUNCTION()
 	void OnRep_Health();
 
-	UPROPERTY()
-	class ABasePlayerController* BasePlayerController;
-
 	void UpdateHUDHealth();
+#pragma endregion Health
 
 #pragma region Elimination
 	UPROPERTY(EditDefaultsOnly, Category = "Elimination")
@@ -190,6 +194,15 @@ private:
 	UFUNCTION()
 	void UpdateDissolveMaterial(float DissolveValue);
 	void StartDissolve();
+
+	UPROPERTY(EditDefaultsOnly, Category = "Elimination")
+	UParticleSystem* EliminationEffect;
+
+	UPROPERTY(VisibleAnywhere, Category = "Elimination")
+	UParticleSystemComponent* EliminationComponent;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Elimination")
+	class USoundCue* EliminationSound;
 #pragma endregion Elimination
 
 public:

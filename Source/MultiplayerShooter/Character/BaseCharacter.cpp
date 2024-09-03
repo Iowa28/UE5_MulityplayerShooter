@@ -10,6 +10,7 @@
 #include "Components/WidgetComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "MultiplayerShooter/MultiplayerShooter.h"
 #include "MultiplayerShooter/Components/CombatComponent.h"
@@ -17,6 +18,8 @@
 #include "MultiplayerShooter/GameMode/ShooterGameMode.h"
 #include "MultiplayerShooter/Weapon/Weapon.h"
 #include "Net/UnrealNetwork.h"
+#include "Particles/ParticleSystemComponent.h"
+#include "Sound/SoundCue.h"
 
 ABaseCharacter::ABaseCharacter()
 {
@@ -135,6 +138,16 @@ void ABaseCharacter::PostInitializeComponents()
 	if (CombatComponent)
 	{
 		CombatComponent->Character = this;
+	}
+}
+
+void ABaseCharacter::Destroyed()
+{
+	Super::Destroyed();
+
+	if (EliminationComponent)
+	{
+		EliminationComponent->DestroyComponent();
 	}
 }
 
@@ -442,6 +455,27 @@ void ABaseCharacter::MulticastEliminate_Implementation()
 
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	if (EliminationEffect)
+	{
+		FVector EliminationSpawnPoint = GetActorLocation();
+		EliminationSpawnPoint.Z += 200.f;
+		EliminationComponent = UGameplayStatics::SpawnEmitterAtLocation(
+			GetWorld(),
+			EliminationEffect,
+			EliminationSpawnPoint,
+			GetActorRotation()
+		);
+	}
+
+	if (EliminationSound)
+	{
+		UGameplayStatics::SpawnSoundAtLocation(
+			this,
+			EliminationSound,
+			GetActorLocation()
+		);
+	}
 }
 
 void ABaseCharacter::EliminationTimerFinished()
