@@ -12,11 +12,23 @@ class MULTIPLAYERSHOOTER_API ABasePlayerState : public APlayerState
 	GENERATED_BODY()
 
 public:
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	
+	void AddToScore(float ScoreAmount);
 	virtual void OnRep_Score() override;
 
-	void AddToScore(float ScoreAmount);
+	void AddToDefeats(int32 DefeatsAmount);
+
+	UFUNCTION()
+	virtual void OnRep_Defeats();
 
 private:
+	UPROPERTY()
 	class ABaseCharacter* Character;
+	
+	UPROPERTY()
 	class ABasePlayerController* Controller;
+
+	UPROPERTY(ReplicatedUsing = OnRep_Defeats)
+	int32 Defeats;
 };

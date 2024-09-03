@@ -13,11 +13,15 @@ void AShooterGameMode::PlayerEliminated(ABaseCharacter* EliminatedCharacter, ABa
                                         ABasePlayerController* AttackerController)
 {
 	ABasePlayerState* AttackerPlayerState = AttackerController ? AttackerController->GetPlayerState<ABasePlayerState>() : nullptr;
-	const ABasePlayerState* VictimPlayerState = VictimController ? VictimController->GetPlayerState<ABasePlayerState>() : nullptr;
+	ABasePlayerState* VictimPlayerState = VictimController ? VictimController->GetPlayerState<ABasePlayerState>() : nullptr;
 
 	if (AttackerPlayerState && AttackerPlayerState != VictimPlayerState)
 	{
 		AttackerPlayerState->AddToScore(1.f);
+	}
+	if (VictimPlayerState)
+	{
+		VictimPlayerState->AddToDefeats(1);
 	}
 	
 	if (EliminatedCharacter)

@@ -141,6 +141,7 @@ void ABaseCharacter::PollInit()
 		if (CharacterPlayerState)
 		{
 			CharacterPlayerState->AddToScore(0.f);
+			CharacterPlayerState->AddToDefeats(0.f);
 		}
 	}
 }

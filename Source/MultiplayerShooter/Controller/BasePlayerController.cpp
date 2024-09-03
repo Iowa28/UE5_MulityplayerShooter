@@ -44,3 +44,12 @@ void ABasePlayerController::SetHUDScore(float Score)
 	const FString ScoreText = FString::FromInt(FMath::FloorToInt(Score));
 	BaseHUD->CharacterOverlay->ScoreAmount->SetText(FText::FromString(ScoreText));
 }
+
+void ABasePlayerController::SetHUDDefeats(int32 Defeats)
+{
+	BaseHUD = BaseHUD ? BaseHUD : Cast<ABaseHUD>(GetHUD());
+	if (!BaseHUD || !BaseHUD->IsCharacterOverlayValid()) { return; }
+
+	const FString DefeatsText = FString::FromInt(Defeats);
+	BaseHUD->CharacterOverlay->DefeatsAmount->SetText(FText::FromString(DefeatsText));
+}
