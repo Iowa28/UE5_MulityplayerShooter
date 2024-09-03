@@ -6,10 +6,20 @@
 #include "GameFramework/PlayerStart.h"
 #include "Kismet/GameplayStatics.h"
 #include "MultiplayerShooter/Character/BaseCharacter.h"
+#include "MultiplayerShooter/Controller/BasePlayerController.h"
+#include "MultiplayerShooter/PlayerState/BasePlayerState.h"
 
 void AShooterGameMode::PlayerEliminated(ABaseCharacter* EliminatedCharacter, ABasePlayerController* VictimController,
                                         ABasePlayerController* AttackerController)
 {
+	ABasePlayerState* AttackerPlayerState = AttackerController ? AttackerController->GetPlayerState<ABasePlayerState>() : nullptr;
+	const ABasePlayerState* VictimPlayerState = VictimController ? VictimController->GetPlayerState<ABasePlayerState>() : nullptr;
+
+	if (AttackerPlayerState && AttackerPlayerState != VictimPlayerState)
+	{
+		AttackerPlayerState->AddToScore(1.f);
+	}
+	
 	if (EliminatedCharacter)
 	{
 		EliminatedCharacter->Eliminate();

@@ -71,6 +71,8 @@ protected:
 	UFUNCTION()
 	void ReceiveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatorController, AActor* DamageCauser);
 
+	void PollInit();
+
 private:
 	UPROPERTY(VisibleAnywhere, Category = "Camera")
 	class USpringArmComponent* CameraBoom;
@@ -204,6 +206,9 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Elimination")
 	class USoundCue* EliminationSound;
 #pragma endregion Elimination
+
+	UPROPERTY()
+	class ABasePlayerState* CharacterPlayerState;
 
 public:
 	void SetOverlappingWeapon(AWeapon* Weapon);

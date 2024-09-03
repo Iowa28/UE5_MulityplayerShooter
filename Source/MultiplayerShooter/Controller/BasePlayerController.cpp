@@ -35,3 +35,12 @@ void ABasePlayerController::SetHUDHealth(float Health, float MaxHealth)
 	const FString HealthText = FString::Printf(TEXT("%d/%d"), FMath::CeilToInt(Health), FMath::CeilToInt(MaxHealth));
 	BaseHUD->CharacterOverlay->HealthText->SetText(FText::FromString(HealthText));
 }
+
+void ABasePlayerController::SetHUDScore(float Score)
+{
+	BaseHUD = BaseHUD ? BaseHUD : Cast<ABaseHUD>(GetHUD());
+	if (!BaseHUD || !BaseHUD->IsCharacterOverlayValid()) { return; }
+
+	const FString ScoreText = FString::FromInt(FMath::FloorToInt(Score));
+	BaseHUD->CharacterOverlay->ScoreAmount->SetText(FText::FromString(ScoreText));
+}

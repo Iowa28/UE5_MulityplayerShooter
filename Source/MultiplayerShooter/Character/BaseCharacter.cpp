@@ -16,6 +16,7 @@
 #include "MultiplayerShooter/Components/CombatComponent.h"
 #include "MultiplayerShooter/Controller/BasePlayerController.h"
 #include "MultiplayerShooter/GameMode/ShooterGameMode.h"
+#include "MultiplayerShooter/PlayerState/BasePlayerState.h"
 #include "MultiplayerShooter/Weapon/Weapon.h"
 #include "Net/UnrealNetwork.h"
 #include "Particles/ParticleSystemComponent.h"
@@ -129,6 +130,19 @@ void ABaseCharacter::Tick(float DeltaTime)
 	}
 	
 	HideCameraIfCharacterClose();
+	PollInit();
+}
+
+void ABaseCharacter::PollInit()
+{
+	if (!CharacterPlayerState)
+	{
+		CharacterPlayerState = GetPlayerState<ABasePlayerState>();
+		if (CharacterPlayerState)
+		{
+			CharacterPlayerState->AddToScore(0.f);
+		}
+	}
 }
 
 void ABaseCharacter::PostInitializeComponents()
