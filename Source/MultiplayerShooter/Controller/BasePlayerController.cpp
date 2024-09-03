@@ -4,6 +4,7 @@
 #include "BasePlayerController.h"
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
+#include "MultiplayerShooter/Character/BaseCharacter.h"
 #include "MultiplayerShooter/HUD/BaseHUD.h"
 #include "MultiplayerShooter/HUD/CharacterOverlay.h"
 
@@ -12,6 +13,16 @@ void ABasePlayerController::BeginPlay()
 	Super::BeginPlay();
 
 	BaseHUD = Cast<ABaseHUD>(GetHUD());
+}
+
+void ABasePlayerController::OnPossess(APawn* aPawn)
+{
+	Super::OnPossess(aPawn);
+
+	if (const ABaseCharacter* BaseCharacter = Cast<ABaseCharacter>(aPawn))
+	{
+		SetHUDHealth(BaseCharacter->GetHealth(), BaseCharacter->GetMaxHealth());
+	}
 }
 
 void ABasePlayerController::SetHUDHealth(float Health, float MaxHealth)
