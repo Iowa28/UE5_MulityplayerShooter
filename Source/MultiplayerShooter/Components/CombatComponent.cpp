@@ -240,7 +240,11 @@ void UCombatComponent::Fire()
 
 void UCombatComponent::StartFireTimer()
 {
-	if (!EquippedWeapon || !Character) { return; }
+	if (!EquippedWeapon || !Character)
+	{
+		bCanFire = true;
+		return;
+	}
 
 	Character->GetWorldTimerManager().SetTimer(FireTimer, this, &ThisClass::FireTimerFinished, EquippedWeapon->GetFireDelay());
 }
@@ -263,7 +267,6 @@ void UCombatComponent::MulticastFire_Implementation(const FVector_NetQuantize& T
 {
 	if (!EquippedWeapon)
 	{
-		GEngine->AddOnScreenDebugMessage(-1,15.f,FColor::Red, TEXT("Weapon not equipped"));
 		return;
 	}
 	
