@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "MultiplayerShooter/Types/WeaponTypes.h"
 #include "Weapon.generated.h"
 
 UENUM(BlueprintType)
@@ -123,6 +124,9 @@ private:
 	UPROPERTY()
 	class ABasePlayerController* OwnerController;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon Properties")
+	EWeaponType WeaponType;
+
 public:
 	void SetWeaponState(EWeaponState State);
 
@@ -142,4 +146,6 @@ public:
 	FORCEINLINE bool IsAutomatic() const { return bAutomatic; }
 	
 	FORCEINLINE bool IsEmpty() const { return Ammo <= 0; }
+
+	FORCEINLINE EWeaponType GetWeaponType() const { return WeaponType; }
 };

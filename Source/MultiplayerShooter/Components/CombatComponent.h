@@ -26,6 +26,8 @@ public:
 
 	void EquipWeapon(class AWeapon* WeaponToEquip);
 
+	void Reload();
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -49,6 +51,9 @@ protected:
 	void TraceUnderCrosshair(FHitResult& TraceHitResult);
 
 	void SetHUDCrosshairs(float DeltaTime);
+
+	UFUNCTION(Server, Reliable)
+	void ServerReload();
 
 private:
 	UPROPERTY()
@@ -119,4 +124,9 @@ private:
 	void OnRep_CarriedAmmo();
 
 	TMap<EWeaponType, int32> CarriedAmmoMap;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Combat")
+	int32 StartingARAmmo = 30;
+
+	void InitializeCarriedAmmo();
 };

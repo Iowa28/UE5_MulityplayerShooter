@@ -111,7 +111,6 @@ void AWeapon::OnRep_Owner()
 void AWeapon::SpendRound()
 {
 	Ammo = FMath::Max(Ammo - 1, 0);
-	--Ammo;
 	SetHUDAmmo();
 }
 

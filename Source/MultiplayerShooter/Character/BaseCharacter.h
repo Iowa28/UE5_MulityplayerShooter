@@ -34,6 +34,8 @@ public:
 
 	void PlayFireMontage(bool bAiming);
 	
+	void PlayReloadMontage();
+	
 	virtual void OnRep_ReplicatedMovement() override;
 
 	UFUNCTION()
@@ -67,6 +69,8 @@ protected:
 
 	void FireButtonPressed();
 	void FireButtonReleased();
+
+	void ReloadButtonPressed();
 
 	UFUNCTION()
 	void ReceiveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatorController, AActor* DamageCauser);
@@ -104,6 +108,10 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
 	UInputAction* FireAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
+	UInputAction* ReloadAction;
+	
 #pragma endregion Actions
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "HUD", meta = (AllowPrivateAccess))
@@ -130,8 +138,15 @@ private:
 
 	void TurnInPlace(float DeltaTime);
 
+	/**
+	 * Animation Montages
+	 */
+	
 	UPROPERTY(EditDefaultsOnly, Category = "Combat")
 	UAnimMontage* FireMontage;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Combat")
+	UAnimMontage* ReloadMontage;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Combat")
 	UAnimMontage* HitReactMontage;
