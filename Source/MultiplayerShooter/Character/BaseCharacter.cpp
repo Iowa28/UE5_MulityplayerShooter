@@ -448,6 +448,11 @@ void ABaseCharacter::Eliminate()
 void ABaseCharacter::MulticastEliminate_Implementation()
 {
 	if (bEliminated) { return; }
+
+	if (BasePlayerController)
+	{
+		BasePlayerController->SetHUDWeaponAmmo(0);
+	}
 	
 	bEliminated = true;
 	PlayEliminationMontage();

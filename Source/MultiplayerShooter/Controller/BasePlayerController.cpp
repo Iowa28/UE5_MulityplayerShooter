@@ -28,7 +28,7 @@ void ABasePlayerController::OnPossess(APawn* aPawn)
 void ABasePlayerController::SetHUDHealth(float Health, float MaxHealth)
 {
 	BaseHUD = BaseHUD ? BaseHUD : Cast<ABaseHUD>(GetHUD());
-	if (!BaseHUD || !BaseHUD->IsCharacterOverlayValid()) { return; }
+	if (!BaseHUD || !BaseHUD->CharacterOverlay || !BaseHUD->CharacterOverlay->HealthBar || !BaseHUD->CharacterOverlay->HealthText) { return; }
 
 	const float HealthPercent = Health / MaxHealth;
 	BaseHUD->CharacterOverlay->HealthBar->SetPercent(HealthPercent);
@@ -39,7 +39,7 @@ void ABasePlayerController::SetHUDHealth(float Health, float MaxHealth)
 void ABasePlayerController::SetHUDScore(float Score)
 {
 	BaseHUD = BaseHUD ? BaseHUD : Cast<ABaseHUD>(GetHUD());
-	if (!BaseHUD || !BaseHUD->IsCharacterOverlayValid()) { return; }
+	if (!BaseHUD || !BaseHUD->CharacterOverlay || !BaseHUD->CharacterOverlay->ScoreAmount) { return; }
 
 	const FString ScoreText = FString::FromInt(FMath::FloorToInt(Score));
 	BaseHUD->CharacterOverlay->ScoreAmount->SetText(FText::FromString(ScoreText));
@@ -48,8 +48,17 @@ void ABasePlayerController::SetHUDScore(float Score)
 void ABasePlayerController::SetHUDDefeats(int32 Defeats)
 {
 	BaseHUD = BaseHUD ? BaseHUD : Cast<ABaseHUD>(GetHUD());
-	if (!BaseHUD || !BaseHUD->IsCharacterOverlayValid()) { return; }
+	if (!BaseHUD || !BaseHUD->CharacterOverlay || !BaseHUD->CharacterOverlay->DefeatsAmount) { return; }
 
 	const FString DefeatsText = FString::FromInt(Defeats);
 	BaseHUD->CharacterOverlay->DefeatsAmount->SetText(FText::FromString(DefeatsText));
+}
+
+void ABasePlayerController::SetHUDWeaponAmmo(int32 Ammo)
+{
+	BaseHUD = BaseHUD ? BaseHUD : Cast<ABaseHUD>(GetHUD());
+	if (!BaseHUD || !BaseHUD->CharacterOverlay || !BaseHUD->CharacterOverlay->WeaponAmmoAmount) { return; }
+
+	const FString AmmoText = FString::FromInt(Ammo);
+	BaseHUD->CharacterOverlay->WeaponAmmoAmount->SetText(FText::FromString(AmmoText));
 }

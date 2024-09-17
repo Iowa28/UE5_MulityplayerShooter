@@ -32,8 +32,12 @@ public:
 
 	void Dropped();
 
+	void SetHUDAmmo();
+
 protected:
 	virtual void BeginPlay() override;
+
+	virtual void OnRep_Owner() override;
 
 	UFUNCTION()
 	virtual void OnSphereOverlap(
@@ -75,6 +79,17 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon Properties")
 	TSubclassOf<class ACasing> CasingClass;
 
+	UPROPERTY(EditDefaultsOnly, ReplicatedUsing = OnRep_Ammo, Category = "Weapon Properties")
+	int32 Ammo;
+
+	UFUNCTION()
+	void OnRep_Ammo();
+
+	void SpendRound();
+
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon Properties")
+	int32 MagCapacity;
+
 	UPROPERTY(EditDefaultsOnly, Category = "Crosshair")
 	UTexture2D* CrosshairCenter;
 
@@ -101,6 +116,12 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Fire")
 	bool bAutomatic = true;
+
+	UPROPERTY()
+	class ABaseCharacter* OwnerCharacter;
+
+	UPROPERTY()
+	class ABasePlayerController* OwnerController;
 
 public:
 	void SetWeaponState(EWeaponState State);

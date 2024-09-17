@@ -31,8 +31,6 @@ public:
 	UPROPERTY()
 	class UCharacterOverlay* CharacterOverlay;
 
-	bool IsCharacterOverlayValid() const;
-
 protected:
 	virtual void BeginPlay() override;
 

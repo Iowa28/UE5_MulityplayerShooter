@@ -2,12 +2,12 @@
 
 
 #include "Weapon.h"
-
 #include "Casing.h"
 #include "Components/SphereComponent.h"
 #include "Components/WidgetComponent.h"
 #include "Engine/SkeletalMeshSocket.h"
 #include "MultiplayerShooter/Character/BaseCharacter.h"
+#include "MultiplayerShooter/Controller/BasePlayerController.h"
 #include "Net/UnrealNetwork.h"
 
 AWeapon::AWeapon()
@@ -36,6 +36,7 @@ void AWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeP
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(AWeapon, WeaponState);
+	DOREPLIFETIME(AWeapon, Ammo);
 }
 
 void AWeapon::BeginPlay()
@@ -72,6 +73,45 @@ void AWeapon::OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActo
 	{
 		Character->SetOverlappingWeapon(nullptr);
 	}
+}
+
+void AWeapon::SetHUDAmmo()
+{
+	OwnerCharacter = OwnerCharacter ? OwnerCharacter : Cast<ABaseCharacter>(GetOwner());
+	if (OwnerCharacter)
+	{
+		OwnerController = OwnerController ? OwnerController : Cast<ABasePlayerController>(OwnerCharacter->GetController());
+		if (OwnerController)
+		{
+			OwnerController->SetHUDWeaponAmmo(Ammo);
+		}
+	}
+}
+
+void AWeapon::OnRep_Ammo()
+{
+	SetHUDAmmo();
+}
+
+void AWeapon::OnRep_Owner()
+{
+	Super::OnRep_Owner();
+	
+	if (!GetOwner())
+	{
+		OwnerCharacter = nullptr;
+		OwnerController = nullptr;
+	}
+	else
+	{
+		SetHUDAmmo();
+	}
+}
+
+void AWeapon::SpendRound()
+{
+	--Ammo;
+	SetHUDAmmo();
 }
 
 void AWeapon::SetWeaponState(EWeaponState State)
@@ -133,10 +173,6 @@ void AWeapon::Fire(const FVector& HitTarget)
 	{
 		WeaponMesh->PlayAnimation(FireAnimation, false);
 	}
-	else
-	{
-		GEngine->AddOnScreenDebugMessage(-1,15.f,FColor::Red, TEXT("Can't fire"));
-	}
 
 	const USkeletalMeshSocket* AmmoEjectSocket = WeaponMesh->GetSocketByName(FName("AmmoEject"));
 	UWorld* World = GetWorld();
@@ -145,10 +181,8 @@ void AWeapon::Fire(const FVector& HitTarget)
 		const FTransform SocketTransform = AmmoEjectSocket->GetSocketTransform(WeaponMesh);
 		World->SpawnActor<ACasing>(CasingClass, SocketTransform.GetLocation(), SocketTransform.GetRotation().Rotator());
 	}
-	else
-	{
-		GEngine->AddOnScreenDebugMessage(-1,15.f,FColor::Red, TEXT("Can't fire"));
-	}
+
+	SpendRound();
 }
 
 void AWeapon::Dropped()
@@ -157,4 +191,6 @@ void AWeapon::Dropped()
 	const FDetachmentTransformRules DetachRules = FDetachmentTransformRules(EDetachmentRule::KeepWorld, true);
 	WeaponMesh->DetachFromComponent(DetachRules);
 	SetOwner(nullptr);
+	OwnerCharacter = nullptr;
+	OwnerController = nullptr;
 }

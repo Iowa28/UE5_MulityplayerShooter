@@ -39,11 +39,6 @@ void ABaseHUD::AddCharacterOverlay()
 	}
 }
 
-bool ABaseHUD::IsCharacterOverlayValid() const
-{
-	return CharacterOverlay && CharacterOverlay->HealthBar && CharacterOverlay->HealthText && CharacterOverlay->ScoreAmount && CharacterOverlay->DefeatsAmount;
-}
-
 void ABaseHUD::DrawCrosshair(UTexture2D* Crosshair, const FVector2D ViewportCenter, const FVector2D Spread)
 {
 	if (!Crosshair) { return; }

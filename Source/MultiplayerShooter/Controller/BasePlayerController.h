@@ -13,8 +13,12 @@ class MULTIPLAYERSHOOTER_API ABasePlayerController : public APlayerController
 
 public:
 	void SetHUDHealth(float Health, float MaxHealth);
+	
 	void SetHUDScore(float Score);
+	
 	void SetHUDDefeats(int32 Defeats);
+	
+	void SetHUDWeaponAmmo(int32 Ammo);
 
 protected:
 	virtual void BeginPlay() override;
