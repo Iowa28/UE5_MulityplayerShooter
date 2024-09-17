@@ -62,3 +62,12 @@ void ABasePlayerController::SetHUDWeaponAmmo(int32 Ammo)
 	const FString AmmoText = FString::FromInt(Ammo);
 	BaseHUD->CharacterOverlay->WeaponAmmoAmount->SetText(FText::FromString(AmmoText));
 }
+
+void ABasePlayerController::SetHUDCarriedAmmo(int32 Ammo)
+{
+	BaseHUD = BaseHUD ? BaseHUD : Cast<ABaseHUD>(GetHUD());
+	if (!BaseHUD || !BaseHUD->CharacterOverlay || !BaseHUD->CharacterOverlay->CarriedAmmoAmount) { return; }
+
+	const FString AmmoText = FString::FromInt(Ammo);
+	BaseHUD->CharacterOverlay->CarriedAmmoAmount->SetText(FText::FromString(AmmoText));
+}
