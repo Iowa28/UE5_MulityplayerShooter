@@ -231,7 +231,7 @@ void UCombatComponent::FireButtonPressed(bool bPressed)
 
 void UCombatComponent::Fire()
 {
-	if (bCanFire)
+	if (CanFire())
 	{
 		bCanFire = false;
 		ServerFire(HitTarget);
@@ -241,6 +241,12 @@ void UCombatComponent::Fire()
 		}
 		StartFireTimer();
 	}
+}
+
+bool UCombatComponent::CanFire() const
+{
+	if (!EquippedWeapon) { return false; }
+	return !EquippedWeapon->IsEmpty() || !bCanFire;
 }
 
 void UCombatComponent::StartFireTimer()

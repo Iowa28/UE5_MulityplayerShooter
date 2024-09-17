@@ -140,4 +140,6 @@ public:
 	
 	FORCEINLINE float GetFireDelay() const { return FireDelay; }
 	FORCEINLINE bool IsAutomatic() const { return bAutomatic; }
+	
+	FORCEINLINE bool IsEmpty() const { return Ammo <= 0; }
 };
