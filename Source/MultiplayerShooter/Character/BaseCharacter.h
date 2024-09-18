@@ -6,6 +6,7 @@
 #include "Components/TimelineComponent.h"
 #include "GameFramework/Character.h"
 #include "MultiplayerShooter/Interfaces/CrosshairInteractInterface.h"
+#include "MultiplayerShooter/Types/CombatState.h"
 #include "MultiplayerShooter/Types/TurningInPlace.h"
 #include "BaseCharacter.generated.h"
 
@@ -123,7 +124,7 @@ private:
 	UFUNCTION()
 	void OnRep_OverlappingWeapon(AWeapon* LastWeapon);
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess))
 	class UCombatComponent* CombatComponent;
 
 	UFUNCTION(Server, Reliable)
@@ -249,4 +250,6 @@ public:
 	
 	FORCEINLINE float GetMaxHealth() const { return MaxHealth; }
 	FORCEINLINE float GetHealth() const { return Health; }
+
+	ECombatState GetCombatState() const;
 };

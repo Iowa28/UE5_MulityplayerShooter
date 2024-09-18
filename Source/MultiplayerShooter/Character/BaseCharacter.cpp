@@ -665,4 +665,9 @@ FVector ABaseCharacter::GetHitTarget() const
 {
 	return CombatComponent ? CombatComponent->HitTarget : FVector();
 }
+
+ECombatState ABaseCharacter::GetCombatState() const
+{
+	return CombatComponent ? CombatComponent->CombatState : ECombatState::ECS_MAX;
+}
 #pragma endregion Getters
