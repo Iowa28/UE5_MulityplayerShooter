@@ -57,6 +57,7 @@ void AWeapon::BeginPlay()
 	}
 }
 
+#pragma region OverlappingWeapon
 void AWeapon::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
                               UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
@@ -74,24 +75,7 @@ void AWeapon::OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActo
 		Character->SetOverlappingWeapon(nullptr);
 	}
 }
-
-void AWeapon::SetHUDAmmo()
-{
-	OwnerCharacter = OwnerCharacter ? OwnerCharacter : Cast<ABaseCharacter>(GetOwner());
-	if (OwnerCharacter)
-	{
-		OwnerController = OwnerController ? OwnerController : Cast<ABasePlayerController>(OwnerCharacter->GetController());
-		if (OwnerController)
-		{
-			OwnerController->SetHUDWeaponAmmo(Ammo);
-		}
-	}
-}
-
-void AWeapon::OnRep_Ammo()
-{
-	SetHUDAmmo();
-}
+#pragma endregion OverlappingWeapon
 
 void AWeapon::OnRep_Owner()
 {
@@ -106,12 +90,6 @@ void AWeapon::OnRep_Owner()
 	{
 		SetHUDAmmo();
 	}
-}
-
-void AWeapon::SpendRound()
-{
-	Ammo = FMath::Max(Ammo - 1, 0);
-	SetHUDAmmo();
 }
 
 void AWeapon::SetWeaponState(EWeaponState State)
@@ -194,3 +172,35 @@ void AWeapon::Dropped()
 	OwnerCharacter = nullptr;
 	OwnerController = nullptr;
 }
+
+#pragma region Ammo
+void AWeapon::SpendRound()
+{
+	Ammo = FMath::Max(Ammo - 1, 0);
+	SetHUDAmmo();
+}
+
+void AWeapon::SetHUDAmmo()
+{
+	OwnerCharacter = OwnerCharacter ? OwnerCharacter : Cast<ABaseCharacter>(GetOwner());
+	if (OwnerCharacter)
+	{
+		OwnerController = OwnerController ? OwnerController : Cast<ABasePlayerController>(OwnerCharacter->GetController());
+		if (OwnerController)
+		{
+			OwnerController->SetHUDWeaponAmmo(Ammo);
+		}
+	}
+}
+
+void AWeapon::AddAmmo(int32 AmmoToAdd)
+{
+	Ammo = FMath::Clamp(Ammo + AmmoToAdd, 0, MagCapacity);
+	SetHUDAmmo();
+}
+
+void AWeapon::OnRep_Ammo()
+{
+	SetHUDAmmo();
+}
+#pragma endregion Ammo

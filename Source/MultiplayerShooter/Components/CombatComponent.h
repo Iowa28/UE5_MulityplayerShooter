@@ -64,8 +64,10 @@ protected:
 private:
 	UPROPERTY()
 	ABaseCharacter* Character;
+	
 	UPROPERTY()
 	class ABasePlayerController* Controller;
+	
 	UPROPERTY()
 	ABaseHUD* HUD;
 
@@ -141,4 +143,8 @@ private:
 
 	UFUNCTION()
 	void OnRep_CombatState();
+
+	int32 AmountToReload();
+
+	void UpdateAmmoValues();
 };
