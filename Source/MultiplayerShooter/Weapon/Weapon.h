@@ -37,6 +37,9 @@ public:
 
 	void AddAmmo(int32 AmmoToAdd);
 
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon Properties")
+	class USoundCue* EquipSound;
+
 protected:
 	virtual void BeginPlay() override;
 
