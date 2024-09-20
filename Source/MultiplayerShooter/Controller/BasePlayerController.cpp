@@ -29,9 +29,11 @@ void ABasePlayerController::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
+	CheckTimeSync(DeltaSeconds);
 	SetHUDTime();
 }
 
+#pragma region HUD
 void ABasePlayerController::SetHUDHealth(float Health, float MaxHealth)
 {
 	BaseHUD = BaseHUD ? BaseHUD : Cast<ABaseHUD>(GetHUD());
@@ -93,11 +95,52 @@ void ABasePlayerController::SetHUDMatchCountdown(float CountdownTime)
 
 void ABasePlayerController::SetHUDTime()
 {
-	const uint32 SecondsLeft = FMath::CeilToInt(MatchTime - GetWorld()->GetTimeSeconds());
+	const uint32 SecondsLeft = FMath::CeilToInt(MatchTime - GetServerTime());
 	if (SecondsLeft != CountdownInt)
 	{
-		SetHUDMatchCountdown(MatchTime - GetWorld()->GetTimeSeconds());
+		SetHUDMatchCountdown(MatchTime - GetServerTime());
 	}
 
 	CountdownInt = SecondsLeft;
 }
+#pragma endregion HUD
+
+#pragma region TimeCalculation
+void ABasePlayerController::CheckTimeSync(float DeltaSeconds)
+{
+	TimeSyncRunningTime += DeltaSeconds;
+	if (IsLocalController() && TimeSyncRunningTime > TimeSyncFrequency)
+	{
+		ServerRequestServerTime(GetWorld()->GetTimeSeconds());
+		TimeSyncRunningTime = 0;
+	}
+}
+
+float ABasePlayerController::GetServerTime() const
+{
+	return HasAuthority() ? GetWorld()->GetTimeSeconds() : GetWorld()->GetTimeSeconds() + ClientServerDelta;
+}
+
+void ABasePlayerController::ReceivedPlayer()
+{
+	Super::ReceivedPlayer();
+
+	if (IsLocalController())
+	{
+		ServerRequestServerTime(GetWorld()->GetTimeSeconds());
+	}
+}
+
+void ABasePlayerController::ServerRequestServerTime_Implementation(float TimeOfClientRequest)
+{
+	const float ServerTimeOfReceipt = GetWorld()->GetTimeSeconds();
+	ClientReportServerTime(TimeOfClientRequest, ServerTimeOfReceipt);
+}
+
+void ABasePlayerController::ClientReportServerTime_Implementation(float TimeOfClientRequest, float TimeServerReceivedClientRequest)
+{
+	const float RoundTripTime = GetWorld()->GetTimeSeconds() - TimeOfClientRequest;
+	const float CurrentServerTime = TimeServerReceivedClientRequest + RoundTripTime / 2;
+	ClientServerDelta = CurrentServerTime - GetWorld()->GetTimeSeconds();
+}
+#pragma endregion TimeCalculation

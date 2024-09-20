@@ -26,6 +26,10 @@ public:
 
 	void SetHUDMatchCountdown(float CountdownTime);
 
+	float GetServerTime() const;
+
+	virtual void ReceivedPlayer() override;
+
 protected:
 	virtual void BeginPlay() override;
 	
@@ -33,10 +37,25 @@ protected:
 
 	void SetHUDTime();
 
+	UPROPERTY(EditDefaultsOnly, Category = "Time")
+	float TimeSyncFrequency = 5.f;
+
+	float TimeSyncRunningTime = 0.f;
+	
+	float ClientServerDelta = 0.f;
+
+	UFUNCTION(Server, Reliable)
+	void ServerRequestServerTime(float TimeOfClientRequest);
+
+	UFUNCTION(Client, Reliable)
+	void ClientReportServerTime(float TimeOfClientRequest, float TimeServerReceivedClientRequest);
+
 private:
 	UPROPERTY()
 	class ABaseHUD* BaseHUD;
 
 	float MatchTime = 120.f;
 	uint32 CountdownInt = 0;
+
+	void CheckTimeSync(float DeltaSeconds);
 };
