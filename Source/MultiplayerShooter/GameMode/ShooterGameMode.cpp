@@ -9,6 +9,32 @@
 #include "MultiplayerShooter/Controller/BasePlayerController.h"
 #include "MultiplayerShooter/PlayerState/BasePlayerState.h"
 
+AShooterGameMode::AShooterGameMode()
+{
+	bDelayedStart = true;
+}
+
+void AShooterGameMode::BeginPlay()
+{
+	Super::BeginPlay();
+
+	LevelStartingTime = GetWorld()->GetTimeSeconds();
+}
+
+void AShooterGameMode::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	if (MatchState == MatchState::WaitingToStart)
+	{
+		CountdownTime = WarmupTime - GetWorld()->GetTimeSeconds() + LevelStartingTime;
+		if (CountdownTime <= 0.f)
+		{
+			StartMatch();
+		}
+	}
+}
+
 void AShooterGameMode::PlayerEliminated(ABaseCharacter* EliminatedCharacter, ABasePlayerController* VictimController,
                                         ABasePlayerController* AttackerController)
 {
