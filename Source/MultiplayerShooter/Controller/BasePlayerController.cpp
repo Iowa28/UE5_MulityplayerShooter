@@ -25,6 +25,13 @@ void ABasePlayerController::OnPossess(APawn* aPawn)
 	}
 }
 
+void ABasePlayerController::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	SetHUDTime();
+}
+
 void ABasePlayerController::SetHUDHealth(float Health, float MaxHealth)
 {
 	BaseHUD = BaseHUD ? BaseHUD : Cast<ABaseHUD>(GetHUD());
@@ -70,4 +77,27 @@ void ABasePlayerController::SetHUDCarriedAmmo(int32 Ammo)
 
 	const FString AmmoText = FString::FromInt(Ammo);
 	BaseHUD->CharacterOverlay->CarriedAmmoAmount->SetText(FText::FromString(AmmoText));
+}
+
+void ABasePlayerController::SetHUDMatchCountdown(float CountdownTime)
+{
+	BaseHUD = BaseHUD ? BaseHUD : Cast<ABaseHUD>(GetHUD());
+	if (!BaseHUD || !BaseHUD->CharacterOverlay || !BaseHUD->CharacterOverlay->MatchCountdownText) { return; }
+
+	const int32 Minutes = FMath::FloorToInt(CountdownTime / 60.f);
+	const int32 Seconds = CountdownTime - Minutes * 60;
+	
+	const FString CountdownText = FString::Printf(TEXT("%02d:%02d"), Minutes, Seconds);
+	BaseHUD->CharacterOverlay->MatchCountdownText->SetText(FText::FromString(CountdownText));
+}
+
+void ABasePlayerController::SetHUDTime()
+{
+	const uint32 SecondsLeft = FMath::CeilToInt(MatchTime - GetWorld()->GetTimeSeconds());
+	if (SecondsLeft != CountdownInt)
+	{
+		SetHUDMatchCountdown(MatchTime - GetWorld()->GetTimeSeconds());
+	}
+
+	CountdownInt = SecondsLeft;
 }
