@@ -17,16 +17,12 @@ public:
 	virtual void Tick(float DeltaSeconds) override;
 	
 	void SetHUDHealth(float Health, float MaxHealth);
-
 	void SetHUDScore(float Score);
-
 	void SetHUDDefeats(int32 Defeats);
-
 	void SetHUDWeaponAmmo(int32 Ammo);
-
 	void SetHUDCarriedAmmo(int32 Ammo);
-
 	void SetHUDMatchCountdown(float CountdownTime);
+	void SetHUDAnnouncementCountdown(float CountdownTime);
 
 	float GetServerTime() const;
 
@@ -58,11 +54,19 @@ protected:
 
 	void HandleMatchHasStarted();
 
+	UFUNCTION(Server, Reliable)
+	void ServerCheckMatchState();
+
+	UFUNCTION(Client, Reliable)
+	void ClientJoinMidGame(FName StateOfMatch, float Warmup, float Match, float StartingTime);
+
 private:
 	UPROPERTY()
 	class ABaseHUD* BaseHUD;
 
-	float MatchTime = 120.f;
+	float LevelStartingTime = 0.f;
+	float MatchTime = 0.f;
+	float WarmupTime = 0.f;
 	uint32 CountdownInt = 0;
 
 	void CheckTimeSync(float DeltaSeconds);

@@ -21,7 +21,10 @@ public:
 
 	virtual void RequestRespawn(ACharacter* EliminatedCharacter, AController* EliminatedController);
 
-	UPROPERTY(EditDefaultsOnly, Category = "Warmup")
+	UPROPERTY(EditDefaultsOnly, Category = "Match Settings")
+	float MatchTime = 120.f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Match Settings")
 	float WarmupTime = 5.f;
 
 	float LevelStartingTime = 0.f;
