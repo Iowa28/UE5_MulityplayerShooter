@@ -7,8 +7,6 @@
 void ABaseHUD::BeginPlay()
 {
 	Super::BeginPlay();
-
-	AddCharacterOverlay();
 }
 
 void ABaseHUD::DrawHUD()

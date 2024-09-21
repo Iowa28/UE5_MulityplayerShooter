@@ -12,6 +12,8 @@ class MULTIPLAYERSHOOTER_API ABasePlayerController : public APlayerController
 	GENERATED_BODY()
 
 public:
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	
 	virtual void Tick(float DeltaSeconds) override;
 	
 	void SetHUDHealth(float Health, float MaxHealth);
@@ -30,12 +32,16 @@ public:
 
 	virtual void ReceivedPlayer() override;
 
+	void OnMatchStateSet(FName State);
+
 protected:
 	virtual void BeginPlay() override;
 	
 	virtual void OnPossess(APawn* aPawn) override;
 
 	void SetHUDTime();
+
+	void PollInit();
 
 	UPROPERTY(EditDefaultsOnly, Category = "Time")
 	float TimeSyncFrequency = 5.f;
@@ -58,4 +64,19 @@ private:
 	uint32 CountdownInt = 0;
 
 	void CheckTimeSync(float DeltaSeconds);
+
+	UPROPERTY(ReplicatedUsing = OnRep_MatchState)
+	FName MatchState;
+
+	UFUNCTION()
+	void OnRep_MatchState();
+
+	UPROPERTY()
+	class UCharacterOverlay* CharacterOverlay;
+
+	bool bInitializeCharacterOverlay = false;
+
+	float HUDHealth, HUDMaxHealth;
+	float HUDScore;
+	int32 HUDDefeats;
 };

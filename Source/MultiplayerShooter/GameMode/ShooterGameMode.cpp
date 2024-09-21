@@ -35,6 +35,19 @@ void AShooterGameMode::Tick(float DeltaSeconds)
 	}
 }
 
+void AShooterGameMode::OnMatchStateSet()
+{
+	Super::OnMatchStateSet();
+
+	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
+	{
+		if (ABasePlayerController* PlayerController = Cast<ABasePlayerController>(*It))
+		{
+			PlayerController->OnMatchStateSet(MatchState);
+		}
+	}
+}
+
 void AShooterGameMode::PlayerEliminated(ABaseCharacter* EliminatedCharacter, ABasePlayerController* VictimController,
                                         ABasePlayerController* AttackerController)
 {

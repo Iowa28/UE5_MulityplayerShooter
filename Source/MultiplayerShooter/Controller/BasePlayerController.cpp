@@ -4,9 +4,11 @@
 #include "BasePlayerController.h"
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
+#include "GameFramework/GameMode.h"
 #include "MultiplayerShooter/Character/BaseCharacter.h"
 #include "MultiplayerShooter/HUD/BaseHUD.h"
 #include "MultiplayerShooter/HUD/CharacterOverlay.h"
+#include "Net/UnrealNetwork.h"
 
 void ABasePlayerController::BeginPlay()
 {
@@ -25,19 +27,33 @@ void ABasePlayerController::OnPossess(APawn* aPawn)
 	}
 }
 
+void ABasePlayerController::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ABasePlayerController, MatchState);
+}
+
 void ABasePlayerController::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
 	CheckTimeSync(DeltaSeconds);
 	SetHUDTime();
+	PollInit();
 }
 
 #pragma region HUD
 void ABasePlayerController::SetHUDHealth(float Health, float MaxHealth)
 {
 	BaseHUD = BaseHUD ? BaseHUD : Cast<ABaseHUD>(GetHUD());
-	if (!BaseHUD || !BaseHUD->CharacterOverlay || !BaseHUD->CharacterOverlay->HealthBar || !BaseHUD->CharacterOverlay->HealthText) { return; }
+	if (!BaseHUD || !BaseHUD->CharacterOverlay || !BaseHUD->CharacterOverlay->HealthBar || !BaseHUD->CharacterOverlay->HealthText)
+	{
+		bInitializeCharacterOverlay = true;
+		HUDHealth = Health;
+		HUDMaxHealth = MaxHealth;
+		return;
+	}
 
 	const float HealthPercent = Health / MaxHealth;
 	BaseHUD->CharacterOverlay->HealthBar->SetPercent(HealthPercent);
@@ -48,7 +64,12 @@ void ABasePlayerController::SetHUDHealth(float Health, float MaxHealth)
 void ABasePlayerController::SetHUDScore(float Score)
 {
 	BaseHUD = BaseHUD ? BaseHUD : Cast<ABaseHUD>(GetHUD());
-	if (!BaseHUD || !BaseHUD->CharacterOverlay || !BaseHUD->CharacterOverlay->ScoreAmount) { return; }
+	if (!BaseHUD || !BaseHUD->CharacterOverlay || !BaseHUD->CharacterOverlay->ScoreAmount)
+	{
+		bInitializeCharacterOverlay = true;
+		HUDScore = Score;
+		return;
+	}
 
 	const FString ScoreText = FString::FromInt(FMath::FloorToInt(Score));
 	BaseHUD->CharacterOverlay->ScoreAmount->SetText(FText::FromString(ScoreText));
@@ -57,7 +78,12 @@ void ABasePlayerController::SetHUDScore(float Score)
 void ABasePlayerController::SetHUDDefeats(int32 Defeats)
 {
 	BaseHUD = BaseHUD ? BaseHUD : Cast<ABaseHUD>(GetHUD());
-	if (!BaseHUD || !BaseHUD->CharacterOverlay || !BaseHUD->CharacterOverlay->DefeatsAmount) { return; }
+	if (!BaseHUD || !BaseHUD->CharacterOverlay || !BaseHUD->CharacterOverlay->DefeatsAmount)
+	{
+		bInitializeCharacterOverlay = true;
+		HUDDefeats = Defeats;
+		return;
+	}
 
 	const FString DefeatsText = FString::FromInt(Defeats);
 	BaseHUD->CharacterOverlay->DefeatsAmount->SetText(FText::FromString(DefeatsText));
@@ -103,6 +129,17 @@ void ABasePlayerController::SetHUDTime()
 
 	CountdownInt = SecondsLeft;
 }
+
+void ABasePlayerController::PollInit()
+{
+	if (!CharacterOverlay && BaseHUD && BaseHUD->CharacterOverlay)
+	{
+		CharacterOverlay = BaseHUD->CharacterOverlay;
+		SetHUDHealth(HUDHealth, HUDMaxHealth);
+		SetHUDScore(HUDScore);
+		SetHUDDefeats(HUDDefeats);
+	}
+}
 #pragma endregion HUD
 
 #pragma region TimeCalculation
@@ -143,4 +180,31 @@ void ABasePlayerController::ClientReportServerTime_Implementation(float TimeOfCl
 	const float CurrentServerTime = TimeServerReceivedClientRequest + RoundTripTime / 2;
 	ClientServerDelta = CurrentServerTime - GetWorld()->GetTimeSeconds();
 }
+
 #pragma endregion TimeCalculation
+
+void ABasePlayerController::OnMatchStateSet(FName State)
+{
+	MatchState = State;
+
+	if (MatchState == MatchState::InProgress)
+	{
+		BaseHUD = BaseHUD ? BaseHUD : Cast<ABaseHUD>(GetHUD());
+		if (BaseHUD)
+		{
+			BaseHUD->AddCharacterOverlay();
+		}
+	}
+}
+
+void ABasePlayerController::OnRep_MatchState()
+{
+	if (MatchState == MatchState::InProgress)
+	{
+		BaseHUD = BaseHUD ? BaseHUD : Cast<ABaseHUD>(GetHUD());
+		if (BaseHUD)
+		{
+			BaseHUD->AddCharacterOverlay();
+		}
+	}
+}
