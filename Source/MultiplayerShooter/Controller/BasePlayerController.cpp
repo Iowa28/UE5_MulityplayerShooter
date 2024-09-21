@@ -6,6 +6,7 @@
 #include "Components/TextBlock.h"
 #include "GameFramework/GameMode.h"
 #include "MultiplayerShooter/Character/BaseCharacter.h"
+#include "MultiplayerShooter/HUD/Announcement.h"
 #include "MultiplayerShooter/HUD/BaseHUD.h"
 #include "MultiplayerShooter/HUD/CharacterOverlay.h"
 #include "Net/UnrealNetwork.h"
@@ -15,6 +16,10 @@ void ABasePlayerController::BeginPlay()
 	Super::BeginPlay();
 
 	BaseHUD = Cast<ABaseHUD>(GetHUD());
+	if (BaseHUD)
+	{
+		BaseHUD->AddAnnouncement();
+	}
 }
 
 void ABasePlayerController::OnPossess(APawn* aPawn)
@@ -183,17 +188,26 @@ void ABasePlayerController::ClientReportServerTime_Implementation(float TimeOfCl
 
 #pragma endregion TimeCalculation
 
+void ABasePlayerController::HandleMatchHasStarted()
+{
+	BaseHUD = BaseHUD ? BaseHUD : Cast<ABaseHUD>(GetHUD());
+	if (BaseHUD)
+	{
+		BaseHUD->AddCharacterOverlay();
+		if (BaseHUD->Announcement)
+		{
+			BaseHUD->Announcement->SetVisibility(ESlateVisibility::Hidden);
+		}
+	}
+}
+
 void ABasePlayerController::OnMatchStateSet(FName State)
 {
 	MatchState = State;
 
 	if (MatchState == MatchState::InProgress)
 	{
-		BaseHUD = BaseHUD ? BaseHUD : Cast<ABaseHUD>(GetHUD());
-		if (BaseHUD)
-		{
-			BaseHUD->AddCharacterOverlay();
-		}
+		HandleMatchHasStarted();
 	}
 }
 
@@ -201,10 +215,6 @@ void ABasePlayerController::OnRep_MatchState()
 {
 	if (MatchState == MatchState::InProgress)
 	{
-		BaseHUD = BaseHUD ? BaseHUD : Cast<ABaseHUD>(GetHUD());
-		if (BaseHUD)
-		{
-			BaseHUD->AddCharacterOverlay();
-		}
+		HandleMatchHasStarted();
 	}
 }

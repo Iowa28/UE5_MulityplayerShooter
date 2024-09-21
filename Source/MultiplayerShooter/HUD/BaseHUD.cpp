@@ -2,6 +2,7 @@
 
 
 #include "BaseHUD.h"
+#include "Announcement.h"
 #include "CharacterOverlay.h"
 
 void ABaseHUD::BeginPlay()
@@ -34,6 +35,15 @@ void ABaseHUD::AddCharacterOverlay()
 	{
 		CharacterOverlay = CreateWidget<UCharacterOverlay>(GetWorld(), CharacterOverlayClass);
 		CharacterOverlay->AddToViewport();
+	}
+}
+
+void ABaseHUD::AddAnnouncement()
+{
+	if (AnnouncementClass)
+	{
+		Announcement = CreateWidget<UAnnouncement>(GetWorld(), AnnouncementClass);
+		Announcement->AddToViewport();
 	}
 }
 

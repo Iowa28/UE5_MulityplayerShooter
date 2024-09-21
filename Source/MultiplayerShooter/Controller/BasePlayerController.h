@@ -56,6 +56,8 @@ protected:
 	UFUNCTION(Client, Reliable)
 	void ClientReportServerTime(float TimeOfClientRequest, float TimeServerReceivedClientRequest);
 
+	void HandleMatchHasStarted();
+
 private:
 	UPROPERTY()
 	class ABaseHUD* BaseHUD;

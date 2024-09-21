@@ -31,7 +31,11 @@ public:
 	UPROPERTY()
 	class UCharacterOverlay* CharacterOverlay;
 
+	UPROPERTY()
+	class UAnnouncement* Announcement;
+
 	void AddCharacterOverlay();
+	void AddAnnouncement();
 
 protected:
 	virtual void BeginPlay() override;
@@ -39,6 +43,9 @@ protected:
 private:
 	UPROPERTY(EditDefaultsOnly, Category = "Player Stats")
 	TSubclassOf<UUserWidget> CharacterOverlayClass;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Announcements")
+	TSubclassOf<UUserWidget> AnnouncementClass;
 	
 	UPROPERTY(EditDefaultsOnly)
 	float CrosshairSpreadMax = 16.f;
