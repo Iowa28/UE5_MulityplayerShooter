@@ -85,4 +85,6 @@ private:
 	float HUDHealth, HUDMaxHealth;
 	float HUDScore;
 	int32 HUDDefeats;
+
+	void HandleCooldown();
 };

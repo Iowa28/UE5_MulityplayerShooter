@@ -6,6 +6,11 @@
 #include "GameFramework/GameMode.h"
 #include "ShooterGameMode.generated.h"
 
+namespace MatchState
+{
+	extern MULTIPLAYERSHOOTER_API const FName Cooldown; // Match duration has been reached. Display winner and begin cooldown timer.
+}
+
 UCLASS()
 class MULTIPLAYERSHOOTER_API AShooterGameMode : public AGameMode
 {
@@ -26,6 +31,9 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Match Settings")
 	float WarmupTime = 5.f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Match Settings")
+	float CooldownTime = 5.f;
 
 	float LevelStartingTime = 0.f;
 

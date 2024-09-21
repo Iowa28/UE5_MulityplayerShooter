@@ -216,19 +216,7 @@ void ABasePlayerController::ClientReportServerTime_Implementation(float TimeOfCl
 
 #pragma endregion TimeCalculation
 
-void ABasePlayerController::HandleMatchHasStarted()
-{
-	BaseHUD = BaseHUD ? BaseHUD : Cast<ABaseHUD>(GetHUD());
-	if (BaseHUD)
-	{
-		BaseHUD->AddCharacterOverlay();
-		if (BaseHUD->Announcement)
-		{
-			BaseHUD->Announcement->SetVisibility(ESlateVisibility::Hidden);
-		}
-	}
-}
-
+#pragma region Match
 void ABasePlayerController::ServerCheckMatchState_Implementation()
 {
 	if (const AShooterGameMode* GameMode = Cast<AShooterGameMode>(UGameplayStatics::GetGameMode(this)))
@@ -263,6 +251,10 @@ void ABasePlayerController::OnMatchStateSet(FName State)
 	{
 		HandleMatchHasStarted();
 	}
+	else if (MatchState == MatchState::Cooldown)
+	{
+		HandleCooldown();
+	}
 }
 
 void ABasePlayerController::OnRep_MatchState()
@@ -271,4 +263,35 @@ void ABasePlayerController::OnRep_MatchState()
 	{
 		HandleMatchHasStarted();
 	}
+	else if (MatchState == MatchState::Cooldown)
+	{
+		HandleCooldown();
+	}
 }
+
+void ABasePlayerController::HandleMatchHasStarted()
+{
+	BaseHUD = BaseHUD ? BaseHUD : Cast<ABaseHUD>(GetHUD());
+	if (BaseHUD)
+	{
+		BaseHUD->AddCharacterOverlay();
+		if (BaseHUD->Announcement)
+		{
+			BaseHUD->Announcement->SetVisibility(ESlateVisibility::Hidden);
+		}
+	}
+}
+
+void ABasePlayerController::HandleCooldown()
+{
+	BaseHUD = BaseHUD ? BaseHUD : Cast<ABaseHUD>(GetHUD());
+	if (BaseHUD)
+	{
+		BaseHUD->CharacterOverlay->RemoveFromParent();
+		if (BaseHUD->Announcement)
+		{
+			BaseHUD->Announcement->SetVisibility(ESlateVisibility::Visible);
+		}
+	}
+}
+#pragma endregion Match
