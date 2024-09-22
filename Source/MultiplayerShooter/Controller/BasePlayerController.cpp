@@ -116,6 +116,12 @@ void ABasePlayerController::SetHUDMatchCountdown(float CountdownTime)
 	BaseHUD = BaseHUD ? BaseHUD : Cast<ABaseHUD>(GetHUD());
 	if (!BaseHUD || !BaseHUD->CharacterOverlay || !BaseHUD->CharacterOverlay->MatchCountdownText) { return; }
 
+	if (CountdownTime < 0.f)
+	{
+		BaseHUD->CharacterOverlay->MatchCountdownText->SetText(FText());
+		return;
+	}
+
 	const int32 Minutes = FMath::FloorToInt(CountdownTime / 60.f);
 	const int32 Seconds = CountdownTime - Minutes * 60;
 	
@@ -127,6 +133,12 @@ void ABasePlayerController::SetHUDAnnouncementCountdown(float CountdownTime)
 {
 	BaseHUD = BaseHUD ? BaseHUD : Cast<ABaseHUD>(GetHUD());
 	if (!BaseHUD || !BaseHUD->Announcement || !BaseHUD->Announcement->WarmupTime) { return; }
+
+	if (CountdownTime < 0.f)
+	{
+		BaseHUD->Announcement->WarmupTime->SetText(FText());
+		return;
+	}
 
 	const int32 Minutes = FMath::FloorToInt(CountdownTime / 60.f);
 	const int32 Seconds = CountdownTime - Minutes * 60;
@@ -146,11 +158,24 @@ void ABasePlayerController::SetHUDTime()
 	{
 		TimeLeft = WarmupTime + MatchTime - GetServerTime() + LevelStartingTime;
 	}
-	
-	const uint32 SecondsLeft = FMath::CeilToInt(TimeLeft);
+	else if (MatchState == MatchState::Cooldown)
+	{
+		TimeLeft = CooldownTime + WarmupTime + MatchTime - GetServerTime() + LevelStartingTime;
+	}
+	uint32 SecondsLeft = FMath::CeilToInt(TimeLeft);
+
+	if (HasAuthority())
+	{
+		GameMode = GameMode ? GameMode : Cast<AShooterGameMode>(UGameplayStatics::GetGameMode(this));
+		if (GameMode)
+		{
+			SecondsLeft = FMath::CeilToInt(GameMode->GetCountdownTime() + LevelStartingTime);
+		}
+	}
+		
 	if (SecondsLeft != CountdownInt)
 	{
-		if (MatchState == MatchState::WaitingToStart)
+		if (MatchState == MatchState::WaitingToStart || MatchState == MatchState::Cooldown)
 		{
 			SetHUDAnnouncementCountdown(TimeLeft);
 		}
@@ -219,21 +244,24 @@ void ABasePlayerController::ClientReportServerTime_Implementation(float TimeOfCl
 #pragma region Match
 void ABasePlayerController::ServerCheckMatchState_Implementation()
 {
-	if (const AShooterGameMode* GameMode = Cast<AShooterGameMode>(UGameplayStatics::GetGameMode(this)))
+	GameMode = GameMode ? GameMode : Cast<AShooterGameMode>(UGameplayStatics::GetGameMode(this));
+	if (GameMode)
 	{
 		WarmupTime = GameMode->WarmupTime;
 		MatchTime = GameMode->MatchTime;
+		CooldownTime = GameMode->CooldownTime;
 		LevelStartingTime = GameMode->LevelStartingTime;
 		MatchState = GameMode->GetMatchState();
-		ClientJoinMidGame(MatchState, WarmupTime, MatchTime, LevelStartingTime);
+		ClientJoinMidGame(MatchState, WarmupTime, MatchTime, LevelStartingTime, CooldownTime);
 	}
 }
 
-void ABasePlayerController::ClientJoinMidGame_Implementation(FName StateOfMatch, float Warmup, float Match, float StartingTime)
+void ABasePlayerController::ClientJoinMidGame_Implementation(FName StateOfMatch, float Warmup, float Match, float StartingTime, float Cooldown)
 {
 	MatchState = StateOfMatch;
 	WarmupTime = Warmup;
 	MatchTime = Match;
+	CooldownTime = Cooldown;
 	LevelStartingTime = StartingTime;
 	OnMatchStateSet(MatchState);
 
@@ -288,9 +316,12 @@ void ABasePlayerController::HandleCooldown()
 	if (BaseHUD)
 	{
 		BaseHUD->CharacterOverlay->RemoveFromParent();
-		if (BaseHUD->Announcement)
+		if (BaseHUD->Announcement && BaseHUD->Announcement->AnnouncementText && BaseHUD->Announcement->InfoText)
 		{
 			BaseHUD->Announcement->SetVisibility(ESlateVisibility::Visible);
+			const FString AnnouncementText = FString("New match starts in:");
+			BaseHUD->Announcement->AnnouncementText->SetText(FText::FromString(AnnouncementText));
+			BaseHUD->Announcement->InfoText->SetText(FText());
 		}
 	}
 }
