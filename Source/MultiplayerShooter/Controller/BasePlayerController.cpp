@@ -305,7 +305,10 @@ void ABasePlayerController::HandleMatchHasStarted()
 	BaseHUD = BaseHUD ? BaseHUD : Cast<ABaseHUD>(GetHUD());
 	if (BaseHUD)
 	{
-		BaseHUD->AddCharacterOverlay();
+		if (!BaseHUD->CharacterOverlay)
+		{
+			BaseHUD->AddCharacterOverlay();
+		}
 		if (BaseHUD->Announcement)
 		{
 			BaseHUD->Announcement->SetVisibility(ESlateVisibility::Hidden);

@@ -136,6 +136,9 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Combat")
 	int32 StartingARAmmo = 30;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Combat")
+	int32 StartingRocketAmmo = 0;
+
 	void InitializeCarriedAmmo();
 
 	UPROPERTY(ReplicatedUsing = OnRep_CombatState)

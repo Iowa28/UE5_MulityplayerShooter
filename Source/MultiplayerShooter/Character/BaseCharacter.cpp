@@ -57,6 +57,8 @@ ABaseCharacter::ABaseCharacter()
 	MinNetUpdateFrequency = 33.f;
 
 	DissolveTimeline = CreateDefaultSubobject<UTimelineComponent>(TEXT("DissolveTimelineComponent"));
+
+	Health = MaxHealth;
 }
 
 void ABaseCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -80,7 +82,6 @@ void ABaseCharacter::BeginPlay()
 		}
 	}
 
-	Health = MaxHealth;
 	UpdateHUDHealth();
 	if (HasAuthority())
 	{
@@ -489,7 +490,6 @@ void ABaseCharacter::MulticastEliminate_Implementation()
 	}
 
 	GetCharacterMovement()->DisableMovement();
-	GetCharacterMovement()->StopMovementImmediately();
 	bDisableGameplay = true;
 	if (CombatComponent)
 	{
