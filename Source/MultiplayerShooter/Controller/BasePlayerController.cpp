@@ -7,6 +7,7 @@
 #include "GameFramework/GameMode.h"
 #include "Kismet/GameplayStatics.h"
 #include "MultiplayerShooter/Character/BaseCharacter.h"
+#include "MultiplayerShooter/Components/CombatComponent.h"
 #include "MultiplayerShooter/GameMode/ShooterGameMode.h"
 #include "MultiplayerShooter/HUD/Announcement.h"
 #include "MultiplayerShooter/HUD/BaseHUD.h"
@@ -322,6 +323,15 @@ void ABasePlayerController::HandleCooldown()
 			const FString AnnouncementText = FString("New match starts in:");
 			BaseHUD->Announcement->AnnouncementText->SetText(FText::FromString(AnnouncementText));
 			BaseHUD->Announcement->InfoText->SetText(FText());
+		}
+	}
+
+	if (ABaseCharacter* BaseCharacter = Cast<ABaseCharacter>(GetPawn()))
+	{
+		BaseCharacter->bDisableGameplay = true;
+		if (BaseCharacter->GetCombatComonent())
+		{
+			BaseCharacter->GetCombatComonent()->FireButtonPressed(false);
 		}
 	}
 }

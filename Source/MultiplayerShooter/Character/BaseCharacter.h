@@ -34,8 +34,8 @@ public:
 	virtual void Jump() override;
 
 	void PlayFireMontage(bool bAiming);
-	
 	void PlayReloadMontage();
+	void PlayEliminationMontage();
 	
 	virtual void OnRep_ReplicatedMovement() override;
 
@@ -44,10 +44,11 @@ public:
 	
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastEliminate();
-	
-	void PlayEliminationMontage();
 
 	virtual void Destroyed() override;
+
+	UPROPERTY(Replicated)
+	bool bDisableGameplay = false;
 
 protected:
 	virtual void BeginPlay() override;
@@ -64,6 +65,7 @@ protected:
 	void AimButtonPressed();
 	void AimButtonReleased();
 
+	void RotateInPlace(float DeltaTime);
 	void AimOffset(float DeltaTime);
 	void CalculateAimOffsetPitch();
 	void SimProxiesTurn();
@@ -252,4 +254,6 @@ public:
 	FORCEINLINE float GetHealth() const { return Health; }
 
 	ECombatState GetCombatState() const;
+
+	FORCEINLINE UCombatComponent* GetCombatComonent() const { return CombatComponent; }
 };

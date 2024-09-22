@@ -65,6 +65,7 @@ void ABaseCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 
 	DOREPLIFETIME_CONDITION(ABaseCharacter, OverlappingWeapon, COND_OwnerOnly);
 	DOREPLIFETIME(ABaseCharacter, Health);
+	DOREPLIFETIME(ABaseCharacter, bDisableGameplay);
 }
 
 void ABaseCharacter::BeginPlay()
@@ -117,20 +118,7 @@ void ABaseCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (GetLocalRole() > ROLE_SimulatedProxy && IsLocallyControlled())
-	{
-		AimOffset(DeltaTime);
-	}
-	else
-	{
-		TimeSinceLastMovementReplication += DeltaTime;
-		if (TimeSinceLastMovementReplication > .25f)
-		{
-			OnRep_ReplicatedMovement();
-		}
-		CalculateAimOffsetPitch();
-	}
-	
+	RotateInPlace(DeltaTime);
 	HideCameraIfCharacterClose();
 	PollInit();
 }
@@ -166,6 +154,10 @@ void ABaseCharacter::Destroyed()
 	{
 		EliminationComponent->DestroyComponent();
 	}
+	if (CombatComponent && CombatComponent->EquippedWeapon)
+	{
+		CombatComponent->EquippedWeapon->Destroy();
+	}
 }
 
 #pragma region Movement
@@ -179,9 +171,7 @@ void ABaseCharacter::OnRep_ReplicatedMovement()
 
 void ABaseCharacter::Move(const FInputActionValue& Value)
 {
-	const FVector2D MovementVector = Value.Get<FVector2D>();
-
-	if (Controller)
+	if (Controller && !bDisableGameplay)
 	{
 		const FRotator Rotation = Controller->GetControlRotation();
 		const FRotator YawRotation(0, Rotation.Yaw, 0);
@@ -189,6 +179,7 @@ void ABaseCharacter::Move(const FInputActionValue& Value)
 		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 
+		const FVector2D MovementVector = Value.Get<FVector2D>();
 		AddMovementInput(ForwardDirection, MovementVector.Y);
 		AddMovementInput(RightDirection, MovementVector.X);
 	}
@@ -196,10 +187,9 @@ void ABaseCharacter::Move(const FInputActionValue& Value)
 
 void ABaseCharacter::Look(const FInputActionValue& Value)
 {
-	const FVector2D LookAxisVector = Value.Get<FVector2D>();
-
 	if (Controller)
 	{
+		const FVector2D LookAxisVector = Value.Get<FVector2D>();
 		AddControllerYawInput(LookAxisVector.X);
 		AddControllerPitchInput(LookAxisVector.Y);
 	}
@@ -207,6 +197,8 @@ void ABaseCharacter::Look(const FInputActionValue& Value)
 
 void ABaseCharacter::Jump()
 {
+	if (bDisableGameplay) { return; }
+	
 	if (bIsCrouched)
 	{
 		UnCrouch();
@@ -241,6 +233,7 @@ void ABaseCharacter::HideCameraIfCharacterClose()
 #pragma region Duck
 void ABaseCharacter::DuckButtonPressed()
 {
+	if (bDisableGameplay) { return; }
 	Crouch();
 }
 
@@ -253,7 +246,7 @@ void ABaseCharacter::DuckButtonReleased()
 #pragma region Aiming
 void ABaseCharacter::AimButtonPressed()
 {
-	if (CombatComponent)
+	if (CombatComponent && !bDisableGameplay)
 	{
 		CombatComponent->SetAiming(true);
 	}
@@ -269,6 +262,30 @@ void ABaseCharacter::AimButtonReleased()
 #pragma endregion Aiming
 
 #pragma region AimOffset
+void ABaseCharacter::RotateInPlace(float DeltaTime)
+{
+	if (bDisableGameplay)
+	{
+		bUseControllerRotationYaw = false;
+		TurningInPlace = ETurningInPlace::ETIP_NotTurning;
+		return;
+	}
+	
+	if (GetLocalRole() > ROLE_SimulatedProxy && IsLocallyControlled())
+	{
+		AimOffset(DeltaTime);
+	}
+	else
+	{
+		TimeSinceLastMovementReplication += DeltaTime;
+		if (TimeSinceLastMovementReplication > .25f)
+		{
+			OnRep_ReplicatedMovement();
+		}
+		CalculateAimOffsetPitch();
+	}
+}
+
 void ABaseCharacter::AimOffset(float DeltaTime)
 {
 	if (!CombatComponent || !CombatComponent->EquippedWeapon) { return; }
@@ -470,10 +487,7 @@ void ABaseCharacter::MulticastEliminate_Implementation()
 
 	GetCharacterMovement()->DisableMovement();
 	GetCharacterMovement()->StopMovementImmediately();
-	if (BasePlayerController)
-	{
-		DisableInput(BasePlayerController);
-	}
+	bDisableGameplay = true;
 
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -530,7 +544,7 @@ void ABaseCharacter::StartDissolve()
 #pragma region Fire
 void ABaseCharacter::FireButtonPressed()
 {
-	if (CombatComponent)
+	if (CombatComponent && !bDisableGameplay)
 	{
 		CombatComponent->FireButtonPressed(true);
 	}
@@ -561,7 +575,7 @@ void ABaseCharacter::PlayFireMontage(bool bAiming)
 #pragma region Reload
 void ABaseCharacter::ReloadButtonPressed()
 {
-	if (CombatComponent)
+	if (CombatComponent && !bDisableGameplay)
 	{
 		CombatComponent->Reload();
 	}
@@ -592,7 +606,7 @@ void ABaseCharacter::PlayReloadMontage()
 #pragma region Equipment
 void ABaseCharacter::EquipButtonPressed()
 {
-	if (CombatComponent)
+	if (CombatComponent && !bDisableGameplay)
 	{
 		if (HasAuthority())
 		{
