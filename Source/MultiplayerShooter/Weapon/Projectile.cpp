@@ -6,7 +6,6 @@
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "MultiplayerShooter/MultiplayerShooter.h"
-#include "MultiplayerShooter/Character/BaseCharacter.h"
 #include "Sound/SoundCue.h"
 
 AProjectile::AProjectile()
@@ -68,7 +67,6 @@ void AProjectile::Destroyed()
 	{
 		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticles, GetActorTransform());
 	}
-
 	if (ImpactSound)
 	{
 		UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation());

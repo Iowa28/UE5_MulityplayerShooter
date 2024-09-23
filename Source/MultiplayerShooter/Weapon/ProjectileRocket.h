@@ -13,10 +13,19 @@ class MULTIPLAYERSHOOTER_API AProjectileRocket : public AProjectile
 
 public:
 	AProjectileRocket();
+	
+	virtual void Destroyed() override;
 
 protected:
+	UPROPERTY(EditDefaultsOnly, Category = "Projectile")
+	class UNiagaraSystem* TrailSystem;
+	
+	virtual void BeginPlay() override;
+	
 	virtual void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp,
-		FVector NormalImpulse, const FHitResult& Hit) override;
+	                   FVector NormalImpulse, const FHitResult& Hit) override;
+	
+	void DestroyTimerFinished();
 
 private:
 	UPROPERTY(EditDefaultsOnly, Category = "Projectile")
@@ -27,7 +36,23 @@ private:
 	
 	UPROPERTY(EditDefaultsOnly, Category = "Projectile")
 	float DamageOuterRadius = 500.f;
-
+	
 	UPROPERTY(VisibleAnywhere, Category = "Projectile")
 	UStaticMeshComponent* RocketMesh;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "Projectile")
+	float DestroyTime = 3.f;
+	FTimerHandle DestroyTimer;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "Projectile")
+	USoundCue* ProjectileLoop;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "Projectile")
+	USoundAttenuation* LoopingSoundAttenuation;
+	
+	UPROPERTY()
+	UAudioComponent* ProjectileLoopComponent;
+	
+	UPROPERTY()
+	class UNiagaraComponent* TrailSystemComponent;
 };
