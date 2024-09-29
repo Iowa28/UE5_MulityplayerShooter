@@ -27,6 +27,9 @@ protected:
 	
 	void DestroyTimerFinished();
 
+	UPROPERTY(VisibleDefaultsOnly)
+	class URocketMovementComponent* RocketMovementComponent;
+
 private:
 	UPROPERTY(EditDefaultsOnly, Category = "Projectile")
 	float MinimumDamage = 10.f;
