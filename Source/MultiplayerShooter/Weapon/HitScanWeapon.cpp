@@ -5,6 +5,7 @@
 #include "Engine/SkeletalMeshSocket.h"
 #include "Kismet/GameplayStatics.h"
 #include "MultiplayerShooter/Character/BaseCharacter.h"
+#include "Particles/ParticleSystemComponent.h"
 
 void AHitScanWeapon::Fire(const FVector& HitTarget)
 {
@@ -13,7 +14,6 @@ void AHitScanWeapon::Fire(const FVector& HitTarget)
 	APawn* OwnerPawn = Cast<APawn>(GetOwner());
 	if (!OwnerPawn) { return; }
 	AController* InstigatorController = OwnerPawn->GetController();
-	if (!InstigatorController) { return; }
 
 	if (const USkeletalMeshSocket* MuzzleFlashSocket = GetWeaponMesh()->GetSocketByName("MuzzleFlash"))
 	{
@@ -30,10 +30,12 @@ void AHitScanWeapon::Fire(const FVector& HitTarget)
 				End,
 				ECC_Visibility
 			);
+			FVector BeamEnd = End;
 			if (FireHit.bBlockingHit)
 			{
+				BeamEnd = FireHit.ImpactPoint;
 				ABaseCharacter* Character = Cast<ABaseCharacter>(FireHit.GetActor());
-				if (Character && HasAuthority())
+				if (Character && HasAuthority() && InstigatorController)
 				{
 					UGameplayStatics::ApplyDamage(
 						Character,
@@ -51,6 +53,18 @@ void AHitScanWeapon::Fire(const FVector& HitTarget)
 						FireHit.ImpactPoint,
 						FireHit.ImpactNormal.Rotation()
 					);
+				}
+			}
+			if (BeamParticles)
+			{
+				UParticleSystemComponent* Beam = UGameplayStatics::SpawnEmitterAtLocation(
+					World,
+					BeamParticles,
+					SocketTransform
+				);
+				if (Beam)
+				{
+					Beam->SetVectorParameter(FName("Target"), BeamEnd);
 				}
 			}
 		}

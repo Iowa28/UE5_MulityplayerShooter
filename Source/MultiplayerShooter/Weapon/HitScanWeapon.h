@@ -20,4 +20,7 @@ private:
 
 	UPROPERTY(EditDefaultsOnly)
 	UParticleSystem* ImpactParticles;
+
+	UPROPERTY(EditDefaultsOnly)
+	UParticleSystem* BeamParticles;
 };
