@@ -96,31 +96,31 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon Properties")
 	int32 MagCapacity;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Crosshair")
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon Properties")
 	UTexture2D* CrosshairCenter;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Crosshair")
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon Properties")
 	UTexture2D* CrosshairLeft;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Crosshair")
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon Properties")
 	UTexture2D* CrosshairRight;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Crosshair")
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon Properties")
 	UTexture2D* CrosshairTop;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Crosshair")
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon Properties")
 	UTexture2D* CrosshairBottom;
 
-	UPROPERTY(EditAnywhere, Category = "Zoom")
+	UPROPERTY(EditAnywhere, Category = "Weapon Properties")
 	float ZoomedFOV = 30.f;
 
-	UPROPERTY(EditAnywhere, Category = "Zoom")
+	UPROPERTY(EditAnywhere, Category = "Weapon Properties")
 	float ZoomInterpSpeed = 20.f;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Fire")
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon Properties")
 	float FireDelay = .15f;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Fire")
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon Properties")
 	bool bAutomatic = true;
 
 	UPROPERTY()
