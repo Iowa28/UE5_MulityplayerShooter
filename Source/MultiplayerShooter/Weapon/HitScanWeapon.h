@@ -14,6 +14,9 @@ class MULTIPLAYERSHOOTER_API AHitScanWeapon : public AWeapon
 public:
 	virtual void Fire(const FVector& HitTarget) override;
 
+protected:
+	FVector TraceEndWithScatter(const FVector& TraceStart, const FVector& HitTarget);
+
 private:
 	UPROPERTY(EditDefaultsOnly)
 	float Damage = 20.f;
@@ -32,4 +35,13 @@ private:
 
 	UPROPERTY(EditDefaultsOnly)
 	USoundCue* HitSound;
+
+	UPROPERTY(EditDefaultsOnly)
+	float DistanceToSphere = 800.f;
+
+	UPROPERTY(EditDefaultsOnly)
+	float SphereRadius = 75.f;
+
+	UPROPERTY(EditDefaultsOnly)
+	bool bUseScatter = false;
 };

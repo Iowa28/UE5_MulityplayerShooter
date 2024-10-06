@@ -175,14 +175,6 @@ void UCombatComponent::TraceUnderCrosshair(FHitResult& TraceHitResult)
 	}
 
 	HUDPackage.CrosshairColor = TraceHitResult.GetActor() && TraceHitResult.GetActor()->Implements<UCrosshairInteractInterface>() ? FLinearColor::Red : FLinearColor::White;
-	if (TraceHitResult.GetActor() && TraceHitResult.GetActor()->Implements<UCrosshairInteractInterface>())
-	{
-		
-	}
-	else
-	{
-		
-	}
 }
 #pragma endregion Crosshair
 
@@ -421,5 +413,6 @@ void UCombatComponent::InitializeCarriedAmmo()
 	CarriedAmmoMap.Emplace(EWeaponType::EWT_RocketLauncher, StartingRocketAmmo);
 	CarriedAmmoMap.Emplace(EWeaponType::EWT_Pistol, StartingPistolAmmo);
 	CarriedAmmoMap.Emplace(EWeaponType::EWT_SMG, StartingSMGAmmo);
+	CarriedAmmoMap.Emplace(EWeaponType::EWT_Shotgun, StartingShotgunAmmo);
 }
 #pragma endregion Reload

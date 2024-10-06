@@ -4,6 +4,7 @@
 #include "HitScanWeapon.h"
 #include "Engine/SkeletalMeshSocket.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "MultiplayerShooter/Character/BaseCharacter.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "Sound/SoundCue.h"
@@ -25,12 +26,7 @@ void AHitScanWeapon::Fire(const FVector& HitTarget)
 		if (UWorld* World = GetWorld())
 		{
 			FHitResult FireHit;
-			World->LineTraceSingleByChannel(
-				FireHit,
-				Start,
-				End,
-				ECC_Visibility
-			);
+			World->LineTraceSingleByChannel(FireHit, Start, End, ECC_Visibility);
 			FVector BeamEnd = End;
 			if (FireHit.bBlockingHit)
 			{
@@ -87,4 +83,19 @@ void AHitScanWeapon::Fire(const FVector& HitTarget)
 			}
 		}
 	}
+}
+
+FVector AHitScanWeapon::TraceEndWithScatter(const FVector& TraceStart, const FVector& HitTarget)
+{
+	const FVector ToTargetNormalized = (HitTarget - TraceStart).GetSafeNormal();
+	const FVector SphereCenter = TraceStart + ToTargetNormalized * DistanceToSphere;
+	const FVector RandomVector = UKismetMathLibrary::RandomUnitVector() * FMath::FRandRange(0.f, SphereRadius);
+	const FVector EndLocation = SphereCenter + RandomVector;
+	const FVector ToEndLocation = EndLocation - TraceStart;
+	
+	DrawDebugSphere(GetWorld(), SphereCenter, SphereRadius, 16, FColor::Red, true);
+	DrawDebugSphere(GetWorld(), EndLocation, 4.f, 12, FColor::Orange, true);
+	DrawDebugLine(GetWorld(), TraceStart, FVector(TraceStart + ToEndLocation * TRACE_LENGTH / ToEndLocation.Size()), FColor::Cyan, true);
+
+	return FVector(TraceStart + ToEndLocation * TRACE_LENGTH / ToEndLocation.Size());
 }
