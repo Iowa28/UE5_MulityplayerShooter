@@ -6,10 +6,7 @@
 #include "HitScanWeapon.h"
 #include "Shotgun.generated.h"
 
-/**
- * 
- */
-UCLASS()
+UCLASS(meta = (PrioritizeCategories ="HitScan Weapon"))
 class MULTIPLAYERSHOOTER_API AShotgun : public AHitScanWeapon
 {
 	GENERATED_BODY()
@@ -18,6 +15,6 @@ public:
 	virtual void Fire(const FVector& HitTarget) override;
 
 private:
-	UPROPERTY(EditDefaultsOnly, Category = "Hit Scan Weapon")
+	UPROPERTY(EditDefaultsOnly, Category = "HitScan")
 	uint32 NumberOfPellets = 10;
 };

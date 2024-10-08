@@ -6,12 +6,12 @@
 #include "Weapon.h"
 #include "ProjectileWeapon.generated.h"
 
-UCLASS()
+UCLASS(meta = (PrioritizeCategories ="Projectile Weapon"))
 class MULTIPLAYERSHOOTER_API AProjectileWeapon : public AWeapon
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "Projectile")
 	TSubclassOf<class AProjectile> ProjectileClass;
 
 public:

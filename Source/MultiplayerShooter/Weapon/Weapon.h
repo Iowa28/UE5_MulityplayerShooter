@@ -37,7 +37,7 @@ public:
 
 	void AddAmmo(int32 AmmoToAdd);
 
-	UPROPERTY(EditDefaultsOnly, Category = "Weapon Properties")
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 	class USoundCue* EquipSound;
 
 protected:
@@ -64,28 +64,28 @@ protected:
 	);
 
 private:
-	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
+	UPROPERTY(VisibleAnywhere, Category = "Weapon")
 	USkeletalMeshComponent* WeaponMesh;
 
-	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
+	UPROPERTY(VisibleAnywhere, Category = "Weapon")
 	class USphereComponent* AreaSphere;
 
-	UPROPERTY(ReplicatedUsing = OnRep_WeaponState, VisibleAnywhere, Category = "Weapon Properties")
+	UPROPERTY(ReplicatedUsing = OnRep_WeaponState, VisibleAnywhere, Category = "Weapon")
 	EWeaponState WeaponState;
 
 	UFUNCTION()
 	void OnRep_WeaponState();
 
-	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
+	UPROPERTY(VisibleAnywhere, Category = "Weapon")
 	class UWidgetComponent* PickupWidget;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Weapon Properties")
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 	UAnimationAsset* FireAnimation;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Weapon Properties")
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 	TSubclassOf<class ACasing> CasingClass;
 
-	UPROPERTY(EditDefaultsOnly, ReplicatedUsing = OnRep_Ammo, Category = "Weapon Properties")
+	UPROPERTY(EditDefaultsOnly, ReplicatedUsing = OnRep_Ammo, Category = "Weapon")
 	int32 Ammo;
 
 	UFUNCTION()
@@ -93,34 +93,34 @@ private:
 
 	void SpendRound();
 
-	UPROPERTY(EditDefaultsOnly, Category = "Weapon Properties")
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 	int32 MagCapacity;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Weapon Properties")
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 	UTexture2D* CrosshairCenter;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Weapon Properties")
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 	UTexture2D* CrosshairLeft;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Weapon Properties")
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 	UTexture2D* CrosshairRight;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Weapon Properties")
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 	UTexture2D* CrosshairTop;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Weapon Properties")
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 	UTexture2D* CrosshairBottom;
 
-	UPROPERTY(EditAnywhere, Category = "Weapon Properties")
+	UPROPERTY(EditAnywhere, Category = "Weapon")
 	float ZoomedFOV = 30.f;
 
-	UPROPERTY(EditAnywhere, Category = "Weapon Properties")
+	UPROPERTY(EditAnywhere, Category = "Weapon")
 	float ZoomInterpSpeed = 20.f;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Weapon Properties")
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 	float FireDelay = .15f;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Weapon Properties")
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 	bool bAutomatic = true;
 
 	UPROPERTY()
@@ -129,7 +129,7 @@ private:
 	UPROPERTY()
 	class ABasePlayerController* OwnerController;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Weapon Properties")
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 	EWeaponType WeaponType;
 
 public:

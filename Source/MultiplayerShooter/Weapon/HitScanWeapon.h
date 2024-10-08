@@ -15,33 +15,35 @@ public:
 	virtual void Fire(const FVector& HitTarget) override;
 
 protected:
+	UPROPERTY(EditDefaultsOnly, Category = "HitScan")
+	float Damage = 20.f;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "HitScan")
+	UParticleSystem* ImpactParticles;
+
+	UPROPERTY(EditDefaultsOnly, Category = "HitScan")
+	USoundCue* HitSound;
+	
+	void WeaponTraceHit(const FVector& TraceStart, const FVector& HitTarget, FHitResult& OutHit);
+	
 	FVector TraceEndWithScatter(const FVector& TraceStart, const FVector& HitTarget);
 
 private:
-	UPROPERTY(EditDefaultsOnly)
-	float Damage = 20.f;
-
-	UPROPERTY(EditDefaultsOnly)
-	UParticleSystem* ImpactParticles;
-
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "HitScan")
 	UParticleSystem* BeamParticles;
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "HitScan")
 	UParticleSystem* MuzzleFlash;
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "HitScan")
 	USoundCue* FireSound;
 
-	UPROPERTY(EditDefaultsOnly)
-	USoundCue* HitSound;
-
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "HitScan")
 	float DistanceToSphere = 800.f;
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "HitScan")
 	float SphereRadius = 75.f;
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "HitScan")
 	bool bUseScatter = false;
 };
