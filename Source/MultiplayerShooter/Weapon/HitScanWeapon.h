@@ -6,7 +6,7 @@
 #include "Weapon.h"
 #include "HitScanWeapon.generated.h"
 
-UCLASS()
+UCLASS(meta = (PrioritizeCategories ="HitScan Scatter Weapon"))
 class MULTIPLAYERSHOOTER_API AHitScanWeapon : public AWeapon
 {
 	GENERATED_BODY()
@@ -38,12 +38,12 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "HitScan")
 	USoundCue* FireSound;
 
-	UPROPERTY(EditDefaultsOnly, Category = "HitScan")
+	UPROPERTY(EditDefaultsOnly, Category = "Scatter")
 	float DistanceToSphere = 800.f;
 
-	UPROPERTY(EditDefaultsOnly, Category = "HitScan")
+	UPROPERTY(EditDefaultsOnly, Category = "Scatter")
 	float SphereRadius = 75.f;
 
-	UPROPERTY(EditDefaultsOnly, Category = "HitScan")
+	UPROPERTY(EditDefaultsOnly, Category = "Scatter")
 	bool bUseScatter = false;
 };

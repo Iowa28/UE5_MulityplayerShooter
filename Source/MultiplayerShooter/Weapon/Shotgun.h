@@ -6,7 +6,7 @@
 #include "HitScanWeapon.h"
 #include "Shotgun.generated.h"
 
-UCLASS(meta = (PrioritizeCategories ="HitScan Weapon"))
+UCLASS(meta = (PrioritizeCategories ="HitScan Scatter Weapon Crosshair"))
 class MULTIPLAYERSHOOTER_API AShotgun : public AHitScanWeapon
 {
 	GENERATED_BODY()

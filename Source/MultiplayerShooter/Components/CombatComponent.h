@@ -9,7 +9,7 @@
 #include "MultiplayerShooter/Types/WeaponTypes.h"
 #include "CombatComponent.generated.h"
 
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+UCLASS( ClassGroup = (Custom), meta = (BlueprintSpawnableComponent, PrioritizeCategories ="Combat Ammo") )
 class MULTIPLAYERSHOOTER_API UCombatComponent : public UActorComponent
 {
 	GENERATED_BODY()
@@ -75,7 +75,7 @@ private:
 	UPROPERTY(Replicated)
 	bool bAiming;
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "Combat")
 	float AimWalkSpeed;
 	
 	float BaseWalkSpeed;
@@ -131,20 +131,23 @@ private:
 
 	TMap<EWeaponType, int32> CarriedAmmoMap;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Combat")
+	UPROPERTY(EditDefaultsOnly, Category = "Ammo")
 	int32 StartingARAmmo = 30;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Combat")
+	UPROPERTY(EditDefaultsOnly, Category = "Ammo")
 	int32 StartingRocketAmmo = 0;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Combat")
+	UPROPERTY(EditDefaultsOnly, Category = "Ammo")
 	int32 StartingPistolAmmo = 0;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Combat")
+	UPROPERTY(EditDefaultsOnly, Category = "Ammo")
 	int32 StartingSMGAmmo = 0;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Combat")
+	UPROPERTY(EditDefaultsOnly, Category = "Ammo")
 	int32 StartingShotgunAmmo = 0;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Ammo")
+	int32 StartingSniperAmmo = 0;
 
 	void InitializeCarriedAmmo();
 
