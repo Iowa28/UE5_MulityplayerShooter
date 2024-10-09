@@ -470,9 +470,12 @@ void ABaseCharacter::Eliminate()
 
 void ABaseCharacter::MulticastEliminate_Implementation()
 {
-	if (bEliminated || !CombatComponent || !BasePlayerController) { return; }
+	if (bEliminated) { return; }
 
-	BasePlayerController->SetHUDWeaponAmmo(0);
+	if (BasePlayerController)
+	{
+		BasePlayerController->SetHUDWeaponAmmo(0);
+	}
 	bEliminated = true;
 	PlayEliminationMontage();
 
@@ -487,7 +490,10 @@ void ABaseCharacter::MulticastEliminate_Implementation()
 
 	GetCharacterMovement()->DisableMovement();
 	bDisableGameplay = true;
-	CombatComponent->FireButtonPressed(false);
+	if (CombatComponent)
+	{
+		CombatComponent->FireButtonPressed(false);
+	}
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
@@ -511,7 +517,7 @@ void ABaseCharacter::MulticastEliminate_Implementation()
 		);
 	}
 	
-	if (IsLocallyControlled() && CombatComponent->bAiming && CombatComponent->EquippedWeapon && CombatComponent->EquippedWeapon->GetWeaponType() == EWeaponType::EWT_SniperRifle)
+	if (IsLocallyControlled() && CombatComponent && CombatComponent->bAiming && CombatComponent->EquippedWeapon && CombatComponent->EquippedWeapon->GetWeaponType() == EWeaponType::EWT_SniperRifle)
 	{
 		ToggleSniperScopeWidget(false);
 	}
