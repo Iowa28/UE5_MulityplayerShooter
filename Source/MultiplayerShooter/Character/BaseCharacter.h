@@ -50,6 +50,9 @@ public:
 	UPROPERTY(Replicated)
 	bool bDisableGameplay = false;
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void ToggleSniperScopeWidget(bool bShowScope);
+
 protected:
 	virtual void BeginPlay() override;
 	

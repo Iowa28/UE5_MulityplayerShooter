@@ -470,13 +470,9 @@ void ABaseCharacter::Eliminate()
 
 void ABaseCharacter::MulticastEliminate_Implementation()
 {
-	if (bEliminated) { return; }
+	if (bEliminated || !CombatComponent || !BasePlayerController) { return; }
 
-	if (BasePlayerController)
-	{
-		BasePlayerController->SetHUDWeaponAmmo(0);
-	}
-	
+	BasePlayerController->SetHUDWeaponAmmo(0);
 	bEliminated = true;
 	PlayEliminationMontage();
 
@@ -491,11 +487,7 @@ void ABaseCharacter::MulticastEliminate_Implementation()
 
 	GetCharacterMovement()->DisableMovement();
 	bDisableGameplay = true;
-	if (CombatComponent)
-	{
-		CombatComponent->FireButtonPressed(false);
-	}
-
+	CombatComponent->FireButtonPressed(false);
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
@@ -510,7 +502,6 @@ void ABaseCharacter::MulticastEliminate_Implementation()
 			GetActorRotation()
 		);
 	}
-
 	if (EliminationSound)
 	{
 		UGameplayStatics::SpawnSoundAtLocation(
@@ -518,6 +509,11 @@ void ABaseCharacter::MulticastEliminate_Implementation()
 			EliminationSound,
 			GetActorLocation()
 		);
+	}
+	
+	if (IsLocallyControlled() && CombatComponent->bAiming && CombatComponent->EquippedWeapon && CombatComponent->EquippedWeapon->GetWeaponType() == EWeaponType::EWT_SniperRifle)
+	{
+		ToggleSniperScopeWidget(false);
 	}
 }
 
