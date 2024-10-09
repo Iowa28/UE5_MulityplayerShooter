@@ -6,7 +6,7 @@
 #include "Weapon.h"
 #include "ProjectileWeapon.generated.h"
 
-UCLASS(meta = (PrioritizeCategories ="Projectile Weapon"))
+UCLASS(meta = (PrioritizeCategories ="Projectile Weapon Materials ActorTick"))
 class MULTIPLAYERSHOOTER_API AProjectileWeapon : public AWeapon
 {
 	GENERATED_BODY()
