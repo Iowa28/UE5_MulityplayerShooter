@@ -94,6 +94,12 @@ void UCombatComponent::OnRep_CombatState()
 			Fire();
 		}
 		break;
+	case ECombatState::ECS_ThrowingGrenade:
+		if (Character && !Character->IsLocallyControlled())
+		{
+			Character->PlayThrowGrenadeMontage();
+		}
+		break;
 	}
 }
 
@@ -206,7 +212,7 @@ void UCombatComponent::ServerSetAiming_Implementation(bool bIsAiming)
 #pragma region Equipping
 void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 {
-	if (!Character || !WeaponToEquip) { return; }
+	if (!Character || !WeaponToEquip || CombatState != ECombatState::ECS_Unoccupied) { return; }
 	if (EquippedWeapon)
 	{
 		EquippedWeapon->Dropped();
@@ -361,7 +367,7 @@ void UCombatComponent::MulticastFire_Implementation(const FVector_NetQuantize& T
 #pragma region Reload
 void UCombatComponent::Reload()
 {
-	if (CarriedAmmo > 0 && CombatState != ECombatState::ECS_Reloading)
+	if (CarriedAmmo > 0 && CombatState != ECombatState::ECS_Unoccupied)
 	{
 		ServerReload();
 	}
@@ -465,6 +471,39 @@ int32 UCombatComponent::AmountToReload()
 	return 0;
 }
 #pragma endregion Reload
+
+#pragma region ThrowGrenade
+
+void UCombatComponent::ThrowGrenade()
+{
+	if (CombatState != ECombatState::ECS_Unoccupied) { return; }
+	
+	CombatState = ECombatState::ECS_ThrowingGrenade;
+	if (Character)
+	{
+		Character->PlayThrowGrenadeMontage();
+	}
+	if (Character && !Character->HasAuthority())
+	{
+		ServerThrowGrenade();
+	}
+}
+
+void UCombatComponent::ServerThrowGrenade_Implementation()
+{
+	CombatState = ECombatState::ECS_ThrowingGrenade;
+	if (Character)
+	{
+		Character->PlayThrowGrenadeMontage();
+	}
+}
+
+void UCombatComponent::ThrowGrenadeFinished()
+{
+	CombatState = ECombatState::ECS_Unoccupied;
+}
+
+#pragma endregion ThrowGrenade
 
 void UCombatComponent::InitializeCarriedAmmo()
 {

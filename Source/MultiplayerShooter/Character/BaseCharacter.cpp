@@ -112,6 +112,8 @@ void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Completed, this, &ThisClass::FireButtonReleased);
 
 		EnhancedInputComponent->BindAction(ReloadAction, ETriggerEvent::Started, this, &ThisClass::ReloadButtonPressed);
+		
+		EnhancedInputComponent->BindAction(ThrowGrenadeAction, ETriggerEvent::Started, this, &ThisClass::ThrowGrenadeButtonPressed);
 	}
 }
 
@@ -685,6 +687,25 @@ void ABaseCharacter::SetOverlappingWeapon(AWeapon* Weapon)
 	}
 }
 #pragma endregion OverlappingWeapon
+
+#pragma region ThrowGrenade
+void ABaseCharacter::ThrowGrenadeButtonPressed()
+{
+	if (CombatComponent)
+	{
+		CombatComponent->ThrowGrenade();
+	}
+}
+
+void ABaseCharacter::PlayThrowGrenadeMontage()
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && ThrowGrenadeMontage)
+	{
+		AnimInstance->Montage_Play(ThrowGrenadeMontage);
+	}
+}
+#pragma endregion ThrowGrenade
 
 #pragma region Getters
 bool ABaseCharacter::IsWeaponEquipped() const
