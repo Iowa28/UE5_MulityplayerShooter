@@ -292,8 +292,9 @@ void UCombatComponent::Fire()
 
 bool UCombatComponent::CanFire() const
 {
-	if (!EquippedWeapon) { return false; }
-	return !EquippedWeapon->IsEmpty() && bCanFire && CombatState == ECombatState::ECS_Unoccupied;
+	if (!EquippedWeapon || EquippedWeapon->IsEmpty() || !bCanFire) { return false; }
+	if (CombatState == ECombatState::ECS_Reloading && EquippedWeapon->GetWeaponType() == EWeaponType::EWT_Shotgun) { return true; }
+	return CombatState == ECombatState::ECS_Unoccupied;
 }
 
 void UCombatComponent::OnRep_CarriedAmmo()
@@ -302,6 +303,11 @@ void UCombatComponent::OnRep_CarriedAmmo()
 	if (Controller)
 	{
 		Controller->SetHUDCarriedAmmo(CarriedAmmo);
+	}
+
+	if (CombatState == ECombatState::ECS_Reloading && EquippedWeapon && EquippedWeapon->GetWeaponType() == EWeaponType::EWT_Shotgun && CarriedAmmo == 0)
+	{
+		JumpToShotgunEnd();
 	}
 }
 
@@ -336,7 +342,15 @@ void UCombatComponent::ServerFire_Implementation(const FVector_NetQuantize& Trac
 
 void UCombatComponent::MulticastFire_Implementation(const FVector_NetQuantize& TraceHitTarget)
 {
-	if (Character && EquippedWeapon && CombatState == ECombatState::ECS_Unoccupied)
+	if (!Character || !EquippedWeapon) { return; }
+
+	if (CombatState == ECombatState::ECS_Reloading && EquippedWeapon->GetWeaponType() == EWeaponType::EWT_Shotgun)
+	{
+		Character->PlayFireMontage(bAiming);
+		EquippedWeapon->Fire(TraceHitTarget);
+		CombatState = ECombatState::ECS_Unoccupied;
+	}
+	else if (CombatState == ECombatState::ECS_Unoccupied)
 	{
 		Character->PlayFireMontage(bAiming);
 		EquippedWeapon->Fire(TraceHitTarget);
@@ -379,6 +393,22 @@ void UCombatComponent::FinishReloading()
 	}
 }
 
+void UCombatComponent::ShotgunShotReload()
+{
+	if (Character && Character->HasAuthority())
+	{
+		UpdateShotgunAmmoValues();
+	}
+}
+
+void UCombatComponent::JumpToShotgunEnd()
+{
+	if (UAnimInstance* AnimInstance = Character->GetMesh()->GetAnimInstance())
+	{
+		AnimInstance->Montage_JumpToSection(FName("ShotgunEnd"));
+	}
+}
+
 void UCombatComponent::UpdateAmmoValues()
 {
 	if (!Character || !EquippedWeapon) { return; }
@@ -395,6 +425,30 @@ void UCombatComponent::UpdateAmmoValues()
 	if (Controller)
 	{
 		Controller->SetHUDCarriedAmmo(CarriedAmmo);
+	}
+}
+
+void UCombatComponent::UpdateShotgunAmmoValues()
+{
+	if (!Character || !EquippedWeapon) { return; }
+
+	if (CarriedAmmoMap.Contains(EquippedWeapon->GetWeaponType()))
+	{
+		CarriedAmmoMap[EquippedWeapon->GetWeaponType()] -= 1;
+		CarriedAmmo = CarriedAmmoMap[EquippedWeapon->GetWeaponType()];
+	}
+	EquippedWeapon->AddAmmo(1);
+	bCanFire = true;
+
+	Controller = Controller ? Controller : Cast<ABasePlayerController>(Character->GetController());
+	if (Controller)
+	{
+		Controller->SetHUDCarriedAmmo(CarriedAmmo);
+	}
+
+	if (EquippedWeapon->IsFull() || CarriedAmmo == 0)
+	{
+		JumpToShotgunEnd();
 	}
 }
 
