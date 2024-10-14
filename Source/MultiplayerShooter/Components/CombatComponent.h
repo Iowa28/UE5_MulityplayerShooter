@@ -50,6 +50,14 @@ protected:
 
 	UFUNCTION()
 	void OnRep_EquippedWeapon();
+
+	void DropEquippedWeapon();
+	void AttachWeaponToRightHand(AWeapon* WeaponToAttach);
+	void AttachWeaponToLeftHand(AWeapon* WeaponToAttach);
+	void UpdateCarriedAmmo();
+	void PlayEquippedWeaponSound();
+	void ReloadEmptyWeapon();
+	
 	void Fire();
 
 	UFUNCTION(Server, Reliable)
@@ -97,10 +105,6 @@ private:
 
 	FVector HitTarget;
 
-	/*
-	* HUD and crosshairs
-	*/
-	
 	float CrosshairVelocityFactor;
 	float CrosshairInAirFactor;
 	float CrosshairAimFactor;
@@ -108,10 +112,6 @@ private:
 
 	FHUDPackage HUDPackage;
 
-	/*
-	* Field of view settings
-	*/
-	
 	float DefaultFOV;
 	float CurrentFOV;
 
@@ -123,10 +123,6 @@ private:
 
 	void InterpFOV(float DeltaTime);
 
-	/*
-	* Weapon fire
-	*/
-	
 	bool bCanFire = true;
 
 	FTimerHandle FireTimer;
