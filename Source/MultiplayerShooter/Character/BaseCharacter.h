@@ -240,6 +240,9 @@ private:
 	UPROPERTY()
 	class ABasePlayerState* CharacterPlayerState;
 
+	UPROPERTY(VisibleAnywhere)
+	UStaticMeshComponent* AttachedGrenade;
+
 public:
 	void SetOverlappingWeapon(AWeapon* Weapon);
 

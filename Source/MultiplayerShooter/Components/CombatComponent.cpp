@@ -401,7 +401,7 @@ void UCombatComponent::MulticastFire_Implementation(const FVector_NetQuantize& T
 #pragma region Reload
 void UCombatComponent::Reload()
 {
-	if (CarriedAmmo > 0 && EquippedWeapon && !EquippedWeapon->IsFull() && CombatState == ECombatState::ECS_Unoccupied)
+	if (CarriedAmmo > 0 && CombatState == ECombatState::ECS_Unoccupied && EquippedWeapon && !EquippedWeapon->IsFull())
 	{
 		ServerReload();
 	}
