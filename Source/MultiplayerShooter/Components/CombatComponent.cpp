@@ -99,6 +99,7 @@ void UCombatComponent::OnRep_CombatState()
 		{
 			AttachWeaponToLeftHand(EquippedWeapon);
 			Character->PlayThrowGrenadeMontage();
+			ShowAttachedGrenade(true);
 		}
 		break;
 	}
@@ -516,6 +517,7 @@ void UCombatComponent::ThrowGrenade()
 	CombatState = ECombatState::ECS_ThrowingGrenade;
 	AttachWeaponToLeftHand(EquippedWeapon);
 	Character->PlayThrowGrenadeMontage();
+	ShowAttachedGrenade(true);
 
 	if (!Character->HasAuthority())
 	{
@@ -530,12 +532,26 @@ void UCombatComponent::ServerThrowGrenade_Implementation()
 	CombatState = ECombatState::ECS_ThrowingGrenade;
 	AttachWeaponToLeftHand(EquippedWeapon);
 	Character->PlayThrowGrenadeMontage();
+	ShowAttachedGrenade(true);
 }
 
 void UCombatComponent::ThrowGrenadeFinished()
 {
 	CombatState = ECombatState::ECS_Unoccupied;
 	AttachWeaponToRightHand(EquippedWeapon);
+}
+
+void UCombatComponent::LaunchGrenade()
+{
+	ShowAttachedGrenade(false);
+}
+
+void UCombatComponent::ShowAttachedGrenade(bool bShowGrenade)
+{
+	if (Character && Character->GetAttachedGrenade())
+	{
+		Character->GetAttachedGrenade()->SetVisibility(bShowGrenade);
+	}
 }
 
 #pragma endregion ThrowGrenade

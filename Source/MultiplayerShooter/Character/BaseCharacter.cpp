@@ -93,6 +93,7 @@ void ABaseCharacter::BeginPlay()
 	}
 	
 	AttachedGrenade->AttachToComponent(GetMesh(), FAttachmentTransformRules(EAttachmentRule::KeepRelative, true), TEXT("GrenadeSocket"));
+	AttachedGrenade->SetVisibility(false);
 }
 
 void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)

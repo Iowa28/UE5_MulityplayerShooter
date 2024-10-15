@@ -270,5 +270,7 @@ public:
 
 	ECombatState GetCombatState() const;
 
-	FORCEINLINE UCombatComponent* GetCombatComonent() const { return CombatComponent; }
+	FORCEINLINE UCombatComponent* GetCombatComponent() const { return CombatComponent; }
+	
+	FORCEINLINE UStaticMeshComponent* GetAttachedGrenade() const { return AttachedGrenade; }
 };

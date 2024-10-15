@@ -246,9 +246,9 @@ void AWeapon::AddAmmo(int32 AmmoToAdd)
 void AWeapon::OnRep_Ammo()
 {
 	OwnerCharacter = OwnerCharacter ? OwnerCharacter : Cast<ABaseCharacter>(GetOwner());
-	if (OwnerCharacter && OwnerCharacter->GetCombatComonent() && IsFull())
+	if (OwnerCharacter && OwnerCharacter->GetCombatComponent() && IsFull())
 	{
-		OwnerCharacter->GetCombatComonent()->JumpToShotgunEnd();
+		OwnerCharacter->GetCombatComponent()->JumpToShotgunEnd();
 	}
 	SetHUDAmmo();
 }

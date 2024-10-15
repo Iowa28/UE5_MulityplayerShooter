@@ -363,9 +363,9 @@ void ABasePlayerController::HandleCooldown()
 	if (ABaseCharacter* BaseCharacter = Cast<ABaseCharacter>(GetPawn()))
 	{
 		BaseCharacter->bDisableGameplay = true;
-		if (BaseCharacter->GetCombatComonent())
+		if (BaseCharacter->GetCombatComponent())
 		{
-			BaseCharacter->GetCombatComonent()->FireButtonPressed(false);
+			BaseCharacter->GetCombatComponent()->FireButtonPressed(false);
 		}
 	}
 }
