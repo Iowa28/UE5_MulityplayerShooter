@@ -43,6 +43,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void LaunchGrenade();
 
+	UFUNCTION(Server, Reliable)
+	void ServerLaunchGrenade(const FVector_NetQuantize& Target);
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -77,6 +80,9 @@ protected:
 	void ServerReload();
 
 	void HandleReload();
+
+	UPROPERTY(EditDefaultsOnly, Category = "Combat")
+	TSubclassOf<class AProjectile> GrenadeClass;
 
 	void ThrowGrenade();
 

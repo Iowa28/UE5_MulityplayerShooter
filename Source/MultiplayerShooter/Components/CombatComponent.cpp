@@ -8,6 +8,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "MultiplayerShooter/Character/BaseCharacter.h"
 #include "MultiplayerShooter/Controller/BasePlayerController.h"
+#include "MultiplayerShooter/Weapon/Projectile.h"
 #include "MultiplayerShooter/Weapon/Weapon.h"
 #include "Net/UnrealNetwork.h"
 #include "Sound/SoundCue.h"
@@ -512,7 +513,7 @@ int32 UCombatComponent::AmountToReload()
 
 void UCombatComponent::ThrowGrenade()
 {
-	if (!Character || CombatState != ECombatState::ECS_Unoccupied) { return; }
+	if (!Character || CombatState != ECombatState::ECS_Unoccupied || !EquippedWeapon) { return; }
 	
 	CombatState = ECombatState::ECS_ThrowingGrenade;
 	AttachWeaponToLeftHand(EquippedWeapon);
@@ -544,6 +545,27 @@ void UCombatComponent::ThrowGrenadeFinished()
 void UCombatComponent::LaunchGrenade()
 {
 	ShowAttachedGrenade(false);
+	
+	if (Character && Character->IsLocallyControlled())
+	{
+		ServerLaunchGrenade(HitTarget);
+	}
+}
+
+void UCombatComponent::ServerLaunchGrenade_Implementation(const FVector_NetQuantize& Target)
+{
+	if (Character && Character->GetAttachedGrenade() && GrenadeClass)
+	{
+		const FVector StartingLocation = Character->GetAttachedGrenade()->GetComponentLocation();
+		const FVector ToTarget = Target - StartingLocation;
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.Owner = Character;
+		SpawnParams.Instigator = Character;
+		if (UWorld* World = GetWorld())
+		{
+			World->SpawnActor<AProjectile>(GrenadeClass, StartingLocation, ToTarget.Rotation(), SpawnParams);
+		}
+	}
 }
 
 void UCombatComponent::ShowAttachedGrenade(bool bShowGrenade)
