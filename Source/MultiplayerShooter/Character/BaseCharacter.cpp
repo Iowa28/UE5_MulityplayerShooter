@@ -408,6 +408,8 @@ void ABaseCharacter::TurnInPlace(float DeltaTime)
 void ABaseCharacter::ReceiveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType,
                                    AController* InstigatorController, AActor* DamageCauser)
 {
+	if (bEliminated) { return; }
+	
 	Health = FMathf::Max(0, Health - Damage);
 	UpdateHUDHealth();
 	PlayHitReactMontage();

@@ -26,6 +26,7 @@ void UCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	DOREPLIFETIME(UCombatComponent, bAiming);
 	DOREPLIFETIME_CONDITION(UCombatComponent, CarriedAmmo, COND_OwnerOnly);
 	DOREPLIFETIME(UCombatComponent, CombatState);
+	DOREPLIFETIME(UCombatComponent, Grenades);
 }
 
 void UCombatComponent::BeginPlay()
@@ -47,6 +48,8 @@ void UCombatComponent::BeginPlay()
 			InitializeCarriedAmmo();
 		}
 	}
+
+	Grenades = MaxGrenades;
 }
 
 void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -509,18 +512,23 @@ int32 UCombatComponent::AmountToReload()
 }
 #pragma endregion Reload
 
-#pragma region ThrowGrenade
+#pragma region Grenade
 
 void UCombatComponent::ThrowGrenade()
 {
-	if (!Character || CombatState != ECombatState::ECS_Unoccupied || !EquippedWeapon) { return; }
+	if (Grenades <= 0 || !Character || CombatState != ECombatState::ECS_Unoccupied || !EquippedWeapon) { return; }
 	
 	CombatState = ECombatState::ECS_ThrowingGrenade;
 	AttachWeaponToLeftHand(EquippedWeapon);
 	Character->PlayThrowGrenadeMontage();
 	ShowAttachedGrenade(true);
 
-	if (!Character->HasAuthority())
+	if (Character->HasAuthority())
+	{
+		Grenades = FMath::Clamp(Grenades - 1, 0, MaxGrenades);
+		UpdateHUDGrenades();
+	}
+	else
 	{
 		ServerThrowGrenade();
 	}
@@ -528,12 +536,28 @@ void UCombatComponent::ThrowGrenade()
 
 void UCombatComponent::ServerThrowGrenade_Implementation()
 {
-	if (!Character) { return; }
+	if (Grenades <= 0 || !Character) { return; }
 	
 	CombatState = ECombatState::ECS_ThrowingGrenade;
 	AttachWeaponToLeftHand(EquippedWeapon);
 	Character->PlayThrowGrenadeMontage();
 	ShowAttachedGrenade(true);
+	Grenades = FMath::Clamp(Grenades - 1, 0, MaxGrenades);
+	UpdateHUDGrenades();
+}
+
+void UCombatComponent::OnRep_Grenades()
+{
+	UpdateHUDGrenades();
+}
+
+void UCombatComponent::UpdateHUDGrenades()
+{
+	Controller = Controller ? Controller : Cast<ABasePlayerController>(Character->GetController());
+	if (Controller)
+	{
+		Controller->SetHUDGrenades(Grenades);
+	}
 }
 
 void UCombatComponent::ThrowGrenadeFinished()
@@ -576,7 +600,7 @@ void UCombatComponent::ShowAttachedGrenade(bool bShowGrenade)
 	}
 }
 
-#pragma endregion ThrowGrenade
+#pragma endregion Grenade
 
 void UCombatComponent::InitializeCarriedAmmo()
 {

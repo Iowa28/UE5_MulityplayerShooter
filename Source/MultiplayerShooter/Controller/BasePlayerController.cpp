@@ -150,6 +150,20 @@ void ABasePlayerController::SetHUDAnnouncementCountdown(float CountdownTime)
 	BaseHUD->Announcement->WarmupTime->SetText(FText::FromString(CountdownText));
 }
 
+void ABasePlayerController::SetHUDGrenades(int32 Grenades)
+{
+	BaseHUD = BaseHUD ? BaseHUD : Cast<ABaseHUD>(GetHUD());
+	if (!BaseHUD || !BaseHUD->CharacterOverlay || !BaseHUD->CharacterOverlay->GrenadesText)
+	{
+		bInitializeCharacterOverlay = true;
+		HUDGrenades = Grenades;
+		return;
+	}
+
+	const FString GrenadesText = FString::FromInt(Grenades);
+	BaseHUD->CharacterOverlay->GrenadesText->SetText(FText::FromString(GrenadesText));
+}
+
 void ABasePlayerController::SetHUDTime()
 {
 	float TimeLeft = 0.f;
@@ -199,6 +213,12 @@ void ABasePlayerController::PollInit()
 		SetHUDHealth(HUDHealth, HUDMaxHealth);
 		SetHUDScore(HUDScore);
 		SetHUDDefeats(HUDDefeats);
+
+		const ABaseCharacter* PlayerCharacter = Cast<ABaseCharacter>(GetPawn());
+		if (PlayerCharacter && PlayerCharacter->GetCombatComponent())
+		{
+			SetHUDGrenades(PlayerCharacter->GetCombatComponent()->GetGrenades());
+		}
 	}
 }
 #pragma endregion HUD
