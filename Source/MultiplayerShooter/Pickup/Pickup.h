@@ -19,6 +19,12 @@ public:
 	virtual void Destroyed() override;
 
 protected:
+	UPROPERTY(EditDefaultsOnly)
+	UStaticMeshComponent* PickupMesh;
+
+	UPROPERTY(EditDefaultsOnly)
+	float BaseTurnRate = 45.f;
+	
 	virtual void BeginPlay() override;
 
 	UFUNCTION()
@@ -37,8 +43,5 @@ private:
 	
 	UPROPERTY(EditDefaultsOnly)
 	class USoundCue* PickupSound;
-
-	UPROPERTY(EditDefaultsOnly)
-	UStaticMeshComponent* PickupMesh;
 
 };

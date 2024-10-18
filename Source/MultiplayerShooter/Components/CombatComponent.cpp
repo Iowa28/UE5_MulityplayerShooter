@@ -280,6 +280,14 @@ void UCombatComponent::AttachWeaponToLeftHand(AWeapon* WeaponToAttach)
 	}
 }
 
+void UCombatComponent::PlayEquippedWeaponSound()
+{
+	if (Character && EquippedWeapon && EquippedWeapon->EquipSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, EquippedWeapon->EquipSound, Character->GetActorLocation());
+	}
+}
+
 void UCombatComponent::UpdateCarriedAmmo()
 {
 	if (!EquippedWeapon) { return; }
@@ -296,17 +304,14 @@ void UCombatComponent::UpdateCarriedAmmo()
 	}
 }
 
-void UCombatComponent::PlayEquippedWeaponSound()
+void UCombatComponent::PickupAmmo(EWeaponType WeaponType, int32 AmmoAmount)
 {
-	if (Character && EquippedWeapon && EquippedWeapon->EquipSound)
+	if (CarriedAmmoMap.Contains(WeaponType))
 	{
-		UGameplayStatics::PlaySoundAtLocation(this, EquippedWeapon->EquipSound, Character->GetActorLocation());
+		CarriedAmmoMap[WeaponType] = FMath::Clamp(CarriedAmmoMap[WeaponType] + AmmoAmount, 0, MaxCarriedAmmo);
+		UpdateCarriedAmmo();
 	}
-}
-
-void UCombatComponent::ReloadEmptyWeapon()
-{
-	if (EquippedWeapon && EquippedWeapon->IsEmpty())
+	if (EquippedWeapon && EquippedWeapon->IsEmpty() && EquippedWeapon->GetWeaponType() == WeaponType)
 	{
 		Reload();
 	}
@@ -510,6 +515,15 @@ int32 UCombatComponent::AmountToReload()
 
 	return 0;
 }
+
+void UCombatComponent::ReloadEmptyWeapon()
+{
+	if (EquippedWeapon && EquippedWeapon->IsEmpty())
+	{
+		Reload();
+	}
+}
+
 #pragma endregion Reload
 
 #pragma region Grenade
