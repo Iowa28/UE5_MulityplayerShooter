@@ -2,6 +2,8 @@
 
 
 #include "Pickup.h"
+#include "NiagaraComponent.h"
+#include "NiagaraFunctionLibrary.h"
 #include "Components/SphereComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "MultiplayerShooter/Types/WeaponTypes.h"
@@ -28,6 +30,9 @@ APickup::APickup()
 	PickupMesh->SetRelativeScale3D(FVector(2.5f, 2.5f, 2.5f));
 	PickupMesh->SetRenderCustomDepth(true);
 	PickupMesh->SetCustomDepthStencilValue(CUSTOM_DEPTH_PURPLE);
+
+	PickupEffectComponent = CreateDefaultSubobject<UNiagaraComponent>(TEXT("PickupEffectComponent"));
+	PickupEffectComponent->SetupAttachment(RootComponent);
 }
 
 void APickup::BeginPlay()
@@ -52,8 +57,6 @@ void APickup::Tick(float DeltaTime)
 
 void APickup::Destroyed()
 {
-	Super::Destroyed();
-
 	if (PickupSound)
 	{
 		UGameplayStatics::PlaySoundAtLocation(
@@ -62,6 +65,18 @@ void APickup::Destroyed()
 			GetActorLocation()
 		);
 	}
+
+	if (PickupEffect)
+	{
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+			this,
+			PickupEffect,
+			PickupEffectComponent->GetComponentLocation(),
+			PickupEffectComponent->GetComponentRotation()
+		);
+	}
+
+	Super::Destroyed();
 }
 
 void APickup::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
