@@ -22,7 +22,7 @@ protected:
 
 private:
 	UPROPERTY(EditDefaultsOnly, Category = "Pickup")
-	float HealthAmount = 100.f;
+	float HealAmount = 100.f;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Pickup")
 	float HealingTime = 3.f;

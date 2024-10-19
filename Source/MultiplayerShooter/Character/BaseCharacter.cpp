@@ -433,10 +433,13 @@ void ABaseCharacter::ReceiveDamage(AActor* DamagedActor, float Damage, const UDa
 	}
 }
 
-void ABaseCharacter::OnRep_Health()
+void ABaseCharacter::OnRep_Health(float LastHealth)
 {
 	UpdateHUDHealth();
-	PlayHitReactMontage();
+	if (Health < LastHealth)
+	{
+		PlayHitReactMontage();
+	}
 }
 
 void ABaseCharacter::UpdateHUDHealth()

@@ -24,12 +24,10 @@ public:
 	ABaseCharacter();
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
-
 	virtual void Tick(float DeltaTime) override;
-
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
-
 	virtual void PostInitializeComponents() override;
+	virtual void Destroyed() override;
 
 	virtual void Jump() override;
 
@@ -46,13 +44,13 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastEliminate();
 
-	virtual void Destroyed() override;
-
 	UPROPERTY(Replicated)
 	bool bDisableGameplay = false;
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void ToggleSniperScopeWidget(bool bShowScope);
+
+	void UpdateHUDHealth();
 
 protected:
 	virtual void BeginPlay() override;
@@ -198,9 +196,7 @@ private:
 	bool bEliminated;
 
 	UFUNCTION()
-	void OnRep_Health();
-
-	void UpdateHUDHealth();
+	void OnRep_Health(float LastHealth);
 #pragma endregion Health
 
 #pragma region Elimination
@@ -270,6 +266,7 @@ public:
 	
 	FORCEINLINE float GetMaxHealth() const { return MaxHealth; }
 	FORCEINLINE float GetHealth() const { return Health; }
+	FORCEINLINE void SetHealth(const float Amount) { Health = Amount; }
 
 	ECombatState GetCombatState() const;
 

@@ -19,8 +19,16 @@ public:
 
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
+	void Heal(float HealAmount, float HealingTime);
+
+	bool bHealing = false;
+	float HealingRate = 0;
+	float AmountToHeal;
+
 protected:
 	virtual void BeginPlay() override;
+
+	void HealRamUp(float DeltaTime);
 
 private:
 	UPROPERTY()

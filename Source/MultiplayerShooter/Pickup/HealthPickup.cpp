@@ -21,7 +21,7 @@ void AHealthPickup::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AA
 
 	if (UBuffComponent* BuffComponent = OtherActor->GetComponentByClass<UBuffComponent>())
 	{
-		// BuffComponent->PickupAmmo(WeaponType, AmmoAmount);
+		BuffComponent->Heal(HealAmount, HealingTime);
 	}
 
 	Destroy();

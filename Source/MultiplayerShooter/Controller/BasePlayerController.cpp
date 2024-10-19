@@ -64,7 +64,7 @@ void ABasePlayerController::SetHUDHealth(float Health, float MaxHealth)
 
 	const float HealthPercent = Health / MaxHealth;
 	BaseHUD->CharacterOverlay->HealthBar->SetPercent(HealthPercent);
-	const FString HealthText = FString::Printf(TEXT("%d/%d"), FMath::CeilToInt(Health), FMath::CeilToInt(MaxHealth));
+	const FString HealthText = FString::Printf(TEXT("%d/%d"), FMath::RoundToInt(Health), FMath::RoundToInt(MaxHealth));
 	BaseHUD->CharacterOverlay->HealthText->SetText(FText::FromString(HealthText));
 }
 
@@ -207,17 +207,16 @@ void ABasePlayerController::SetHUDTime()
 
 void ABasePlayerController::PollInit()
 {
-	if (!CharacterOverlay && BaseHUD && BaseHUD->CharacterOverlay)
+	if (!CharacterOverlay && BaseHUD && BaseHUD->CharacterOverlay && GetPawn())
 	{
 		CharacterOverlay = BaseHUD->CharacterOverlay;
 		SetHUDHealth(HUDHealth, HUDMaxHealth);
 		SetHUDScore(HUDScore);
 		SetHUDDefeats(HUDDefeats);
 
-		const ABaseCharacter* PlayerCharacter = Cast<ABaseCharacter>(GetPawn());
-		if (PlayerCharacter && PlayerCharacter->GetCombatComponent())
+		if (const UCombatComponent* CombatComponent = GetPawn()->GetComponentByClass<UCombatComponent>())
 		{
-			SetHUDGrenades(PlayerCharacter->GetCombatComponent()->GetGrenades());
+			SetHUDGrenades(CombatComponent->GetGrenades());
 		}
 	}
 }
