@@ -415,7 +415,6 @@ void UCombatComponent::Reload()
 	{
 		ServerReload();
 	}
-	GEngine->AddOnScreenDebugMessage(-1,15.f,FColor::Purple, FString::Printf(TEXT("Ammo %d"), CarriedAmmo));
 }
 
 void UCombatComponent::ServerReload_Implementation()
