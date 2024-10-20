@@ -31,6 +31,7 @@ void ABasePlayerController::OnPossess(APawn* aPawn)
 	if (const ABaseCharacter* BaseCharacter = Cast<ABaseCharacter>(aPawn))
 	{
 		SetHUDHealth(BaseCharacter->GetHealth(), BaseCharacter->GetMaxHealth());
+		SetHUDShield(BaseCharacter->GetShield(), BaseCharacter->GetMaxShield());
 	}
 }
 
@@ -50,22 +51,73 @@ void ABasePlayerController::Tick(float DeltaSeconds)
 	PollInit();
 }
 
+void ABasePlayerController::PollInit()
+{
+	if (!CharacterOverlay && BaseHUD && BaseHUD->CharacterOverlay)
+	{
+		CharacterOverlay = BaseHUD->CharacterOverlay;
+		if (bInitializeHealth)
+		{
+			SetHUDHealth(HUDHealth, HUDMaxHealth);
+		}
+		if (bInitializeShield)
+		{
+			SetHUDShield(HUDShield, HUDMaxShield);
+		}
+		if (bInitializeScore)
+		{
+			SetHUDScore(HUDScore);
+		}
+		if (bInitializeDefeats)
+		{
+			SetHUDDefeats(HUDDefeats);
+		}
+
+		if (bInitializeGrenades && GetPawn())
+		{
+			if (const UCombatComponent* CombatComponent = GetPawn()->GetComponentByClass<UCombatComponent>())
+			{
+				SetHUDGrenades(CombatComponent->GetGrenades());
+			}
+		}
+	}
+}
+
 #pragma region HUD
 void ABasePlayerController::SetHUDHealth(float Health, float MaxHealth)
 {
 	BaseHUD = BaseHUD ? BaseHUD : Cast<ABaseHUD>(GetHUD());
 	if (!BaseHUD || !BaseHUD->CharacterOverlay || !BaseHUD->CharacterOverlay->HealthBar || !BaseHUD->CharacterOverlay->HealthText)
 	{
-		bInitializeCharacterOverlay = true;
+		bInitializeHealth = true;
 		HUDHealth = Health;
 		HUDMaxHealth = MaxHealth;
 		return;
 	}
-
+	
+	bInitializeHealth = false;
 	const float HealthPercent = Health / MaxHealth;
 	BaseHUD->CharacterOverlay->HealthBar->SetPercent(HealthPercent);
 	const FString HealthText = FString::Printf(TEXT("%d/%d"), FMath::RoundToInt(Health), FMath::RoundToInt(MaxHealth));
 	BaseHUD->CharacterOverlay->HealthText->SetText(FText::FromString(HealthText));
+}
+
+void ABasePlayerController::SetHUDShield(float Shield, float MaxShield)
+{
+	BaseHUD = BaseHUD ? BaseHUD : Cast<ABaseHUD>(GetHUD());
+	if (!BaseHUD || !BaseHUD->CharacterOverlay || !BaseHUD->CharacterOverlay->ShieldBar || !BaseHUD->CharacterOverlay->ShieldText)
+	{
+		bInitializeShield = true;
+		HUDShield = Shield;
+		HUDMaxShield = MaxShield;
+		return;
+	}
+
+	bInitializeShield = false;
+	const float ShieldPercent = Shield / MaxShield;
+	BaseHUD->CharacterOverlay->ShieldBar->SetPercent(ShieldPercent);
+	const FString ShieldText = FString::Printf(TEXT("%d/%d"), FMath::RoundToInt(Shield), FMath::RoundToInt(MaxShield));
+	BaseHUD->CharacterOverlay->ShieldText->SetText(FText::FromString(ShieldText));
 }
 
 void ABasePlayerController::SetHUDScore(float Score)
@@ -73,11 +125,12 @@ void ABasePlayerController::SetHUDScore(float Score)
 	BaseHUD = BaseHUD ? BaseHUD : Cast<ABaseHUD>(GetHUD());
 	if (!BaseHUD || !BaseHUD->CharacterOverlay || !BaseHUD->CharacterOverlay->ScoreAmount)
 	{
-		bInitializeCharacterOverlay = true;
+		bInitializeScore = true;
 		HUDScore = Score;
 		return;
 	}
 
+	bInitializeScore = false;
 	const FString ScoreText = FString::FromInt(FMath::FloorToInt(Score));
 	BaseHUD->CharacterOverlay->ScoreAmount->SetText(FText::FromString(ScoreText));
 }
@@ -87,11 +140,12 @@ void ABasePlayerController::SetHUDDefeats(int32 Defeats)
 	BaseHUD = BaseHUD ? BaseHUD : Cast<ABaseHUD>(GetHUD());
 	if (!BaseHUD || !BaseHUD->CharacterOverlay || !BaseHUD->CharacterOverlay->DefeatsAmount)
 	{
-		bInitializeCharacterOverlay = true;
+		bInitializeDefeats = true;
 		HUDDefeats = Defeats;
 		return;
 	}
 
+	bInitializeDefeats = false;
 	const FString DefeatsText = FString::FromInt(Defeats);
 	BaseHUD->CharacterOverlay->DefeatsAmount->SetText(FText::FromString(DefeatsText));
 }
@@ -155,11 +209,12 @@ void ABasePlayerController::SetHUDGrenades(int32 Grenades)
 	BaseHUD = BaseHUD ? BaseHUD : Cast<ABaseHUD>(GetHUD());
 	if (!BaseHUD || !BaseHUD->CharacterOverlay || !BaseHUD->CharacterOverlay->GrenadesText)
 	{
-		bInitializeCharacterOverlay = true;
+		bInitializeGrenades = true;
 		HUDGrenades = Grenades;
 		return;
 	}
 
+	bInitializeGrenades = false;
 	const FString GrenadesText = FString::FromInt(Grenades);
 	BaseHUD->CharacterOverlay->GrenadesText->SetText(FText::FromString(GrenadesText));
 }
@@ -203,22 +258,6 @@ void ABasePlayerController::SetHUDTime()
 	}
 
 	CountdownInt = SecondsLeft;
-}
-
-void ABasePlayerController::PollInit()
-{
-	if (!CharacterOverlay && BaseHUD && BaseHUD->CharacterOverlay && GetPawn())
-	{
-		CharacterOverlay = BaseHUD->CharacterOverlay;
-		SetHUDHealth(HUDHealth, HUDMaxHealth);
-		SetHUDScore(HUDScore);
-		SetHUDDefeats(HUDDefeats);
-
-		if (const UCombatComponent* CombatComponent = GetPawn()->GetComponentByClass<UCombatComponent>())
-		{
-			SetHUDGrenades(CombatComponent->GetGrenades());
-		}
-	}
 }
 #pragma endregion HUD
 

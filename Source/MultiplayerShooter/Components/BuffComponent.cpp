@@ -9,7 +9,6 @@
 UBuffComponent::UBuffComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
-	// UE_LOG(LogTemp, Warning, TEXT("Test"));
 }
 
 void UBuffComponent::BeginPlay()

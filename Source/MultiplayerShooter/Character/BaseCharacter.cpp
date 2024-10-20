@@ -26,6 +26,8 @@
 ABaseCharacter::ABaseCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
+	// UE_LOG(LogTemp, Warning, TEXT("Test"));
+	// UE_LOG(LogTemp, Warning, TEXT("%f"), Health);
 
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(GetMesh());
@@ -65,8 +67,6 @@ ABaseCharacter::ABaseCharacter()
 	AttachedGrenade = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("AttachedGrenade"));
 	AttachedGrenade->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	AttachedGrenade->SetupAttachment(GetMesh(), FName("AttachedGrenade"));
-
-	Health = MaxHealth;
 }
 
 void ABaseCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -75,6 +75,7 @@ void ABaseCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 
 	DOREPLIFETIME_CONDITION(ABaseCharacter, OverlappingWeapon, COND_OwnerOnly);
 	DOREPLIFETIME(ABaseCharacter, Health);
+	DOREPLIFETIME(ABaseCharacter, Shield);
 	DOREPLIFETIME(ABaseCharacter, bDisableGameplay);
 }
 
@@ -90,7 +91,11 @@ void ABaseCharacter::BeginPlay()
 		}
 	}
 
+	Health = MaxHealth;
+	Shield = MaxShield;
 	UpdateHUDHealth();
+	UpdateHUDShield();
+	
 	if (HasAuthority())
 	{
 		OnTakeAnyDamage.AddDynamic(this, &ThisClass::ReceiveDamage);
@@ -419,8 +424,24 @@ void ABaseCharacter::ReceiveDamage(AActor* DamagedActor, float Damage, const UDa
                                    AController* InstigatorController, AActor* DamageCauser)
 {
 	if (bEliminated) { return; }
+
+	float DamageToHealth = Damage;
+	if (Shield > 0.f)
+	{
+		if (Shield >= Damage)
+		{
+			Shield = FMath::Min(Shield - Damage, MaxShield);
+			DamageToHealth = 0.f;
+		}
+		else
+		{
+			Shield = 0.f;
+			DamageToHealth = FMath::Min(DamageToHealth - Shield, Damage);
+		}
+		UpdateHUDShield();
+	}
 	
-	Health = FMathf::Max(0, Health - Damage);
+	Health = FMathf::Max(0, Health - DamageToHealth);
 	UpdateHUDHealth();
 	PlayHitReactMontage();
 
@@ -444,12 +465,30 @@ void ABaseCharacter::OnRep_Health(float LastHealth)
 	}
 }
 
+void ABaseCharacter::OnRep_Shield(float LastShield)
+{
+	UpdateHUDShield();
+	if (Shield < LastShield)
+	{
+		PlayHitReactMontage();
+	}
+}
+
 void ABaseCharacter::UpdateHUDHealth()
 {
 	BasePlayerController = BasePlayerController ? BasePlayerController : Cast<ABasePlayerController>(GetController());
 	if (BasePlayerController)
 	{
 		BasePlayerController->SetHUDHealth(Health, MaxHealth);
+	}
+}
+
+void ABaseCharacter::UpdateHUDShield()
+{
+	BasePlayerController = BasePlayerController ? BasePlayerController : Cast<ABasePlayerController>(GetController());
+	if (BasePlayerController)
+	{
+		BasePlayerController->SetHUDShield(Shield, MaxShield);
 	}
 }
 

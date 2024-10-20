@@ -51,6 +51,7 @@ public:
 	void ToggleSniperScopeWidget(bool bShowScope);
 
 	void UpdateHUDHealth();
+	void UpdateHUDShield();
 
 protected:
 	virtual void BeginPlay() override;
@@ -199,6 +200,17 @@ private:
 	void OnRep_Health(float LastHealth);
 #pragma endregion Health
 
+#pragma region Shield
+	UPROPERTY(EditDefaultsOnly, Category = "Player Stats")
+	float MaxShield = 100.f;
+
+	UPROPERTY(VisibleAnywhere, ReplicatedUsing = OnRep_Shield, Category = "Player Stats")
+	float Shield;
+
+	UFUNCTION()
+	void OnRep_Shield(float LastShield);
+#pragma endregion Shield
+
 #pragma region Elimination
 	UPROPERTY(EditDefaultsOnly, Category = "Elimination")
 	UAnimMontage* EliminationMontage;
@@ -267,6 +279,9 @@ public:
 	FORCEINLINE float GetMaxHealth() const { return MaxHealth; }
 	FORCEINLINE float GetHealth() const { return Health; }
 	FORCEINLINE void SetHealth(const float Amount) { Health = Amount; }
+	FORCEINLINE float GetMaxShield() const { return MaxShield; }
+	FORCEINLINE float GetShield() const { return Shield; }
+	FORCEINLINE void SetShield(const float Amount) { Shield = Amount; }
 
 	ECombatState GetCombatState() const;
 
