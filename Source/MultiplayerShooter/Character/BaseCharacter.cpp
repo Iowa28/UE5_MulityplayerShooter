@@ -162,6 +162,7 @@ void ABaseCharacter::PostInitializeComponents()
 	{
 		BuffComponent->Character = this;
 		BuffComponent->SetInitialSpeed(GetCharacterMovement()->MaxWalkSpeed, GetCharacterMovement()->MaxWalkSpeedCrouched);
+		BuffComponent->SetInitialJumpVelocity(GetCharacterMovement()->JumpZVelocity);
 	}
 }
 
