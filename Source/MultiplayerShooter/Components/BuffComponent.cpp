@@ -21,6 +21,7 @@ void UBuffComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorC
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	HealRamUp(DeltaTime);
+	ShieldRamUp(DeltaTime);
 }
 
 void UBuffComponent::Heal(float HealAmount, float HealingTime)
@@ -28,6 +29,13 @@ void UBuffComponent::Heal(float HealAmount, float HealingTime)
 	bHealing = true;
 	HealingRate = HealAmount / HealingTime;
 	AmountToHeal += HealAmount;
+}
+
+void UBuffComponent::ReplenishShield(float ShieldAmount, float ReplenishTime)
+{
+	bReplenishingShield = true;
+	ReplenishingRate = ShieldAmount / ReplenishTime;
+	ReplenishShieldAmount += ShieldAmount;
 }
 
 void UBuffComponent::HealRamUp(float DeltaTime)
@@ -40,9 +48,25 @@ void UBuffComponent::HealRamUp(float DeltaTime)
 	Character->UpdateHUDHealth();
 	AmountToHeal = FMath::Max(0.f, AmountToHeal - HealThisFrame);
 
-	if (FMath::IsNearlyEqual(AmountToHeal, 0.f) || Character->GetHealth() >= Character->GetMaxHealth())
+	if (FMath::IsNearlyEqual(AmountToHeal, 0.f) || FMath::IsNearlyEqual(Character->GetHealth(), Character->GetMaxHealth()))
 	{
 		bHealing = false;
+	}
+}
+
+void UBuffComponent::ShieldRamUp(float DeltaTime)
+{
+	if (!bReplenishingShield || !Character || Character->IsEliminated()) return;
+
+	const float ReplenishThisFrame = ReplenishingRate * DeltaTime;
+	const float ShieldAmount = FMath::Min(Character->GetShield() + ReplenishThisFrame, Character->GetMaxShield());
+	Character->SetShield(ShieldAmount);
+	Character->UpdateHUDShield();
+	ReplenishShieldAmount = FMath::Max(0.f, ReplenishShieldAmount - ReplenishThisFrame);
+
+	if (FMath::IsNearlyEqual(ReplenishShieldAmount, 0.f) || FMath::IsNearlyEqual(Character->GetShield(), Character->GetMaxShield()))
+	{
+		bReplenishingShield = false;
 	}
 }
 

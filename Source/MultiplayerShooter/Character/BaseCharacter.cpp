@@ -92,7 +92,7 @@ void ABaseCharacter::BeginPlay()
 	}
 
 	Health = MaxHealth;
-	Shield = MaxShield;
+	Shield = 0;
 	UpdateHUDHealth();
 	UpdateHUDShield();
 	
