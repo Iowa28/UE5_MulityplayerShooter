@@ -14,7 +14,8 @@ void APickupSpawnPoint::BeginPlay()
 {
 	Super::BeginPlay();
 
-	StartSpawnPickupTimer(nullptr);
+	// StartSpawnPickupTimer(nullptr);
+	SpawnPickup();
 }
 
 void APickupSpawnPoint::Tick(float DeltaTime)

@@ -22,6 +22,7 @@ AWeapon::AWeapon()
 	WeaponMesh->SetCollisionResponseToAllChannels(ECR_Block);
 	WeaponMesh->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
 	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	WeaponMesh->SetRelativeScale3D(FVector(2.f, 2.f, 2.f));
 
 	WeaponMesh->SetCustomDepthStencilValue(CUSTOM_DEPTH_BLUE);
 	WeaponMesh->MarkRenderStateDirty();
@@ -116,6 +117,7 @@ void AWeapon::SetWeaponState(EWeaponState State)
 		ShowPickupWidget(false);
 		AreaSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		WeaponMesh->SetSimulatePhysics(false);
+		WeaponMesh->SetRelativeScale3D(FVector(1.f, 1.f, 1.f));
 		if (WeaponType == EWeaponType::EWT_SMG)
 		{
 			WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
@@ -154,6 +156,7 @@ void AWeapon::OnRep_WeaponState()
 	case EWeaponState::EWS_Equipped:
 		ShowPickupWidget(false);
 		WeaponMesh->SetSimulatePhysics(false);
+		WeaponMesh->SetRelativeScale3D(FVector(1.f, 1.f, 1.f));
 		if (WeaponType == EWeaponType::EWT_SMG)
 		{
 			WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
