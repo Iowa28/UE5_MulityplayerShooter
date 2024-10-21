@@ -72,6 +72,14 @@ void ABasePlayerController::PollInit()
 		{
 			SetHUDDefeats(HUDDefeats);
 		}
+		if (bInitializeWeaponAmmo)
+		{
+			SetHUDWeaponAmmo(HUDWeaponAmmo);
+		}
+		if (bInitializeCarriedAmmo)
+		{
+			SetHUDCarriedAmmo(HUDCarriedAmmo);
+		}
 
 		if (bInitializeGrenades && GetPawn())
 		{
@@ -153,8 +161,14 @@ void ABasePlayerController::SetHUDDefeats(int32 Defeats)
 void ABasePlayerController::SetHUDWeaponAmmo(int32 Ammo)
 {
 	BaseHUD = BaseHUD ? BaseHUD : Cast<ABaseHUD>(GetHUD());
-	if (!BaseHUD || !BaseHUD->CharacterOverlay || !BaseHUD->CharacterOverlay->WeaponAmmoAmount) { return; }
+	if (!BaseHUD || !BaseHUD->CharacterOverlay || !BaseHUD->CharacterOverlay->WeaponAmmoAmount)
+	{
+		bInitializeWeaponAmmo = true;
+		HUDWeaponAmmo = Ammo;
+		return;
+	}
 
+	bInitializeWeaponAmmo = false;
 	const FString AmmoText = FString::FromInt(Ammo);
 	BaseHUD->CharacterOverlay->WeaponAmmoAmount->SetText(FText::FromString(AmmoText));
 }
@@ -162,8 +176,14 @@ void ABasePlayerController::SetHUDWeaponAmmo(int32 Ammo)
 void ABasePlayerController::SetHUDCarriedAmmo(int32 Ammo)
 {
 	BaseHUD = BaseHUD ? BaseHUD : Cast<ABaseHUD>(GetHUD());
-	if (!BaseHUD || !BaseHUD->CharacterOverlay || !BaseHUD->CharacterOverlay->CarriedAmmoAmount) { return; }
+	if (!BaseHUD || !BaseHUD->CharacterOverlay || !BaseHUD->CharacterOverlay->CarriedAmmoAmount)
+	{
+		bInitializeCarriedAmmo = true;
+		HUDCarriedAmmo = Ammo;
+		return;
+	}
 
+	bInitializeCarriedAmmo = false;
 	const FString AmmoText = FString::FromInt(Ammo);
 	BaseHUD->CharacterOverlay->CarriedAmmoAmount->SetText(FText::FromString(AmmoText));
 }

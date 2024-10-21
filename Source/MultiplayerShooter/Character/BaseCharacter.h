@@ -53,6 +53,8 @@ public:
 	void UpdateHUDHealth();
 	void UpdateHUDShield();
 
+	void SpawnDefaultWeapon();
+
 protected:
 	virtual void BeginPlay() override;
 	
@@ -253,6 +255,11 @@ private:
 
 	UPROPERTY(VisibleAnywhere)
 	UStaticMeshComponent* AttachedGrenade;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Combat")
+	TSubclassOf<AWeapon> DefaultWeaponClass;
+
+	void UpdateHUDAmmo();
 
 public:
 	void SetOverlappingWeapon(AWeapon* Weapon);

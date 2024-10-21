@@ -100,9 +100,11 @@ void ABaseCharacter::BeginPlay()
 	{
 		OnTakeAnyDamage.AddDynamic(this, &ThisClass::ReceiveDamage);
 	}
-	
+
 	AttachedGrenade->AttachToComponent(GetMesh(), FAttachmentTransformRules(EAttachmentRule::KeepRelative, true), TEXT("GrenadeSocket"));
 	AttachedGrenade->SetVisibility(false);
+	SpawnDefaultWeapon();
+	UpdateHUDAmmo();
 }
 
 void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -520,7 +522,14 @@ void ABaseCharacter::Eliminate()
 {
 	if (CombatComponent && CombatComponent->EquippedWeapon)
 	{
-		CombatComponent->EquippedWeapon->Dropped();
+		if (CombatComponent->EquippedWeapon->bDestroyWeapon)
+		{
+			CombatComponent->EquippedWeapon->Destroy();
+		}
+		else
+		{
+			CombatComponent->EquippedWeapon->Dropped();
+		}
 	}
 	MulticastEliminate();
 	GetWorldTimerManager().SetTimer(
@@ -767,6 +776,32 @@ void ABaseCharacter::PlayThrowGrenadeMontage()
 	}
 }
 #pragma endregion ThrowGrenade
+
+#pragma region DefaultWeapon
+
+void ABaseCharacter::SpawnDefaultWeapon()
+{
+	const AShooterGameMode* ShooterGameMode = Cast<AShooterGameMode>(UGameplayStatics::GetGameMode(this));
+	UWorld* World = GetWorld();
+	if (ShooterGameMode && World && !bEliminated && DefaultWeaponClass && CombatComponent)
+	{
+		AWeapon* StartingWeapon = World->SpawnActor<AWeapon>(DefaultWeaponClass);
+		StartingWeapon->bDestroyWeapon = true;
+		CombatComponent->EquipWeapon(StartingWeapon);
+	}
+}
+
+void ABaseCharacter::UpdateHUDAmmo()
+{
+	BasePlayerController = BasePlayerController ? BasePlayerController : Cast<ABasePlayerController>(GetController());
+	if (BasePlayerController && CombatComponent && CombatComponent->EquippedWeapon)
+	{
+		BasePlayerController->SetHUDCarriedAmmo(CombatComponent->CarriedAmmo);
+		BasePlayerController->SetHUDWeaponAmmo(CombatComponent->EquippedWeapon->GetAmmo());
+	}
+}
+
+#pragma endregion DefaultWeapon
 
 #pragma region Getters
 bool ABaseCharacter::IsWeaponEquipped() const
