@@ -59,10 +59,17 @@ protected:
 	UFUNCTION()
 	void OnRep_EquippedWeapon();
 
+	UFUNCTION()
+	void OnRep_SecondaryWeapon();
+
+	void EquipPrimaryWeapon(AWeapon* WeaponToEquip);
+	void EquipSecondaryWeapon(AWeapon* WeaponToEquip);
+
 	void DropEquippedWeapon();
 	void AttachWeaponToRightHand(AWeapon* WeaponToAttach);
 	void AttachWeaponToLeftHand(AWeapon* WeaponToAttach);
-	void PlayEquippedWeaponSound();
+	void AttachWeaponToBackpack(AWeapon* WeaponToAttach);
+	void PlayEquippedWeaponSound(AWeapon* Weapon);
 	void UpdateCarriedAmmo();
 	void ReloadEmptyWeapon();
 	
@@ -105,6 +112,9 @@ private:
 
 	UPROPERTY(ReplicatedUsing = OnRep_EquippedWeapon)
 	AWeapon* EquippedWeapon;
+
+	UPROPERTY(ReplicatedUsing = OnRep_SecondaryWeapon)
+	AWeapon* SecondaryWeapon;
 
 	UPROPERTY(Replicated)
 	bool bAiming;

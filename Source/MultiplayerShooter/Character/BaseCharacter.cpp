@@ -707,14 +707,7 @@ void ABaseCharacter::EquipButtonPressed()
 {
 	if (CombatComponent && !bDisableGameplay)
 	{
-		if (HasAuthority())
-		{
-			CombatComponent->EquipWeapon(OverlappingWeapon);
-		}
-		else
-		{
-			ServerEquipButtonPressed();
-		}
+		ServerEquipButtonPressed();
 	}
 }
 
