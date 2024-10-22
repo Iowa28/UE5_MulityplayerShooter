@@ -43,6 +43,8 @@ public:
 	
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastEliminate();
+	
+	void DropOrDestroyWeapon(AWeapon* Weapon);
 
 	UPROPERTY(Replicated)
 	bool bDisableGameplay = false;

@@ -520,16 +520,10 @@ void ABaseCharacter::PlayEliminationMontage()
 
 void ABaseCharacter::Eliminate()
 {
-	if (CombatComponent && CombatComponent->EquippedWeapon)
+	if (CombatComponent)
 	{
-		if (CombatComponent->EquippedWeapon->bDestroyWeapon)
-		{
-			CombatComponent->EquippedWeapon->Destroy();
-		}
-		else
-		{
-			CombatComponent->EquippedWeapon->Dropped();
-		}
+		DropOrDestroyWeapon(CombatComponent->EquippedWeapon);
+		DropOrDestroyWeapon(CombatComponent->SecondaryWeapon);
 	}
 	MulticastEliminate();
 	GetWorldTimerManager().SetTimer(
@@ -600,6 +594,20 @@ void ABaseCharacter::EliminationTimerFinished()
 	if (AShooterGameMode* ShooterGameMode = GetWorld()->GetAuthGameMode<AShooterGameMode>())
 	{
 		ShooterGameMode->RequestRespawn(this, GetController());
+	}
+}
+
+void ABaseCharacter::DropOrDestroyWeapon(AWeapon* Weapon)
+{
+	if (!Weapon) { return; }
+
+	if (Weapon->bDestroyWeapon)
+	{
+		Weapon->Destroy();
+	}
+	else
+	{
+		Weapon->Dropped();
 	}
 }
 
