@@ -713,9 +713,15 @@ void ABaseCharacter::EquipButtonPressed()
 
 void ABaseCharacter::ServerEquipButtonPressed_Implementation()
 {
-	if (CombatComponent)
+	if (!CombatComponent) { return; }
+	
+	if (OverlappingWeapon)
 	{
 		CombatComponent->EquipWeapon(OverlappingWeapon);
+	}
+	else if (CombatComponent->ShouldSwapWeapons())
+	{
+		CombatComponent->SpawnWeapons();
 	}
 }
 #pragma endregion Equipment

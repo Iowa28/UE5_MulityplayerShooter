@@ -26,6 +26,7 @@ public:
 	void FireButtonPressed(bool bPressed);
 
 	void EquipWeapon(class AWeapon* WeaponToEquip);
+	void SpawnWeapons();
 
 	void Reload();
 
@@ -57,7 +58,7 @@ protected:
 	void ServerSetAiming(bool bIsAiming);
 
 	UFUNCTION()
-	void OnRep_EquippedWeapon();
+	void OnRep_PrimaryWeapon();
 
 	UFUNCTION()
 	void OnRep_SecondaryWeapon();
@@ -110,7 +111,7 @@ private:
 	UPROPERTY()
 	ABaseHUD* HUD;
 
-	UPROPERTY(ReplicatedUsing = OnRep_EquippedWeapon)
+	UPROPERTY(ReplicatedUsing = OnRep_PrimaryWeapon)
 	AWeapon* EquippedWeapon;
 
 	UPROPERTY(ReplicatedUsing = OnRep_SecondaryWeapon)
@@ -213,4 +214,6 @@ private:
 
 public:
 	FORCEINLINE int32 GetGrenades() const { return Grenades; }
+
+	bool ShouldSwapWeapons() const { return EquippedWeapon && SecondaryWeapon; };
 };

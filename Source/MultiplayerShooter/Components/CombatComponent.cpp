@@ -246,21 +246,18 @@ void UCombatComponent::EquipPrimaryWeapon(AWeapon* WeaponToEquip)
 	UpdateCarriedAmmo();
 	PlayEquippedWeaponSound(EquippedWeapon);
 	ReloadEmptyWeapon();
-	EquippedWeapon->EnableCustomDepth(false);
 }
 
 void UCombatComponent::EquipSecondaryWeapon(AWeapon* WeaponToEquip)
 {
 	SecondaryWeapon = WeaponToEquip;
-	SecondaryWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
+	SecondaryWeapon->SetWeaponState(EWeaponState::EWS_EquippedSecondary);
 	AttachWeaponToBackpack(WeaponToEquip);
 	SecondaryWeapon->SetOwner(Character);
 	PlayEquippedWeaponSound(SecondaryWeapon);
-	SecondaryWeapon->GetWeaponMesh()->SetCustomDepthStencilValue(CUSTOM_DEPTH_TAN);
-	SecondaryWeapon->GetWeaponMesh()->MarkRenderStateDirty();
 }
 
-void UCombatComponent::OnRep_EquippedWeapon()
+void UCombatComponent::OnRep_PrimaryWeapon()
 {
 	if (!EquippedWeapon || !Character) { return; }
 	
@@ -269,18 +266,32 @@ void UCombatComponent::OnRep_EquippedWeapon()
 	Character->GetCharacterMovement()->bOrientRotationToMovement = false;
 	Character->bUseControllerRotationYaw = true;
 	PlayEquippedWeaponSound(EquippedWeapon);
-	EquippedWeapon->EnableCustomDepth(false);
+	EquippedWeapon->SetHUDAmmo();
 }
 
 void UCombatComponent::OnRep_SecondaryWeapon()
 {
 	if (!SecondaryWeapon || !Character) { return; }
 	
-	SecondaryWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
+	SecondaryWeapon->SetWeaponState(EWeaponState::EWS_EquippedSecondary);
 	AttachWeaponToBackpack(SecondaryWeapon);
 	PlayEquippedWeaponSound(SecondaryWeapon);
-	SecondaryWeapon->GetWeaponMesh()->SetCustomDepthStencilValue(CUSTOM_DEPTH_TAN);
-	SecondaryWeapon->GetWeaponMesh()->MarkRenderStateDirty();
+}
+
+void UCombatComponent::SpawnWeapons()
+{
+	AWeapon* TempWeapon = EquippedWeapon;
+	EquippedWeapon = SecondaryWeapon;
+	SecondaryWeapon = TempWeapon;
+
+	EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
+	AttachWeaponToRightHand(EquippedWeapon);
+	EquippedWeapon->SetHUDAmmo();
+	UpdateCarriedAmmo();
+	PlayEquippedWeaponSound(EquippedWeapon);
+	
+	SecondaryWeapon->SetWeaponState(EWeaponState::EWS_EquippedSecondary);
+	AttachWeaponToBackpack(SecondaryWeapon);
 }
 
 void UCombatComponent::DropEquippedWeapon()
