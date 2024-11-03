@@ -62,6 +62,10 @@ protected:
 	UFUNCTION(Client, Reliable)
 	void ClientJoinMidGame(FName StateOfMatch, float Warmup, float Match, float StartingTime, float Cooldown);
 
+	void CheckPing(float DeltaSeconds);
+	void  StartHighPingWarning();
+	void  StopHighPingWarning();
+
 private:
 	UPROPERTY()
 	class ABaseHUD* BaseHUD;
@@ -102,4 +106,17 @@ private:
 	bool bInitializeCarriedAmmo = false;
 
 	void HandleCooldown();
+
+	float HighPingRunningTime = 0.f;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "Ping")
+	float HighPingDuration = 5.f;
+
+	float PingAnimationRunningTime = 0.f;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "Ping")
+	float CheckPingFrequency = 20.f;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "Ping")
+	float HighPingThreshold = 50.f;
 };

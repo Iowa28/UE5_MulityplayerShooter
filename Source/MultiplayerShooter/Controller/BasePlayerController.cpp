@@ -2,6 +2,7 @@
 
 
 #include "BasePlayerController.h"
+#include "Components/Image.h"
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
 #include "GameFramework/GameMode.h"
@@ -49,6 +50,7 @@ void ABasePlayerController::Tick(float DeltaSeconds)
 	CheckTimeSync(DeltaSeconds);
 	SetHUDTime();
 	PollInit();
+	CheckPing(DeltaSeconds);
 }
 
 void ABasePlayerController::PollInit()
@@ -448,3 +450,61 @@ void ABasePlayerController::HandleCooldown()
 	}
 }
 #pragma endregion Match
+
+#pragma region Ping
+void ABasePlayerController::CheckPing(float DeltaSeconds)
+{
+	HighPingRunningTime += DeltaSeconds;
+	if (HighPingRunningTime > CheckPingFrequency)
+	{
+		// PlayerState = PlayerState ? PlayerState : GetPlayerState<APlayerState>();
+		if (PlayerState)
+		{
+			const float Ping = PlayerState->GetCompressedPing() * 4;
+			GEngine->AddOnScreenDebugMessage(-1,15.f,FColor::Yellow, FString::Printf(TEXT("Ping: %f"), Ping));
+			if (Ping > HighPingThreshold)
+			{
+				StartHighPingWarning();
+				PingAnimationRunningTime = 0.f;
+			}
+		}
+		HighPingRunningTime = 0.f;
+	}
+
+	if (BaseHUD && BaseHUD->CharacterOverlay && BaseHUD->CharacterOverlay->HighPingAnimation && BaseHUD->CharacterOverlay->IsAnimationPlaying(BaseHUD->CharacterOverlay->HighPingAnimation))
+	{
+		PingAnimationRunningTime += DeltaSeconds;
+		if (PingAnimationRunningTime > HighPingDuration)
+		{
+			StopHighPingWarning();
+		}
+	}
+}
+
+void ABasePlayerController::StartHighPingWarning()
+{
+	BaseHUD = BaseHUD ? BaseHUD : Cast<ABaseHUD>(GetHUD());
+	if (!BaseHUD || !BaseHUD->CharacterOverlay || !BaseHUD->CharacterOverlay->HighPingImage || !BaseHUD->CharacterOverlay->HighPingAnimation)
+	{
+		return;
+	}
+	
+	BaseHUD->CharacterOverlay->HighPingImage->SetOpacity(1.f);
+	BaseHUD->CharacterOverlay->PlayAnimation(BaseHUD->CharacterOverlay->HighPingAnimation, 0.f, 5);
+}
+
+void ABasePlayerController::StopHighPingWarning()
+{
+	BaseHUD = BaseHUD ? BaseHUD : Cast<ABaseHUD>(GetHUD());
+	if (!BaseHUD || !BaseHUD->CharacterOverlay || !BaseHUD->CharacterOverlay->HighPingImage || !BaseHUD->CharacterOverlay->HighPingAnimation)
+	{
+		return;
+	}
+	
+	BaseHUD->CharacterOverlay->HighPingImage->SetOpacity(0);
+	if (BaseHUD->CharacterOverlay->IsAnimationPlaying(BaseHUD->CharacterOverlay->HighPingAnimation))
+	{
+		BaseHUD->CharacterOverlay->StopAnimation(BaseHUD->CharacterOverlay->HighPingAnimation);
+	}
+}
+#pragma endregion Ping
