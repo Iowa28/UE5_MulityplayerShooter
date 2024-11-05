@@ -26,7 +26,7 @@ public:
 	void FireButtonPressed(bool bPressed);
 
 	void EquipWeapon(class AWeapon* WeaponToEquip);
-	void SpawnWeapons();
+	void SwapWeapons();
 
 	void Reload();
 
@@ -75,6 +75,7 @@ protected:
 	void ReloadEmptyWeapon();
 	
 	void Fire();
+	void LocalFire(const FVector_NetQuantize& TraceHitTarget);
 
 	UFUNCTION(Server, Reliable)
 	void ServerFire(const FVector_NetQuantize& TraceHitTarget);

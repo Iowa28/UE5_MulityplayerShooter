@@ -461,7 +461,7 @@ void ABasePlayerController::CheckPing(float DeltaSeconds)
 		if (PlayerState)
 		{
 			const float Ping = PlayerState->GetCompressedPing() * 4;
-			GEngine->AddOnScreenDebugMessage(-1,15.f,FColor::Yellow, FString::Printf(TEXT("Ping: %f"), Ping));
+			// GEngine->AddOnScreenDebugMessage(-1,15.f,FColor::Yellow, FString::Printf(TEXT("Ping: %f"), Ping));
 			if (Ping > HighPingThreshold)
 			{
 				StartHighPingWarning();

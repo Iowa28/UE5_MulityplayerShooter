@@ -729,7 +729,7 @@ void ABaseCharacter::ServerEquipButtonPressed_Implementation()
 	}
 	else if (CombatComponent->ShouldSwapWeapons())
 	{
-		CombatComponent->SpawnWeapons();
+		CombatComponent->SwapWeapons();
 	}
 }
 #pragma endregion Equipment
