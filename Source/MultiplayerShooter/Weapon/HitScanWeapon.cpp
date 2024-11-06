@@ -73,7 +73,7 @@ void AHitScanWeapon::WeaponTraceHit(const FVector& TraceStart, const FVector& Hi
 	const UWorld* World = GetWorld();
 	if (!World) { return; }
 	
-	const FVector End = bUseScatter ? TraceEndWithScatter(TraceStart, HitTarget) : TraceStart + (HitTarget - TraceStart) * 1.25f;
+	const FVector End = TraceStart + (HitTarget - TraceStart) * 1.25f;
 	World->LineTraceSingleByChannel(OutHit, TraceStart, End, ECC_Visibility);
 	
 	FVector BeamEnd = End;
@@ -81,6 +81,8 @@ void AHitScanWeapon::WeaponTraceHit(const FVector& TraceStart, const FVector& Hi
 	{
 		BeamEnd = OutHit.ImpactPoint;
 	}
+
+	DrawDebugSphere(GetWorld(), BeamEnd, 16, 12, FColor::Orange, true);
 
 	if (BeamParticles)
 	{
@@ -96,19 +98,4 @@ void AHitScanWeapon::WeaponTraceHit(const FVector& TraceStart, const FVector& Hi
 			Beam->SetVectorParameter(FName("Target"), BeamEnd);
 		}
 	}
-}
-
-FVector AHitScanWeapon::TraceEndWithScatter(const FVector& TraceStart, const FVector& HitTarget)
-{
-	const FVector ToTargetNormalized = (HitTarget - TraceStart).GetSafeNormal();
-	const FVector SphereCenter = TraceStart + ToTargetNormalized * DistanceToSphere;
-	const FVector RandomVector = UKismetMathLibrary::RandomUnitVector() * FMath::FRandRange(0.f, SphereRadius);
-	const FVector EndLocation = SphereCenter + RandomVector;
-	const FVector ToEndLocation = EndLocation - TraceStart;
-	
-	// DrawDebugSphere(GetWorld(), SphereCenter, SphereRadius, 16, FColor::Red, true);
-	// DrawDebugSphere(GetWorld(), EndLocation, 4.f, 12, FColor::Orange, true);
-	// DrawDebugLine(GetWorld(), TraceStart, FVector(TraceStart + ToEndLocation * TRACE_LENGTH / ToEndLocation.Size()), FColor::Cyan, true);
-
-	return FVector(TraceStart + ToEndLocation * TRACE_LENGTH / ToEndLocation.Size());
 }

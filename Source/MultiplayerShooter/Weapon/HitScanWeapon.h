@@ -25,8 +25,6 @@ protected:
 	USoundCue* HitSound;
 	
 	void WeaponTraceHit(const FVector& TraceStart, const FVector& HitTarget, FHitResult& OutHit);
-	
-	FVector TraceEndWithScatter(const FVector& TraceStart, const FVector& HitTarget);
 
 private:
 	UPROPERTY(EditDefaultsOnly, Category = "HitScan")
@@ -38,12 +36,4 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "HitScan")
 	USoundCue* FireSound;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Scatter")
-	float DistanceToSphere = 800.f;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Scatter")
-	float SphereRadius = 75.f;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Scatter")
-	bool bUseScatter = false;
 };
