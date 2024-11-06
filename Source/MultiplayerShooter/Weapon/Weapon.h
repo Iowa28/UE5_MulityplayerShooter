@@ -61,12 +61,6 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Scatter")
 	bool bUseScatter = false;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Scatter")
-	float DistanceToSphere = 800.f;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Scatter")
-	float SphereRadius = 75.f;
-
 	FVector TraceEndWithScatter(const FVector& HitTarget);
 
 protected:
@@ -96,6 +90,12 @@ protected:
 		UPrimitiveComponent* OtherComp,
 		int32 OtherBodyIndex
 	);
+
+	UPROPERTY(EditDefaultsOnly, Category = "Scatter")
+	float DistanceToSphere = 800.f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Scatter")
+	float SphereRadius = 75.f;
 
 private:
 	UPROPERTY(VisibleAnywhere, Category = "Weapon")
