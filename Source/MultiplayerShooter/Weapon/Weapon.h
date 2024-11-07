@@ -119,11 +119,17 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 	TSubclassOf<class ACasing> CasingClass;
 
-	UPROPERTY(EditDefaultsOnly, ReplicatedUsing = OnRep_Ammo, Category = "Weapon")
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 	int32 Ammo;
 
-	UFUNCTION()
-	void OnRep_Ammo();
+	// The number of unprocessed server requests for Ammo
+	int32 Sequence = 0;
+
+	UFUNCTION(Client, Reliable)
+	void ClientUpdateAmmo(int32 ServerAmmo);
+
+	UFUNCTION(Client, Reliable)
+	void ClientAddAmmo(int32 AmmoToAdd);
 
 	void SpendRound();
 

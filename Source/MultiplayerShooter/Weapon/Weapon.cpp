@@ -43,7 +43,6 @@ void AWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeP
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(AWeapon, WeaponState);
-	DOREPLIFETIME(AWeapon, Ammo);
 }
 
 void AWeapon::EnableCustomDepth(bool bEnable)
@@ -70,26 +69,6 @@ void AWeapon::BeginPlay()
 	}
 }
 
-#pragma region OverlappingWeapon
-void AWeapon::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-                              UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-{
-	if (ABaseCharacter* Character = Cast<ABaseCharacter>(OtherActor))
-	{
-		Character->SetOverlappingWeapon(this);
-	}
-}
-
-void AWeapon::OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-                                 UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
-{
-	if (ABaseCharacter* Character = Cast<ABaseCharacter>(OtherActor))
-	{
-		Character->SetOverlappingWeapon(nullptr);
-	}
-}
-#pragma endregion OverlappingWeapon
-
 void AWeapon::OnRep_Owner()
 {
 	Super::OnRep_Owner();
@@ -108,6 +87,8 @@ void AWeapon::OnRep_Owner()
 		}
 	}
 }
+
+#pragma region WeaponState
 
 void AWeapon::SetWeaponState(EWeaponState State)
 {
@@ -135,6 +116,10 @@ void AWeapon::OnWeaponStateSet()
 		break;
 	}
 }
+
+#pragma endregion WeaponState
+
+#pragma region Equip
 
 void AWeapon::OnEquipped()
 {
@@ -178,23 +163,6 @@ void AWeapon::OnEquippedSecondary()
 	WeaponMesh->MarkRenderStateDirty();
 }
 
-void AWeapon::OnDropped()
-{
-	if (HasAuthority())
-	{
-		AreaSphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	}
-	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
-	WeaponMesh->SetCollisionResponseToAllChannels(ECR_Block);
-	WeaponMesh->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
-	WeaponMesh->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
-	WeaponMesh->SetSimulatePhysics(true);
-	WeaponMesh->SetEnableGravity(true);
-	WeaponMesh->SetCustomDepthStencilValue(CUSTOM_DEPTH_BLUE);
-	WeaponMesh->MarkRenderStateDirty();
-	EnableCustomDepth(true);
-}
-
 void AWeapon::ShowPickupWidget(bool bShowWidget)
 {
 	if (PickupWidget)
@@ -202,6 +170,28 @@ void AWeapon::ShowPickupWidget(bool bShowWidget)
 		PickupWidget->SetVisibility(bShowWidget);
 	}
 }
+
+void AWeapon::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+							  UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (ABaseCharacter* Character = Cast<ABaseCharacter>(OtherActor))
+	{
+		Character->SetOverlappingWeapon(this);
+	}
+}
+
+void AWeapon::OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+								 UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	if (ABaseCharacter* Character = Cast<ABaseCharacter>(OtherActor))
+	{
+		Character->SetOverlappingWeapon(nullptr);
+	}
+}
+
+#pragma endregion Equip
+
+#pragma region Fire
 
 void AWeapon::Fire(const FVector& HitTarget)
 {
@@ -218,10 +208,7 @@ void AWeapon::Fire(const FVector& HitTarget)
 		World->SpawnActor<ACasing>(CasingClass, SocketTransform.GetLocation(), SocketTransform.GetRotation().Rotator());
 	}
 
-	if (HasAuthority())
-	{
-		SpendRound();
-	}
+	SpendRound();
 }
 
 FVector AWeapon::TraceEndWithScatter(const FVector& HitTarget)
@@ -248,6 +235,27 @@ FVector AWeapon::TraceEndWithScatter(const FVector& HitTarget)
 	return FVector(TraceStart + ToEndLocation * TRACE_LENGTH / ToEndLocation.Size());
 }
 
+#pragma endregion Fire
+
+#pragma region Drop
+
+void AWeapon::OnDropped()
+{
+	if (HasAuthority())
+	{
+		AreaSphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	}
+	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
+	WeaponMesh->SetCollisionResponseToAllChannels(ECR_Block);
+	WeaponMesh->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
+	WeaponMesh->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
+	WeaponMesh->SetSimulatePhysics(true);
+	WeaponMesh->SetEnableGravity(true);
+	WeaponMesh->SetCustomDepthStencilValue(CUSTOM_DEPTH_BLUE);
+	WeaponMesh->MarkRenderStateDirty();
+	EnableCustomDepth(true);
+}
+
 void AWeapon::Dropped()
 {
 	SetWeaponState(EWeaponState::EWS_Dropped);
@@ -258,10 +266,51 @@ void AWeapon::Dropped()
 	OwnerController = nullptr;
 }
 
+#pragma endregion Drop
+
 #pragma region Ammo
+
 void AWeapon::SpendRound()
 {
 	Ammo = FMath::Max(Ammo - 1, 0);
+	SetHUDAmmo();
+	if (HasAuthority())
+	{
+		ClientUpdateAmmo(Ammo);
+	}
+	else
+	{
+		Sequence++;
+	}
+}
+
+void AWeapon::ClientUpdateAmmo_Implementation(int32 ServerAmmo)
+{
+	if (HasAuthority()) { return; }
+	
+	Ammo = ServerAmmo;
+	Sequence--;
+	Ammo -= Sequence;
+	SetHUDAmmo();
+}
+
+void AWeapon::AddAmmo(int32 AmmoToAdd)
+{
+	Ammo = FMath::Min(Ammo + AmmoToAdd, MagCapacity);
+	SetHUDAmmo();
+	ClientAddAmmo(AmmoToAdd);
+}
+
+void AWeapon::ClientAddAmmo_Implementation(int32 AmmoToAdd)
+{
+	if (HasAuthority()) { return; }
+	
+	Ammo = FMath::Min(Ammo + AmmoToAdd, MagCapacity);
+	OwnerCharacter = OwnerCharacter ? OwnerCharacter : Cast<ABaseCharacter>(GetOwner());
+	if (OwnerCharacter && OwnerCharacter->GetCombatComponent() && IsFull())
+	{
+		OwnerCharacter->GetCombatComponent()->JumpToShotgunEnd();
+	}
 	SetHUDAmmo();
 }
 
@@ -278,19 +327,4 @@ void AWeapon::SetHUDAmmo()
 	}
 }
 
-void AWeapon::AddAmmo(int32 AmmoToAdd)
-{
-	Ammo = FMath::Clamp(Ammo + AmmoToAdd, 0, MagCapacity);
-	SetHUDAmmo();
-}
-
-void AWeapon::OnRep_Ammo()
-{
-	OwnerCharacter = OwnerCharacter ? OwnerCharacter : Cast<ABaseCharacter>(GetOwner());
-	if (OwnerCharacter && OwnerCharacter->GetCombatComponent() && IsFull())
-	{
-		OwnerCharacter->GetCombatComponent()->JumpToShotgunEnd();
-	}
-	SetHUDAmmo();
-}
 #pragma endregion Ammo

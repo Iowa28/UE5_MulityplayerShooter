@@ -128,8 +128,13 @@ private:
 	UPROPERTY(ReplicatedUsing = OnRep_SecondaryWeapon)
 	AWeapon* SecondaryWeapon;
 
-	UPROPERTY(Replicated)
+	UPROPERTY(ReplicatedUsing = OnRep_Aiming)
 	bool bAiming;
+
+	bool bAimButtonPressed;
+
+	UFUNCTION()
+	void OnRep_Aiming();
 
 	UPROPERTY(EditDefaultsOnly, Category = "Combat")
 	float AimWalkSpeed;
