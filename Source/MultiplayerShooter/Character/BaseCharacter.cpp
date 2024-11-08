@@ -6,6 +6,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 #include "Camera/CameraComponent.h"
+#include "Components/BoxComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/WidgetComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -67,6 +68,78 @@ ABaseCharacter::ABaseCharacter()
 	AttachedGrenade = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("AttachedGrenade"));
 	AttachedGrenade->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	AttachedGrenade->SetupAttachment(GetMesh(), FName("AttachedGrenade"));
+
+	Head = CreateDefaultSubobject<UBoxComponent>(TEXT("Head"));
+	Head->SetupAttachment(GetMesh(), FName("head"));
+	Head->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	
+	Pelvis = CreateDefaultSubobject<UBoxComponent>(TEXT("Pelvis"));
+	Pelvis->SetupAttachment(GetMesh(), FName("Pelvis"));
+	Pelvis->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	
+	Spine_02 = CreateDefaultSubobject<UBoxComponent>(TEXT("Spine_02"));
+	Spine_02->SetupAttachment(GetMesh(), FName("spine_02"));
+	Spine_02->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	
+	Spine_03 = CreateDefaultSubobject<UBoxComponent>(TEXT("Spine_03"));
+	Spine_03->SetupAttachment(GetMesh(), FName("spine_03"));
+	Spine_03->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	
+	UpperArm_L = CreateDefaultSubobject<UBoxComponent>(TEXT("UpperArm_L"));
+	UpperArm_L->SetupAttachment(GetMesh(), FName("UpperArm_L"));
+	UpperArm_L->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	
+	UpperArm_R = CreateDefaultSubobject<UBoxComponent>(TEXT("UpperArm_R"));
+	UpperArm_R->SetupAttachment(GetMesh(), FName("UpperArm_R"));
+	UpperArm_R->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	
+	LowerArm_L = CreateDefaultSubobject<UBoxComponent>(TEXT("LowerArm_L"));
+	LowerArm_L->SetupAttachment(GetMesh(), FName("lowerarm_l"));
+	LowerArm_L->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	
+	LowerArm_R = CreateDefaultSubobject<UBoxComponent>(TEXT("LowerArm_R"));
+	LowerArm_R->SetupAttachment(GetMesh(), FName("lowerarm_r"));
+	LowerArm_R->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	
+	Hand_L = CreateDefaultSubobject<UBoxComponent>(TEXT("Hand_L"));
+	Hand_L->SetupAttachment(GetMesh(), FName("Hand_L"));
+	Hand_L->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	
+	Hand_R = CreateDefaultSubobject<UBoxComponent>(TEXT("Hand_R"));
+	Hand_R->SetupAttachment(GetMesh(), FName("Hand_R"));
+	Hand_R->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	
+	Backpack = CreateDefaultSubobject<UBoxComponent>(TEXT("Backpack"));
+	Backpack->SetupAttachment(GetMesh(), FName("backpack"));
+	Backpack->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	
+	Blanket = CreateDefaultSubobject<UBoxComponent>(TEXT("Blanket"));
+	Blanket->SetupAttachment(GetMesh(), FName("blanket_l"));
+	Blanket->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	
+	Thigh_L = CreateDefaultSubobject<UBoxComponent>(TEXT("Thigh_L"));
+	Thigh_L->SetupAttachment(GetMesh(), FName("Thigh_L"));
+	Thigh_L->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	
+	Thigh_R = CreateDefaultSubobject<UBoxComponent>(TEXT("Thigh_R"));
+	Thigh_R->SetupAttachment(GetMesh(), FName("Thigh_R"));
+	Thigh_R->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	
+	Calf_L = CreateDefaultSubobject<UBoxComponent>(TEXT("Calf_L"));
+	Calf_L->SetupAttachment(GetMesh(), FName("calf_l"));
+	Calf_L->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	
+	Calf_R = CreateDefaultSubobject<UBoxComponent>(TEXT("Calf_R"));
+	Calf_R->SetupAttachment(GetMesh(), FName("calf_r"));
+	Calf_R->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	
+	Foot_L = CreateDefaultSubobject<UBoxComponent>(TEXT("Foot_L"));
+	Foot_L->SetupAttachment(GetMesh(), FName("Foot_L"));
+	Foot_L->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	
+	Foot_R = CreateDefaultSubobject<UBoxComponent>(TEXT("Foot_R"));
+	Foot_R->SetupAttachment(GetMesh(), FName("Foot_R"));
+	Foot_R->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 void ABaseCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -105,6 +178,8 @@ void ABaseCharacter::BeginPlay()
 	AttachedGrenade->SetVisibility(false);
 	SpawnDefaultWeapon();
 	UpdateHUDAmmo();
+
+	// Head->AttachToComponent(GetMesh(), FAttachmentTransformRules(EAttachmentRule::KeepRelative, true), FName("head"));
 }
 
 void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)

@@ -89,6 +89,67 @@ protected:
 
 	void PollInit();
 
+	/**
+	 * Hit boxes used for server-side rewind
+	 */
+#pragma region HitBoxes
+	
+	UPROPERTY(EditDefaultsOnly)
+	class UBoxComponent* Head;
+
+	UPROPERTY(EditDefaultsOnly)
+	UBoxComponent* Pelvis;
+
+	UPROPERTY(EditDefaultsOnly)
+	UBoxComponent* Spine_02;
+
+	UPROPERTY(EditDefaultsOnly)
+	UBoxComponent* Spine_03;
+
+	UPROPERTY(EditDefaultsOnly)
+	UBoxComponent* UpperArm_L;
+
+	UPROPERTY(EditDefaultsOnly)
+	UBoxComponent* UpperArm_R;
+
+	UPROPERTY(EditDefaultsOnly)
+	UBoxComponent* LowerArm_L;
+
+	UPROPERTY(EditDefaultsOnly)
+	UBoxComponent* LowerArm_R;
+
+	UPROPERTY(EditDefaultsOnly)
+	UBoxComponent* Hand_L;
+
+	UPROPERTY(EditDefaultsOnly)
+	UBoxComponent* Hand_R;
+
+	UPROPERTY(EditDefaultsOnly)
+	UBoxComponent* Backpack;
+
+	UPROPERTY(EditDefaultsOnly)
+	UBoxComponent* Blanket;
+
+	UPROPERTY(EditDefaultsOnly)
+	UBoxComponent* Thigh_L;
+
+	UPROPERTY(EditDefaultsOnly)
+	UBoxComponent* Thigh_R;
+
+	UPROPERTY(EditDefaultsOnly)
+	UBoxComponent* Calf_L;
+
+	UPROPERTY(EditDefaultsOnly)
+	UBoxComponent* Calf_R;
+
+	UPROPERTY(EditDefaultsOnly)
+	UBoxComponent* Foot_L;
+
+	UPROPERTY(EditDefaultsOnly)
+	UBoxComponent* Foot_R;
+
+#pragma endregion HitBoxes
+
 private:
 	UPROPERTY(VisibleAnywhere, Category = "Camera")
 	class USpringArmComponent* CameraBoom;
