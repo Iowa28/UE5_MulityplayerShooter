@@ -92,7 +92,10 @@ void UCombatComponent::OnRep_CombatState()
 	switch (CombatState)
 	{
 	case ECombatState::ECS_Reloading:
-		HandleReload();
+		if (Character && !Character->IsLocallyControlled())
+		{
+			HandleReload();
+		}
 		break;
 	case ECombatState::ECS_Unoccupied:
 		if (bFireButtonPressed)
@@ -464,8 +467,14 @@ void UCombatComponent::FireShotgun()
 
 bool UCombatComponent::CanFire() const
 {
-	if (!EquippedWeapon || EquippedWeapon->IsEmpty() || !bCanFire) { return false; }
-	if (CombatState == ECombatState::ECS_Reloading && EquippedWeapon->GetWeaponType() == EWeaponType::EWT_Shotgun) { return true; }
+	if (!EquippedWeapon || EquippedWeapon->IsEmpty() || !bCanFire || bLocallyReloading)
+	{
+		return false;
+	}
+	if (CombatState == ECombatState::ECS_Reloading && EquippedWeapon->GetWeaponType() == EWeaponType::EWT_Shotgun)
+	{
+		return true;
+	}
 	return CombatState == ECombatState::ECS_Unoccupied;
 }
 
@@ -552,11 +561,14 @@ void UCombatComponent::MulticastShotgunFire_Implementation(const TArray<FVector_
 #pragma endregion Fire
 
 #pragma region Reload
+
 void UCombatComponent::Reload()
 {
-	if (CarriedAmmo > 0 && CombatState == ECombatState::ECS_Unoccupied && EquippedWeapon && !EquippedWeapon->IsFull())
+	if (CarriedAmmo > 0 && CombatState == ECombatState::ECS_Unoccupied && EquippedWeapon && !EquippedWeapon->IsFull() && !bLocallyReloading)
 	{
 		ServerReload();
+		HandleReload();
+		bLocallyReloading = true;
 	}
 }
 
@@ -565,7 +577,10 @@ void UCombatComponent::ServerReload_Implementation()
 	if (!Character) { return; }
 
 	CombatState = ECombatState::ECS_Reloading;
-	HandleReload();
+	if (!Character->IsLocallyControlled())
+	{
+		HandleReload();
+	}
 }
 
 void UCombatComponent::HandleReload()
@@ -575,6 +590,7 @@ void UCombatComponent::HandleReload()
 
 void UCombatComponent::FinishReloading()
 {
+	bLocallyReloading = false;
 	if (Character && Character->HasAuthority())
 	{
 		CombatState = ECombatState::ECS_Unoccupied;

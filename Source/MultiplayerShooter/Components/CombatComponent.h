@@ -28,6 +28,8 @@ public:
 	void EquipWeapon(class AWeapon* WeaponToEquip);
 	void SwapWeapons();
 
+	bool bLocallyReloading;
+
 	void Reload();
 
 	UFUNCTION(BlueprintCallable)

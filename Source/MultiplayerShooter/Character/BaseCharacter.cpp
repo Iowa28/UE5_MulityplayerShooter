@@ -811,6 +811,7 @@ void ABaseCharacter::UpdateHUDAmmo()
 #pragma endregion DefaultWeapon
 
 #pragma region Getters
+
 bool ABaseCharacter::IsWeaponEquipped() const
 {
 	return CombatComponent && CombatComponent->EquippedWeapon;
@@ -835,4 +836,10 @@ ECombatState ABaseCharacter::GetCombatState() const
 {
 	return CombatComponent ? CombatComponent->CombatState : ECombatState::ECS_MAX;
 }
+
+bool ABaseCharacter::IsLocallyReloading()
+{
+	return CombatComponent && CombatComponent->bLocallyReloading;
+}
+
 #pragma endregion Getters
