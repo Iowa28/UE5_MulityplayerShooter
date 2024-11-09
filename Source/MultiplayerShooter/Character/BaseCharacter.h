@@ -205,6 +205,9 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	class UBuffComponent* BuffComponent;
 
+	UPROPERTY(VisibleAnywhere)
+	class ULagCompensationComponent* LagCompensationComponent;
+
 	UFUNCTION(Server, Reliable)
 	void ServerEquipButtonPressed();
 

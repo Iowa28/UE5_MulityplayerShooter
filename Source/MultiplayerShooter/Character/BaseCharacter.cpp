@@ -16,6 +16,7 @@
 #include "MultiplayerShooter/MultiplayerShooter.h"
 #include "MultiplayerShooter/Components/BuffComponent.h"
 #include "MultiplayerShooter/Components/CombatComponent.h"
+#include "MultiplayerShooter/Components/LagCompensationComponent.h"
 #include "MultiplayerShooter/Controller/BasePlayerController.h"
 #include "MultiplayerShooter/GameMode/ShooterGameMode.h"
 #include "MultiplayerShooter/PlayerState/BasePlayerState.h"
@@ -27,8 +28,8 @@
 ABaseCharacter::ABaseCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
-	// UE_LOG(LogTemp, Warning, TEXT("Test"));
-	// UE_LOG(LogTemp, Warning, TEXT("%f"), Health);
+	// UE_LOG(LogTemp, Warning, TEXT("Sandwich"));
+	// UE_LOG(LogTemp, Warning, TEXT("%f"), Variable);
 
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(GetMesh());
@@ -51,6 +52,8 @@ ABaseCharacter::ABaseCharacter()
 	BuffComponent = CreateDefaultSubobject<UBuffComponent>(TEXT("BuffComponent"));
 	BuffComponent->SetIsReplicated(true);
 
+	LagCompensationComponent = CreateDefaultSubobject<ULagCompensationComponent>(TEXT("LagCompensationComponent"));
+
 	GetCharacterMovement()->NavAgentProps.bCanCrouch = true;
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
 	GetMesh()->SetCollisionObjectType(ECC_SkeletalMesh);
@@ -69,6 +72,7 @@ ABaseCharacter::ABaseCharacter()
 	AttachedGrenade->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	AttachedGrenade->SetupAttachment(GetMesh(), FName("AttachedGrenade"));
 
+#pragma region HitBoxes
 	Head = CreateDefaultSubobject<UBoxComponent>(TEXT("Head"));
 	Head->SetupAttachment(GetMesh(), FName("head"));
 	Head->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -140,6 +144,7 @@ ABaseCharacter::ABaseCharacter()
 	Foot_R = CreateDefaultSubobject<UBoxComponent>(TEXT("Foot_R"));
 	Foot_R->SetupAttachment(GetMesh(), FName("Foot_R"));
 	Foot_R->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+#pragma endregion HitBoxes
 }
 
 void ABaseCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -245,6 +250,14 @@ void ABaseCharacter::PostInitializeComponents()
 		BuffComponent->Character = this;
 		BuffComponent->SetInitialSpeed(GetCharacterMovement()->MaxWalkSpeed, GetCharacterMovement()->MaxWalkSpeedCrouched);
 		BuffComponent->SetInitialJumpVelocity(GetCharacterMovement()->JumpZVelocity);
+	}
+	if (LagCompensationComponent)
+	{
+		LagCompensationComponent->Character = this;
+		if (Controller)
+		{
+			LagCompensationComponent->Controller = Cast<ABasePlayerController>(Controller);
+		}
 	}
 }
 
