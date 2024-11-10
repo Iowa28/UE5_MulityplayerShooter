@@ -45,8 +45,12 @@ public:
 
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
+	void ShowFramePackage(const FFramePackage& Package, FColor Color);
+
 protected:
 	virtual void BeginPlay() override;
+
+	void SaveFramePackage(FFramePackage& Package);
 
 private:
 	UPROPERTY()

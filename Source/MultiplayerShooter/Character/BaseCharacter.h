@@ -57,6 +57,9 @@ public:
 
 	void SpawnDefaultWeapon();
 
+	UPROPERTY()
+	TMap<FName, class UBoxComponent*> HitCollisionBoxes;
+
 protected:
 	virtual void BeginPlay() override;
 	
@@ -95,7 +98,7 @@ protected:
 #pragma region HitBoxes
 	
 	UPROPERTY(EditDefaultsOnly)
-	class UBoxComponent* Head;
+	UBoxComponent* Head;
 
 	UPROPERTY(EditDefaultsOnly)
 	UBoxComponent* Pelvis;
