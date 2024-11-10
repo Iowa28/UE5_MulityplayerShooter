@@ -13,15 +13,36 @@ ULagCompensationComponent::ULagCompensationComponent()
 void ULagCompensationComponent::BeginPlay()
 {
 	Super::BeginPlay();
-
-	FFramePackage Package;
-	SaveFramePackage(Package);
-	ShowFramePackage(Package, FColor::Emerald);
 }
 
 void ULagCompensationComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	UpdateFrameHistory();
+}
+
+void ULagCompensationComponent::UpdateFrameHistory()
+{
+	if (FrameHistory.Num() <= 1)
+	{
+		FFramePackage ThisFrame;
+		SaveFramePackage(ThisFrame);
+		FrameHistory.AddHead(ThisFrame);
+		return;
+	}
+
+	float HistoryLength = FrameHistory.GetHead()->GetValue().Time - FrameHistory.GetTail()->GetValue().Time;
+	while (HistoryLength > MaxRecordTime)
+	{
+		FrameHistory.RemoveNode(FrameHistory.GetTail());
+		HistoryLength = FrameHistory.GetHead()->GetValue().Time - FrameHistory.GetTail()->GetValue().Time;
+	}
+	
+	FFramePackage ThisFrame;
+	SaveFramePackage(ThisFrame);
+	FrameHistory.AddHead(ThisFrame);
+	ShowFramePackage(ThisFrame, FColor::Magenta);
 }
 
 void ULagCompensationComponent::ShowFramePackage(const FFramePackage& Package, FColor Color)
@@ -34,7 +55,8 @@ void ULagCompensationComponent::ShowFramePackage(const FFramePackage& Package, F
 			BoxInfo.Value.BoxExtent,
 			BoxInfo.Value.Rotation.Quaternion(),
 			Color,
-			true
+			false,
+			4
 		);
 	}
 }

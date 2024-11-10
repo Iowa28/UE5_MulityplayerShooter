@@ -58,4 +58,11 @@ private:
 
 	UPROPERTY()
 	class ABasePlayerController* Controller;
+
+	UPROPERTY(EditDefaultsOnly)
+	float MaxRecordTime = 4.f;
+	
+	TDoubleLinkedList<FFramePackage> FrameHistory;
+
+	void UpdateFrameHistory();
 };
