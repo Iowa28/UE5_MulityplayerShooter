@@ -3,7 +3,10 @@
 
 #include "LagCompensationComponent.h"
 #include "Components/BoxComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "MultiplayerShooter/Character/BaseCharacter.h"
+#include "MultiplayerShooter/Controller/BasePlayerController.h"
+#include "MultiplayerShooter/Weapon/Weapon.h"
 
 ULagCompensationComponent::ULagCompensationComponent()
 {
@@ -19,11 +22,13 @@ void ULagCompensationComponent::TickComponent(float DeltaTime, ELevelTick TickTy
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	UpdateFrameHistory();
+	SaveFramePackage();
 }
 
-void ULagCompensationComponent::UpdateFrameHistory()
+void ULagCompensationComponent::SaveFramePackage()
 {
+	if (!Character || !Character->HasAuthority()) { return; }
+	
 	if (FrameHistory.Num() <= 1)
 	{
 		FFramePackage ThisFrame;
@@ -42,7 +47,7 @@ void ULagCompensationComponent::UpdateFrameHistory()
 	FFramePackage ThisFrame;
 	SaveFramePackage(ThisFrame);
 	FrameHistory.AddHead(ThisFrame);
-	ShowFramePackage(ThisFrame, FColor::Magenta);
+	// ShowFramePackage(ThisFrame, FColor::Magenta);
 }
 
 void ULagCompensationComponent::ShowFramePackage(const FFramePackage& Package, FColor Color)
@@ -77,8 +82,31 @@ void ULagCompensationComponent::SaveFramePackage(FFramePackage& Package)
 	}
 }
 
-FServerSideRewindResult ULagCompensationComponent::ServerSideRewind(ABaseCharacter* HitCharacter, const FVector_NetQuantize& TraceStart,
-	const FVector_NetQuantize& HitLocation, float HitTime)
+void ULagCompensationComponent::ServerScoreRequest_Implementation(ABaseCharacter* HitCharacter,
+	const FVector_NetQuantize& TraceStart, const FVector_NetQuantize& HitLocation, float HitTime, AWeapon* DamageCauser)
+{
+	if (!Character) { return; }
+	// if (!Controller && Character->Controller)
+	// {
+	// 	Controller = Cast<ABasePlayerController>(Controller);
+	// }
+	
+	const FServerSideRewindResult Confirm = ServerSideRewind(HitCharacter, TraceStart, HitLocation, HitTime);
+
+	if (HitCharacter && DamageCauser && Character && Confirm.bHitConfirmed)
+	{
+		UGameplayStatics::ApplyDamage(
+			HitCharacter,
+			DamageCauser->GetDamage(),
+			Character->Controller,
+			DamageCauser,
+			UDamageType::StaticClass()
+		);
+	}
+}
+
+FServerSideRewindResult ULagCompensationComponent::ServerSideRewind(ABaseCharacter* HitCharacter,
+	const FVector_NetQuantize& TraceStart, const FVector_NetQuantize& HitLocation, float HitTime)
 {
 	if (!HitCharacter || !HitCharacter->GetLagCompensationComponent()) { return FServerSideRewindResult(); }
 

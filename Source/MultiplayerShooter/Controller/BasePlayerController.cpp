@@ -318,7 +318,8 @@ void ABasePlayerController::ServerRequestServerTime_Implementation(float TimeOfC
 void ABasePlayerController::ClientReportServerTime_Implementation(float TimeOfClientRequest, float TimeServerReceivedClientRequest)
 {
 	const float RoundTripTime = GetWorld()->GetTimeSeconds() - TimeOfClientRequest;
-	const float CurrentServerTime = TimeServerReceivedClientRequest + RoundTripTime / 2;
+	SingleTripTime = RoundTripTime / 2;
+	const float CurrentServerTime = TimeServerReceivedClientRequest + SingleTripTime;
 	ClientServerDelta = CurrentServerTime - GetWorld()->GetTimeSeconds();
 }
 

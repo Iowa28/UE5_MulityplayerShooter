@@ -48,14 +48,14 @@ public:
 
 	void AddAmmo(int32 AmmoToAdd);
 
-	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	UPROPERTY(EditDefaultsOnly)
 	class USoundCue* EquipSound;
 
 	void EnableCustomDepth(bool bEnable);
 
 	bool bDestroyWeapon = false;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	UPROPERTY(EditDefaultsOnly)
 	EFireType FireType;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Scatter")
@@ -97,29 +97,41 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Scatter")
 	float SphereRadius = 75.f;
 
+	UPROPERTY(EditDefaultsOnly)
+	float Damage = 20.f;
+
+	UPROPERTY(EditDefaultsOnly)
+	bool bUseServerSideRewind = false;
+	
+	UPROPERTY()
+	class ABaseCharacter* OwnerCharacter;
+
+	UPROPERTY()
+	class ABasePlayerController* OwnerController;
+
 private:
-	UPROPERTY(VisibleAnywhere, Category = "Weapon")
+	UPROPERTY(EditDefaultsOnly)
 	USkeletalMeshComponent* WeaponMesh;
 
-	UPROPERTY(VisibleAnywhere, Category = "Weapon")
+	UPROPERTY(EditDefaultsOnly)
 	class USphereComponent* AreaSphere;
 
-	UPROPERTY(ReplicatedUsing = OnRep_WeaponState, VisibleAnywhere, Category = "Weapon")
+	UPROPERTY(ReplicatedUsing = OnRep_WeaponState, VisibleAnywhere)
 	EWeaponState WeaponState;
 
 	UFUNCTION()
 	void OnRep_WeaponState();
 
-	UPROPERTY(VisibleAnywhere, Category = "Weapon")
+	UPROPERTY(EditDefaultsOnly)
 	class UWidgetComponent* PickupWidget;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	UPROPERTY(EditDefaultsOnly)
 	UAnimationAsset* FireAnimation;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<class ACasing> CasingClass;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	UPROPERTY(EditDefaultsOnly)
 	int32 Ammo;
 
 	// The number of unprocessed server requests for Ammo
@@ -133,43 +145,37 @@ private:
 
 	void SpendRound();
 
-	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	UPROPERTY(EditDefaultsOnly)
 	int32 MagCapacity;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	UPROPERTY(EditDefaultsOnly)
 	UTexture2D* CrosshairCenter;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	UPROPERTY(EditDefaultsOnly)
 	UTexture2D* CrosshairLeft;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	UPROPERTY(EditDefaultsOnly)
 	UTexture2D* CrosshairRight;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	UPROPERTY(EditDefaultsOnly)
 	UTexture2D* CrosshairTop;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	UPROPERTY(EditDefaultsOnly)
 	UTexture2D* CrosshairBottom;
 
-	UPROPERTY(EditAnywhere, Category = "Weapon")
+	UPROPERTY(EditDefaultsOnly)
 	float ZoomedFOV = 30.f;
 
-	UPROPERTY(EditAnywhere, Category = "Weapon")
+	UPROPERTY(EditDefaultsOnly)
 	float ZoomInterpSpeed = 20.f;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	UPROPERTY(EditDefaultsOnly)
 	float FireDelay = .15f;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	UPROPERTY(EditDefaultsOnly)
 	bool bAutomatic = true;
 
-	UPROPERTY()
-	class ABaseCharacter* OwnerCharacter;
-
-	UPROPERTY()
-	class ABasePlayerController* OwnerController;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	UPROPERTY(EditDefaultsOnly)
 	EWeaponType WeaponType;
 
 public:
@@ -197,4 +203,5 @@ public:
 
 	FORCEINLINE int32 GetAmmo() const { return Ammo; }
 	FORCEINLINE int32 GetMagCapacity() const { return MagCapacity; }
+	FORCEINLINE float GetDamage() const { return Damage; }
 };

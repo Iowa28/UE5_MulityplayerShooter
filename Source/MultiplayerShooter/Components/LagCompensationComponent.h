@@ -58,7 +58,11 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	void ShowFramePackage(const FFramePackage& Package, FColor Color);
+	
 	FServerSideRewindResult ServerSideRewind(ABaseCharacter* HitCharacter, const FVector_NetQuantize& TraceStart, const FVector_NetQuantize& HitLocation, float HitTime);
+
+	UFUNCTION(Server, Reliable)
+	void ServerScoreRequest(ABaseCharacter* HitCharacter, const FVector_NetQuantize& TraceStart, const FVector_NetQuantize& HitLocation, float HitTime, class AWeapon* DamageCauser);
 
 protected:
 	virtual void BeginPlay() override;
@@ -68,6 +72,7 @@ protected:
 	FFramePackage InterpBetweenFrames(const FFramePackage& OlderFrame, const FFramePackage YoungerFrame, float HitTime);
 	FServerSideRewindResult ConfirmHit(const FFramePackage& Package, ABaseCharacter* HitCharacter, const FVector_NetQuantize& TraceStart, const FVector_NetQuantize& HitLocation);
 
+	void SaveFramePackage();
 	void CacheBoxPosition(ABaseCharacter* HitCharacter, FFramePackage& OutFramePackage);
 	void MoveBoxes(ABaseCharacter* HitCharacter, const FFramePackage& Package);
 	void ResetHitBoxes(ABaseCharacter* HitCharacter, const FFramePackage& Package);
@@ -84,6 +89,4 @@ private:
 	float MaxRecordTime = 4.f;
 	
 	TDoubleLinkedList<FFramePackage> FrameHistory;
-
-	void UpdateFrameHistory();
 };

@@ -16,9 +16,6 @@ public:
 
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = "HitScan")
-	float Damage = 20.f;
-	
-	UPROPERTY(EditDefaultsOnly, Category = "HitScan")
 	UParticleSystem* ImpactParticles;
 
 	UPROPERTY(EditDefaultsOnly, Category = "HitScan")
