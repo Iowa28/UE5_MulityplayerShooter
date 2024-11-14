@@ -31,6 +31,9 @@ struct FFramePackage
 
 	UPROPERTY()
 	TMap<FName, FBoxInformation> HitBoxInfo;
+
+	UPROPERTY()
+	class ABaseCharacter* Character;
 };
 
 USTRUCT(BlueprintType)
@@ -43,6 +46,18 @@ struct FServerSideRewindResult
 
 	UPROPERTY()
 	bool bHeadshot;
+};
+
+USTRUCT(BlueprintType)
+struct FShotgunServerSideRewindResult
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	TMap<ABaseCharacter*, uint32> HeadShots;
+
+	UPROPERTY()
+	TMap<ABaseCharacter*, uint32> BodyShots;
 };
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -72,11 +87,15 @@ protected:
 	FFramePackage InterpBetweenFrames(const FFramePackage& OlderFrame, const FFramePackage YoungerFrame, float HitTime);
 	FServerSideRewindResult ConfirmHit(const FFramePackage& Package, ABaseCharacter* HitCharacter, const FVector_NetQuantize& TraceStart, const FVector_NetQuantize& HitLocation);
 
-	void SaveFramePackage();
+	void UpdateFrameHistory();
 	void CacheBoxPosition(ABaseCharacter* HitCharacter, FFramePackage& OutFramePackage);
 	void MoveBoxes(ABaseCharacter* HitCharacter, const FFramePackage& Package);
 	void ResetHitBoxes(ABaseCharacter* HitCharacter, const FFramePackage& Package);
 	void EnableCharacterMeshCollision(ABaseCharacter* HitCharacter, ECollisionEnabled::Type CollisionEnabled);
+	FFramePackage GetFrameToCheck(ABaseCharacter* HitCharacter, float HitTime);
+
+	FShotgunServerSideRewindResult ShotgunServerSideRewind(const TArray<ABaseCharacter*>& HitCharacters, const FVector_NetQuantize& TraceStart, const TArray<FVector_NetQuantize>& HitLocations, float HitTime);
+	FShotgunServerSideRewindResult ShotgunConfirmHit(const TArray<FFramePackage>& FramePackages, const FVector_NetQuantize& TraceStart, const TArray<FVector_NetQuantize>& HitLocations);
 
 private:
 	UPROPERTY()
