@@ -43,9 +43,8 @@ void AHitScanWeapon::Fire(const FVector& HitTarget)
 				{
 					OwnerCharacter = OwnerCharacter ? OwnerCharacter : Cast<ABaseCharacter>(OwnerPawn);
 					OwnerController = OwnerController ? OwnerController : Cast<ABasePlayerController>(InstigatorController);
-					if (OwnerCharacter && OwnerController && OwnerCharacter->GetLagCompensationComponent())
+					if (OwnerCharacter && OwnerController && OwnerCharacter->GetLagCompensationComponent() && OwnerCharacter->IsLocallyControlled())
 					{
-						GEngine->AddOnScreenDebugMessage(-1,15.f,FColor::Red, TEXT("bUseServerSideRewind"));
 						OwnerCharacter->GetLagCompensationComponent()->ServerScoreRequest(
 							Character,
 							Start,
