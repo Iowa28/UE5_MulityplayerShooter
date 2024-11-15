@@ -14,7 +14,13 @@ class MULTIPLAYERSHOOTER_API AProjectileBullet : public AProjectile
 public:
 	AProjectileBullet();
 
+#if WITH_EDITOR
+	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
+#endif
+
 protected:
+	virtual void BeginPlay() override;
+
 	virtual void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp,
 		FVector NormalImpulse, const FHitResult& Hit) override;
 };

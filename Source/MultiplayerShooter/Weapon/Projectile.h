@@ -15,8 +15,14 @@ public:
 	AProjectile();
 	
 	virtual void Tick(float DeltaTime) override;
-
 	virtual void Destroyed() override;
+
+	bool bUseServerSideRewind = false;
+	FVector_NetQuantize TraceStart;
+	FVector_NetQuantize100 InitialVelocity;
+
+	UPROPERTY(EditDefaultsOnly)
+	float InitialSpeed = 15000.f;
 
 protected:
 	UPROPERTY(EditDefaultsOnly)
