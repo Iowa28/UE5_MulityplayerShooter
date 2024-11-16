@@ -11,9 +11,14 @@ class MULTIPLAYERSHOOTER_API AProjectileWeapon : public AWeapon
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
-	TSubclassOf<class AProjectile> ProjectileClass;
-
 public:
 	virtual void Fire(const FVector& HitTarget) override;
+
+private:
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	TSubclassOf<class AProjectile> ProjectileClass;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	TSubclassOf<AProjectile> ServerSideRewindProjectileClass;
+	
 };

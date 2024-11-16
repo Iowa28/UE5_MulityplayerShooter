@@ -16,6 +16,8 @@ public:
 	
 	virtual void Tick(float DeltaTime) override;
 	virtual void Destroyed() override;
+	
+	float Damage = 20.f;
 
 	bool bUseServerSideRewind = false;
 	FVector_NetQuantize TraceStart;
@@ -25,9 +27,6 @@ public:
 	float InitialSpeed = 15000.f;
 
 protected:
-	UPROPERTY(EditDefaultsOnly)
-	float Damage = 20.f;
-	
 	UPROPERTY(EditDefaultsOnly)
 	UParticleSystem* ImpactParticles;
 
