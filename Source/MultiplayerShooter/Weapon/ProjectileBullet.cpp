@@ -2,9 +2,11 @@
 
 
 #include "ProjectileBullet.h"
-#include "GameFramework/Character.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "MultiplayerShooter/Character/BaseCharacter.h"
+#include "MultiplayerShooter/Components/LagCompensationComponent.h"
+#include "MultiplayerShooter/Controller/BasePlayerController.h"
 
 AProjectileBullet::AProjectileBullet()
 {
@@ -35,6 +37,7 @@ void AProjectileBullet::BeginPlay()
 {
 	Super::BeginPlay();
 
+	/*
 	FPredictProjectilePathParams PathParams;
 	PathParams.bTraceWithChannel = true;
 	PathParams.bTraceWithCollision = true;
@@ -47,20 +50,37 @@ void AProjectileBullet::BeginPlay()
 	PathParams.StartLocation = GetActorLocation();
 	PathParams.TraceChannel = ECC_Visibility;
 	PathParams.ActorsToIgnore.Add(this);
-
+	
 	FPredictProjectilePathResult PathResult;
 	
-	UGameplayStatics::PredictProjectilePath(GetWorld(), PathParams, PathResult);
+	UGameplayStatics::PredictProjectilePath(GetWorld(), PathParams, PathResult); */
 }
 
 void AProjectileBullet::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp,
 	FVector NormalImpulse, const FHitResult& Hit)
 {
-	if (const ACharacter* OwnerCharacter = Cast<ACharacter>(GetOwner()))
+	const ABaseCharacter* OwnerCharacter = Cast<ABaseCharacter>(GetOwner());
+	if (OwnerCharacter && OwnerCharacter->GetController())
 	{
-		if (AController* OwnerController = OwnerCharacter->GetController())
+		if (ABasePlayerController* OwnerController = Cast<ABasePlayerController>(OwnerCharacter->GetController()))
 		{
-			UGameplayStatics::ApplyDamage(OtherActor, Damage, OwnerController, this, UDamageType::StaticClass());
+			if (OwnerCharacter->HasAuthority() && !bUseServerSideRewind)
+			{
+				UGameplayStatics::ApplyDamage(OtherActor, Damage, OwnerController, this, UDamageType::StaticClass());
+				Super::OnHit(HitComp, OtherActor, OtherComp, NormalImpulse, Hit);
+				return;
+			}
+			
+			ABaseCharacter* HitCharacter = Cast<ABaseCharacter>(OtherActor);
+			if (bUseServerSideRewind && OwnerCharacter->GetLagCompensationComponent() && OwnerCharacter->IsLocallyControlled() && HitCharacter)
+			{
+				OwnerCharacter->GetLagCompensationComponent()->ProjectileServerScoreRequest(
+					HitCharacter,
+					TraceStart,
+					InitialVelocity,
+					OwnerController->GetServerTime() - OwnerController->SingleTripTime
+				);
+			}
 		}
 	}
 	

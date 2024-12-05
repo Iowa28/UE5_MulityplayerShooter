@@ -100,7 +100,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly)
 	float Damage = 20.f;
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditAnywhere)
 	bool bUseServerSideRewind = false;
 	
 	UPROPERTY()

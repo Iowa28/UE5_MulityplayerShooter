@@ -27,9 +27,9 @@ void AHitScanWeapon::Fire(const FVector& HitTarget)
 		if (FireHit.bBlockingHit)
 		{
 			ABaseCharacter* Character = Cast<ABaseCharacter>(FireHit.GetActor());
-			if (Character && InstigatorController)
+			if (Character && InstigatorController && OwnerPawn->IsLocallyControlled())
 			{
-				if (HasAuthority() && !bUseServerSideRewind)
+				if (HasAuthority())
 				{
 					UGameplayStatics::ApplyDamage(
 						Character,

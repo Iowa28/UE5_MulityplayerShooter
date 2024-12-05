@@ -17,6 +17,7 @@ void AShotgun::ShotgunFire(const TArray<FVector_NetQuantize>& HitTargets)
 	APawn* OwnerPawn = Cast<APawn>(GetOwner());
 	if (!OwnerPawn) { return; }
 	AController* InstigatorController = OwnerPawn->GetController();
+	if (!InstigatorController) { return; }
 
 	const USkeletalMeshSocket* MuzzleFlashSocket = GetWeaponMesh()->GetSocketByName("MuzzleFlash");
 	if (!MuzzleFlashSocket) { return; }
@@ -69,7 +70,7 @@ void AShotgun::ShotgunFire(const TArray<FVector_NetQuantize>& HitTargets)
 	for (TTuple<ABaseCharacter*, uint32> HitPair : HitMap)
 	{
 		if (!HitPair.Key || !InstigatorController) { return; }
-		if (HasAuthority() && !bUseServerSideRewind)
+		if (HasAuthority() && OwnerPawn->IsLocallyControlled())
 		{
 			UGameplayStatics::ApplyDamage(
 				HitPair.Key,
@@ -82,11 +83,11 @@ void AShotgun::ShotgunFire(const TArray<FVector_NetQuantize>& HitTargets)
 		HitCharacters.Add(HitPair.Key);
 	}
 
-	if (!HasAuthority() && bUseServerSideRewind)
+	if (!HasAuthority() && bUseServerSideRewind && OwnerPawn->IsLocallyControlled())
 	{
 		OwnerCharacter = OwnerCharacter ? OwnerCharacter : Cast<ABaseCharacter>(OwnerPawn);
 		OwnerController = OwnerController ? OwnerController : Cast<ABasePlayerController>(InstigatorController);
-		if (OwnerCharacter && OwnerController && OwnerCharacter->GetLagCompensationComponent() && OwnerCharacter->IsLocallyControlled())
+		if (OwnerCharacter && OwnerController && OwnerCharacter->GetLagCompensationComponent())
 		{
 			OwnerCharacter->GetLagCompensationComponent()->ShotgunServerScoreRequest(
 				HitCharacters,
