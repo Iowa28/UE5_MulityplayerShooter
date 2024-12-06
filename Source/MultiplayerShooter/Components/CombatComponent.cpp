@@ -111,6 +111,12 @@ void UCombatComponent::OnRep_CombatState()
 			ShowAttachedGrenade(true);
 		}
 		break;
+	case ECombatState::ECS_SwappingWeapons:
+		if (Character && !Character->IsLocallyControlled())
+		{
+			Character->PlaySwapWeaponMontage();
+		}
+		break;
 	}
 }
 
@@ -296,24 +302,6 @@ void UCombatComponent::OnRep_SecondaryWeapon()
 	PlayEquippedWeaponSound(SecondaryWeapon);
 }
 
-void UCombatComponent::SwapWeapons()
-{
-	if (CombatState != ECombatState::ECS_Unoccupied) { return; }
-	
-	AWeapon* TempWeapon = EquippedWeapon;
-	EquippedWeapon = SecondaryWeapon;
-	SecondaryWeapon = TempWeapon;
-
-	EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
-	AttachWeaponToRightHand(EquippedWeapon);
-	EquippedWeapon->SetHUDAmmo();
-	UpdateCarriedAmmo();
-	PlayEquippedWeaponSound(EquippedWeapon);
-	
-	SecondaryWeapon->SetWeaponState(EWeaponState::EWS_EquippedSecondary);
-	AttachWeaponToBackpack(SecondaryWeapon);
-}
-
 void UCombatComponent::DropEquippedWeapon()
 {
 	if (EquippedWeapon)
@@ -395,6 +383,53 @@ void UCombatComponent::PickupAmmo(EWeaponType WeaponType, int32 AmmoAmount)
 
 #pragma endregion Equipping
 
+#pragma region Swap
+
+void UCombatComponent::SwapWeapons()
+{
+	if (CombatState != ECombatState::ECS_Unoccupied || !Character) { return; }
+
+	Character->PlaySwapWeaponMontage();
+	Character->bFinishedSwapping = false;
+	CombatState = ECombatState::ECS_SwappingWeapons;
+	if (SecondaryWeapon)
+	{
+		SecondaryWeapon->EnableCustomDepth(false);
+	}
+}
+
+
+void UCombatComponent::FinishSwap()
+{
+	if (Character && Character->HasAuthority())
+	{
+		CombatState = ECombatState::ECS_Unoccupied;
+		Character->bFinishedSwapping = true;
+	}
+	if (SecondaryWeapon)
+	{
+		SecondaryWeapon->EnableCustomDepth(true);
+	}
+}
+
+void UCombatComponent::FinishSwapAttachWeapons()
+{
+	AWeapon* TempWeapon = EquippedWeapon;
+	EquippedWeapon = SecondaryWeapon;
+	SecondaryWeapon = TempWeapon;
+	
+	EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
+	AttachWeaponToRightHand(EquippedWeapon);
+	EquippedWeapon->SetHUDAmmo();
+	UpdateCarriedAmmo();
+	PlayEquippedWeaponSound(EquippedWeapon);
+	
+	SecondaryWeapon->SetWeaponState(EWeaponState::EWS_EquippedSecondary);
+	AttachWeaponToBackpack(SecondaryWeapon);
+}
+
+#pragma endregion Swap
+
 #pragma region Fire
 void UCombatComponent::FireButtonPressed(bool bPressed)
 {
@@ -467,15 +502,15 @@ void UCombatComponent::FireShotgun()
 
 bool UCombatComponent::CanFire() const
 {
-	if (!EquippedWeapon || EquippedWeapon->IsEmpty() || !bCanFire || bLocallyReloading)
+	if (!EquippedWeapon)
 	{
 		return false;
 	}
-	if (CombatState == ECombatState::ECS_Reloading && EquippedWeapon->GetWeaponType() == EWeaponType::EWT_Shotgun)
+	if (!EquippedWeapon->IsEmpty() && bCanFire && CombatState == ECombatState::ECS_Reloading && EquippedWeapon->GetWeaponType() == EWeaponType::EWT_Shotgun)
 	{
 		return true;
 	}
-	return CombatState == ECombatState::ECS_Unoccupied;
+	return !bLocallyReloading && !EquippedWeapon->IsEmpty() && bCanFire && CombatState == ECombatState::ECS_Unoccupied;
 }
 
 void UCombatComponent::OnRep_CarriedAmmo()

@@ -83,10 +83,14 @@ void UCharacterAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	}
 
 	bUseFABRIK = Character->GetCombatState() == ECombatState::ECS_Unoccupied;
-	if (Character->IsLocallyControlled() && Character->GetCombatState() != ECombatState::ECS_ThrowingGrenade)
+	const bool bFABRIKOverride = Character->IsLocallyControlled()
+		&& Character->GetCombatState() != ECombatState::ECS_ThrowingGrenade
+		&& Character->bFinishedSwapping;
+	if (bFABRIKOverride)
 	{
 		bUseFABRIK = !Character->IsLocallyReloading();
 	}
+	
 	bUseAimOffsets = Character->GetCombatState() == ECombatState::ECS_Unoccupied && !Character->bDisableGameplay;
 	bTransformRightHand = Character->GetCombatState() == ECombatState::ECS_Unoccupied && !Character->bDisableGameplay;
 }

@@ -4,7 +4,6 @@
 #include "HitScanWeapon.h"
 #include "Engine/SkeletalMeshSocket.h"
 #include "Kismet/GameplayStatics.h"
-#include "Kismet/KismetMathLibrary.h"
 #include "MultiplayerShooter/Character/BaseCharacter.h"
 #include "MultiplayerShooter/Components/LagCompensationComponent.h"
 #include "MultiplayerShooter/Controller/BasePlayerController.h"
@@ -27,10 +26,12 @@ void AHitScanWeapon::Fire(const FVector& HitTarget)
 		if (FireHit.bBlockingHit)
 		{
 			ABaseCharacter* Character = Cast<ABaseCharacter>(FireHit.GetActor());
-			if (Character && InstigatorController && OwnerPawn->IsLocallyControlled())
+			if (Character && InstigatorController)
 			{
-				if (HasAuthority())
+				bool bCauseAuthDamage = !bUseServerSideRewind || OwnerPawn->IsLocallyControlled();
+				if (HasAuthority() && bCauseAuthDamage)
 				{
+					// UE_LOG(LogTemp, Warning, TEXT("Damaging %s with %f, owner: %s"), *Character->GetName(), Damage, *OwnerPawn->GetName());
 					UGameplayStatics::ApplyDamage(
 						Character,
 						Damage,
@@ -39,7 +40,7 @@ void AHitScanWeapon::Fire(const FVector& HitTarget)
 						UDamageType::StaticClass()
 					);
 				}
-				else if (!HasAuthority() && bUseServerSideRewind)
+				else
 				{
 					OwnerCharacter = OwnerCharacter ? OwnerCharacter : Cast<ABaseCharacter>(OwnerPawn);
 					OwnerController = OwnerController ? OwnerController : Cast<ABasePlayerController>(InstigatorController);

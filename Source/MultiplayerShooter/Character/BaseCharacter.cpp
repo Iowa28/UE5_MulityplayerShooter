@@ -816,7 +816,20 @@ void ABaseCharacter::EquipButtonPressed()
 {
 	if (CombatComponent && !bDisableGameplay)
 	{
-		ServerEquipButtonPressed();
+		if (CombatComponent->CombatState == ECombatState::ECS_Unoccupied)
+		{
+			ServerEquipButtonPressed();
+		}
+		const bool bSwap = CombatComponent->ShouldSwapWeapons()
+			&& !HasAuthority()
+			&& CombatComponent->CombatState == ECombatState::ECS_Unoccupied
+			&& !OverlappingWeapon;
+		if (bSwap)
+		{
+			PlaySwapWeaponMontage();
+			CombatComponent->CombatState = ECombatState::ECS_SwappingWeapons;
+			bFinishedSwapping = false;
+		}
 	}
 }
 
@@ -831,6 +844,15 @@ void ABaseCharacter::ServerEquipButtonPressed_Implementation()
 	else if (CombatComponent->ShouldSwapWeapons())
 	{
 		CombatComponent->SwapWeapons();
+	}
+}
+
+void ABaseCharacter::PlaySwapWeaponMontage()
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && SwapWeaponsMontage)
+	{
+		AnimInstance->Montage_Play(SwapWeaponsMontage);
 	}
 }
 #pragma endregion Equipment
