@@ -450,9 +450,11 @@ void ABasePlayerController::HandleCooldown()
 		}
 	}
 }
+
 #pragma endregion Match
 
 #pragma region Ping
+
 void ABasePlayerController::CheckPing(float DeltaSeconds)
 {
 	HighPingRunningTime += DeltaSeconds;
@@ -462,11 +464,19 @@ void ABasePlayerController::CheckPing(float DeltaSeconds)
 		if (PlayerState)
 		{
 			const float Ping = PlayerState->GetCompressedPing() * 4;
-			// GEngine->AddOnScreenDebugMessage(-1,15.f,FColor::Yellow, FString::Printf(TEXT("Ping: %f"), Ping));
+			if (GetPawn() && GetPawn()->IsLocallyControlled())
+			{
+				GEngine->AddOnScreenDebugMessage(-1,15.f,FColor::Red, FString::Printf(TEXT("Ping: %f"), Ping));
+			}
 			if (Ping > HighPingThreshold)
 			{
 				StartHighPingWarning();
 				PingAnimationRunningTime = 0.f;
+				ServerReportPingStatus(true);
+			}
+			else
+			{
+				ServerReportPingStatus(false);
 			}
 		}
 		HighPingRunningTime = 0.f;
@@ -480,6 +490,11 @@ void ABasePlayerController::CheckPing(float DeltaSeconds)
 			StopHighPingWarning();
 		}
 	}
+}
+
+void ABasePlayerController::ServerReportPingStatus_Implementation(bool bHighPing)
+{
+	HighPingDelegate.Broadcast(bHighPing);
 }
 
 void ABasePlayerController::StartHighPingWarning()

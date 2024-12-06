@@ -100,7 +100,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly)
 	float Damage = 20.f;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Replicated)
 	bool bUseServerSideRewind = false;
 	
 	UPROPERTY()
@@ -108,6 +108,9 @@ protected:
 
 	UPROPERTY()
 	class ABasePlayerController* OwnerController;
+
+	UFUNCTION()
+	void OnHighPing(bool bHighPing);
 
 private:
 	UPROPERTY(EditDefaultsOnly)
