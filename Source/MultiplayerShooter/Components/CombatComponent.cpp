@@ -473,7 +473,7 @@ void UCombatComponent::FireProjectileWeapon()
 	{
 		LocalFire(HitTarget);
 	}
-	ServerFire(HitTarget);
+	ServerFire(HitTarget, EquippedWeapon->GetFireDelay());
 }
 
 void UCombatComponent::FireHitScanWeapon()
@@ -483,7 +483,7 @@ void UCombatComponent::FireHitScanWeapon()
 	{
 		LocalFire(HitTarget);
 	}
-	ServerFire(HitTarget);
+	ServerFire(HitTarget, EquippedWeapon->GetFireDelay());
 }
 
 void UCombatComponent::FireShotgun()
@@ -497,7 +497,7 @@ void UCombatComponent::FireShotgun()
 	{
 		LocalShotgunFire(HitTargets);
 	}
-	ServerShotgunFire(HitTargets);
+	ServerShotgunFire(HitTargets, EquippedWeapon->GetFireDelay());
 }
 
 bool UCombatComponent::CanFire() const
@@ -572,7 +572,7 @@ void UCombatComponent::LocalShotgunFire(const TArray<FVector_NetQuantize>& Trace
 	}
 }
 
-void UCombatComponent::ServerFire_Implementation(const FVector_NetQuantize& TraceHitTarget)
+void UCombatComponent::ServerFire_Implementation(const FVector_NetQuantize& TraceHitTarget, float FireDelay)
 {
 	MulticastFire(TraceHitTarget);
 }
@@ -583,7 +583,7 @@ void UCombatComponent::MulticastFire_Implementation(const FVector_NetQuantize& T
 	LocalFire(TraceHitTarget);
 }
 
-void UCombatComponent::ServerShotgunFire_Implementation(const TArray<FVector_NetQuantize>& TraceHitTargets)
+void UCombatComponent::ServerShotgunFire_Implementation(const TArray<FVector_NetQuantize>& TraceHitTargets, float FireDelay)
 {
 	MulticastShotgunFire(TraceHitTargets);
 }
@@ -592,6 +592,20 @@ void UCombatComponent::MulticastShotgunFire_Implementation(const TArray<FVector_
 {
 	if (!Character || !EquippedWeapon || (Character->IsLocallyControlled() && !Character->HasAuthority())) { return; }
 	LocalShotgunFire(TraceHitTargets);
+}
+
+bool UCombatComponent::ServerFire_Validate(const FVector_NetQuantize& TraceHitTarget, float FireDelay)
+{
+	if (!EquippedWeapon) { return true; }
+
+	return FMath::IsNearlyEqual(EquippedWeapon->GetFireDelay(), FireDelay, .001f);
+}
+
+bool UCombatComponent::ServerShotgunFire_Validate(const TArray<FVector_NetQuantize>& TraceHitTargets, float FireDelay)
+{
+	if (!EquippedWeapon) { return true; }
+
+	return FMath::IsNearlyEqual(EquippedWeapon->GetFireDelay(), FireDelay, .001f);
 }
 #pragma endregion Fire
 
