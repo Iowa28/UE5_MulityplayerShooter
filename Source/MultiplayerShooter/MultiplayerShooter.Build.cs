@@ -8,6 +8,19 @@ public class MultiplayerShooter : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "OnlineSubsystem", "OnlineSubsystemSteam", "Niagara" });
+		PublicDependencyModuleNames.AddRange(new[]
+		{
+			"Core",
+			"CoreUObject",
+			"Engine",
+			"InputCore",
+			"EnhancedInput",
+			"OnlineSubsystem",
+			"OnlineSubsystemSteam",
+			"Niagara",
+			"MultiplayerSessions",
+			"OnlineSubsystem",
+			"OnlineSubsystemSteam"
+		});
 	}
 }

@@ -43,6 +43,8 @@ protected:
 	
 	virtual void OnPossess(APawn* aPawn) override;
 
+	virtual void SetupInputComponent() override;
+
 	void SetHUDTime();
 
 	void PollInit();
@@ -72,12 +74,25 @@ protected:
 	void  StartHighPingWarning();
 	void  StopHighPingWarning();
 
+	void ShowReturnToMainMenu();
+
 private:
 	UPROPERTY()
 	class ABaseHUD* BaseHUD;
 
 	UPROPERTY()
 	class AShooterGameMode* GameMode;
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<UUserWidget> ReturnToMainMenuWidget;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	class UInputAction* QuitAction;
+
+	UPROPERTY()
+	class UReturnToMainMenu* ReturnToMainMenu;
+
+	bool bReturnToMainMenuOpen = false;
 
 	float LevelStartingTime = 0.f;
 	float MatchTime = 0.f;

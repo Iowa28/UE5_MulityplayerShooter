@@ -244,14 +244,29 @@ void UCombatComponent::OnRep_Aiming()
 
 void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 {
+	GEngine->AddOnScreenDebugMessage(-1,15.f,FColor::Red, TEXT("EquipWeapon"));
+	if (!Character)
+	{
+		GEngine->AddOnScreenDebugMessage(-1,15.f,FColor::Red, TEXT("!Character"));
+	}
+	if (!WeaponToEquip)
+	{
+		GEngine->AddOnScreenDebugMessage(-1,15.f,FColor::Red, TEXT("!WeaponToEquip"));
+	}
+	if (CombatState != ECombatState::ECS_Unoccupied)
+	{
+		GEngine->AddOnScreenDebugMessage(-1,15.f,FColor::Red, TEXT("CombatState != ECombatState::ECS_Unoccupied"));
+	}
 	if (!Character || !WeaponToEquip || CombatState != ECombatState::ECS_Unoccupied) { return; }
 
 	if (EquippedWeapon && !SecondaryWeapon)
 	{
+		GEngine->AddOnScreenDebugMessage(-1,15.f,FColor::Red, TEXT("EquipSecondaryWeapon"));
 		EquipSecondaryWeapon(WeaponToEquip);
 	}
 	else
 	{
+		GEngine->AddOnScreenDebugMessage(-1,15.f,FColor::Red, TEXT("EquipPrimaryWeapon"));
 		EquipPrimaryWeapon(WeaponToEquip);
 	}
 	
@@ -401,9 +416,9 @@ void UCombatComponent::SwapWeapons()
 
 void UCombatComponent::FinishSwap()
 {
-	if (Character && Character->HasAuthority())
+	CombatState = ECombatState::ECS_Unoccupied;
+	if (Character)
 	{
-		CombatState = ECombatState::ECS_Unoccupied;
 		Character->bFinishedSwapping = true;
 	}
 	if (SecondaryWeapon)
@@ -442,6 +457,21 @@ void UCombatComponent::FireButtonPressed(bool bPressed)
 
 void UCombatComponent::Fire()
 {
+	switch (CombatState)
+	{
+	case ECombatState::ECS_Unoccupied:
+		GEngine->AddOnScreenDebugMessage(-1,15.f,FColor::Green, FString::Printf(TEXT("%s in Unoccupied state"), *Character->GetName()));
+		break;
+	case ECombatState::ECS_Reloading:
+		GEngine->AddOnScreenDebugMessage(-1,15.f,FColor::Green, FString::Printf(TEXT("%s in Reloading state"), *Character->GetName()));
+		break;
+	case ECombatState::ECS_SwappingWeapons:
+		GEngine->AddOnScreenDebugMessage(-1,15.f,FColor::Green, FString::Printf(TEXT("%s in Swapping state"), *Character->GetName()));
+		break;
+	case ECombatState::ECS_ThrowingGrenade:
+		GEngine->AddOnScreenDebugMessage(-1,15.f,FColor::Green, FString::Printf(TEXT("%s in ThrowingGrenade state"), *Character->GetName()));
+		break;
+	}
 	if (CanFire())
 	{
 		bCanFire = false;
@@ -463,6 +493,10 @@ void UCombatComponent::Fire()
 			}
 		}
 		StartFireTimer();
+	}
+	else
+	{
+		GEngine->AddOnScreenDebugMessage(-1,15.f,FColor::Red, TEXT("You can't fire now"));
 	}
 }
 
@@ -497,7 +531,7 @@ void UCombatComponent::FireShotgun()
 	{
 		LocalShotgunFire(HitTargets);
 	}
-	ServerShotgunFire(HitTargets, EquippedWeapon->GetFireDelay());
+	ServerShotgunFire(HitTargets, Shotgun->GetFireDelay());
 }
 
 bool UCombatComponent::CanFire() const
@@ -596,16 +630,30 @@ void UCombatComponent::MulticastShotgunFire_Implementation(const TArray<FVector_
 
 bool UCombatComponent::ServerFire_Validate(const FVector_NetQuantize& TraceHitTarget, float FireDelay)
 {
-	if (!EquippedWeapon) { return true; }
+	if (EquippedWeapon)
+	{
+		GEngine->AddOnScreenDebugMessage(-1,15.f,FColor::Yellow, FString::Printf(TEXT("%f %f"),EquippedWeapon->GetFireDelay(), FireDelay));
+	}
+	else
+	{
+		GEngine->AddOnScreenDebugMessage(-1,15.f,FColor::Red, TEXT("No weapon LOL"));
+	}
 
-	return FMath::IsNearlyEqual(EquippedWeapon->GetFireDelay(), FireDelay, .001f);
+	return true;
 }
 
 bool UCombatComponent::ServerShotgunFire_Validate(const TArray<FVector_NetQuantize>& TraceHitTargets, float FireDelay)
 {
-	if (!EquippedWeapon) { return true; }
-
-	return FMath::IsNearlyEqual(EquippedWeapon->GetFireDelay(), FireDelay, .001f);
+	if (EquippedWeapon)
+	{
+		GEngine->AddOnScreenDebugMessage(-1,15.f,FColor::Yellow, FString::Printf(TEXT("%f %f"),EquippedWeapon->GetFireDelay(), FireDelay));
+	}
+	else
+	{
+		GEngine->AddOnScreenDebugMessage(-1,15.f,FColor::Red, TEXT("No weapon LOL"));
+	}
+	
+	return true;
 }
 #pragma endregion Fire
 
@@ -640,11 +688,8 @@ void UCombatComponent::HandleReload()
 void UCombatComponent::FinishReloading()
 {
 	bLocallyReloading = false;
-	if (Character && Character->HasAuthority())
-	{
-		CombatState = ECombatState::ECS_Unoccupied;
-		UpdateAmmoValues();
-	}
+	CombatState = ECombatState::ECS_Unoccupied;
+	UpdateAmmoValues();
 	if (bFireButtonPressed)
 	{
 		Fire();

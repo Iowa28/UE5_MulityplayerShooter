@@ -2,6 +2,7 @@
 
 
 #include "BasePlayerController.h"
+#include "EnhancedInputComponent.h"
 #include "Components/Image.h"
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
@@ -14,6 +15,7 @@
 #include "MultiplayerShooter/HUD/Announcement.h"
 #include "MultiplayerShooter/HUD/BaseHUD.h"
 #include "MultiplayerShooter/HUD/CharacterOverlay.h"
+#include "MultiplayerShooter/HUD/ReturnToMainMenu.h"
 #include "MultiplayerShooter/PlayerState/BasePlayerState.h"
 #include "Net/UnrealNetwork.h"
 
@@ -33,6 +35,18 @@ void ABasePlayerController::OnPossess(APawn* aPawn)
 	{
 		SetHUDHealth(BaseCharacter->GetHealth(), BaseCharacter->GetMaxHealth());
 		SetHUDShield(BaseCharacter->GetShield(), BaseCharacter->GetMaxShield());
+	}
+}
+
+void ABasePlayerController::SetupInputComponent()
+{
+	Super::SetupInputComponent();
+
+	if (!InputComponent) { return; }
+
+	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(InputComponent))
+	{
+		EnhancedInputComponent->BindAction(QuitAction, ETriggerEvent::Started, this, &ThisClass::ShowReturnToMainMenu);
 	}
 }
 
@@ -524,3 +538,22 @@ void ABasePlayerController::StopHighPingWarning()
 	}
 }
 #pragma endregion Ping
+
+void ABasePlayerController::ShowReturnToMainMenu()
+{
+	if (!ReturnToMainMenuWidget) { return; }
+
+	ReturnToMainMenu = ReturnToMainMenu ? ReturnToMainMenu : CreateWidget<UReturnToMainMenu>(this, ReturnToMainMenuWidget);
+	if (ReturnToMainMenu)
+	{
+		bReturnToMainMenuOpen = !bReturnToMainMenuOpen;
+		if (bReturnToMainMenuOpen)
+		{
+			ReturnToMainMenu->MenuSetup();
+		}
+		else
+		{
+			ReturnToMainMenu->MenuTearDown();
+		}
+	}
+}
