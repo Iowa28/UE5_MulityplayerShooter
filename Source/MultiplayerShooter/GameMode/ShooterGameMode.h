@@ -26,6 +26,8 @@ public:
 
 	virtual void RequestRespawn(ACharacter* EliminatedCharacter, AController* EliminatedController);
 
+	void PlayerLeftGame(class ABasePlayerState* PlayerLeaving);
+
 	UPROPERTY(EditDefaultsOnly, Category = "Match Settings")
 	float MatchTime = 120.f;
 

@@ -15,6 +15,8 @@ class UInputMappingContext;
 class UInputAction;
 struct FInputActionValue;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLeftGame);
+
 UCLASS(meta = (PrioritizeCategories ="Ammo Combat Input Elimination"))
 class MULTIPLAYERSHOOTER_API ABaseCharacter : public ACharacter, public ICrosshairInteractInterface
 {
@@ -43,10 +45,10 @@ public:
 	virtual void OnRep_ReplicatedMovement() override;
 
 	UFUNCTION()
-	void Eliminate();
+	void Eliminate(bool bPlayerLeftGame);
 	
 	UFUNCTION(NetMulticast, Reliable)
-	void MulticastEliminate();
+	void MulticastEliminate(bool bPlayerLeftGame);
 	
 	void DropOrDestroyWeapon(AWeapon* Weapon);
 
@@ -65,6 +67,11 @@ public:
 	TMap<FName, class UBoxComponent*> HitCollisionBoxes;
 
 	bool bFinishedSwapping = true;
+
+	FOnLeftGame OnLeftGame;
+
+	UFUNCTION(Server, Reliable)
+	void ServerLeaveGame();
 
 protected:
 	virtual void BeginPlay() override;
@@ -326,6 +333,8 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Elimination")
 	class USoundCue* EliminationSound;
+
+	bool bLeftGame = false;
 #pragma endregion Elimination
 
 	UPROPERTY()

@@ -619,24 +619,19 @@ void ABaseCharacter::PlayEliminationMontage()
 	}
 }
 
-void ABaseCharacter::Eliminate()
+void ABaseCharacter::Eliminate(bool bPlayerLeftGame)
 {
 	if (CombatComponent)
 	{
 		DropOrDestroyWeapon(CombatComponent->EquippedWeapon);
 		DropOrDestroyWeapon(CombatComponent->SecondaryWeapon);
 	}
-	MulticastEliminate();
-	GetWorldTimerManager().SetTimer(
-		EliminationTimer,
-		this,
-		&ThisClass::EliminationTimerFinished,
-		EliminationDelay
-	);
+	MulticastEliminate(bPlayerLeftGame);
 }
 
-void ABaseCharacter::MulticastEliminate_Implementation()
+void ABaseCharacter::MulticastEliminate_Implementation(bool bPlayerLeftGame)
 {
+	bLeftGame = bPlayerLeftGame;	
 	if (bEliminated) { return; }
 
 	if (BasePlayerController)
@@ -688,13 +683,25 @@ void ABaseCharacter::MulticastEliminate_Implementation()
 	{
 		ToggleSniperScopeWidget(false);
 	}
+
+	GetWorldTimerManager().SetTimer(
+		EliminationTimer,
+		this,
+		&ThisClass::EliminationTimerFinished,
+		EliminationDelay
+	);
 }
 
 void ABaseCharacter::EliminationTimerFinished()
 {
-	if (AShooterGameMode* ShooterGameMode = GetWorld()->GetAuthGameMode<AShooterGameMode>())
+	AShooterGameMode* ShooterGameMode = GetWorld()->GetAuthGameMode<AShooterGameMode>();
+	if (ShooterGameMode && !bLeftGame)
 	{
 		ShooterGameMode->RequestRespawn(this, GetController());
+	}
+	if (bLeftGame && IsLocallyControlled())
+	{
+		OnLeftGame.Broadcast();
 	}
 }
 
@@ -727,6 +734,16 @@ void ABaseCharacter::StartDissolve()
 	{
 		DissolveTimeline->AddInterpFloat(DissolveCurve, DissolveTrack);
 		DissolveTimeline->Play();
+	}
+}
+
+void ABaseCharacter::ServerLeaveGame_Implementation()
+{
+	AShooterGameMode* ShooterGameMode = GetWorld()->GetAuthGameMode<AShooterGameMode>();
+	CharacterPlayerState = CharacterPlayerState ? CharacterPlayerState : GetPlayerState<ABasePlayerState>();
+	if (ShooterGameMode && CharacterPlayerState)
+	{
+		ShooterGameMode->PlayerLeftGame(CharacterPlayerState);
 	}
 }
 #pragma endregion Elimination

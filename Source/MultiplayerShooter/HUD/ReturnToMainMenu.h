@@ -32,4 +32,7 @@ private:
 
 	UFUNCTION()
 	void OnDestroySession(bool bWasSuccessful);
+
+	UFUNCTION()
+	void OnPlayerLeftGame();
 };

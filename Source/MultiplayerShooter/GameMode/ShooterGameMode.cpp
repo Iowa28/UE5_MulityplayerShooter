@@ -90,7 +90,7 @@ void AShooterGameMode::PlayerEliminated(ABaseCharacter* EliminatedCharacter, ABa
 	
 	if (EliminatedCharacter)
 	{
-		EliminatedCharacter->Eliminate();
+		EliminatedCharacter->Eliminate(false);
 	}
 }
 
@@ -108,5 +108,21 @@ void AShooterGameMode::RequestRespawn(ACharacter* EliminatedCharacter, AControll
 		UGameplayStatics::GetAllActorsOfClass(this, APlayerStart::StaticClass(), PlayerStarts);
 		const int32 Selection = FMath::RandRange(0, PlayerStarts.Num() - 1);
 		RestartPlayerAtPlayerStart(EliminatedController, PlayerStarts[Selection]);
+	}
+}
+
+void AShooterGameMode::PlayerLeftGame(ABasePlayerState* PlayerLeaving)
+{
+	if (!PlayerLeaving) { return; }
+
+	AShooterGameState* ShooterGameState = GetGameState<AShooterGameState>();
+	if (ShooterGameState && ShooterGameState->TopScoringPlayers.Contains(PlayerLeaving))
+	{
+		ShooterGameState->TopScoringPlayers.Remove(PlayerLeaving);
+	}
+
+	if (ABaseCharacter* CharacterLeaving = Cast<ABaseCharacter>(PlayerLeaving->GetPawn()))
+	{
+		CharacterLeaving->Eliminate(true);
 	}
 }
