@@ -2,7 +2,6 @@
 
 
 #include "ShooterGameState.h"
-
 #include "MultiplayerShooter/PlayerState/BasePlayerState.h"
 #include "Net/UnrealNetwork.h"
 

@@ -31,7 +31,6 @@ void AHitScanWeapon::Fire(const FVector& HitTarget)
 				bool bCauseAuthDamage = !bUseServerSideRewind || OwnerPawn->IsLocallyControlled();
 				if (HasAuthority() && bCauseAuthDamage)
 				{
-					// UE_LOG(LogTemp, Warning, TEXT("Damaging %s with %f, owner: %s"), *Character->GetName(), Damage, *OwnerPawn->GetName());
 					UGameplayStatics::ApplyDamage(
 						Character,
 						Damage,
@@ -98,8 +97,6 @@ void AHitScanWeapon::WeaponTraceHit(const FVector& TraceStart, const FVector& Hi
 	{
 		BeamEnd = OutHit.ImpactPoint;
 	}
-
-	DrawDebugSphere(GetWorld(), BeamEnd, 16, 12, FColor::Orange, true);
 
 	if (BeamParticles)
 	{

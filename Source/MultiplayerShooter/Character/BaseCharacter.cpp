@@ -5,6 +5,8 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
+#include "NiagaraComponent.h"
+#include "NiagaraFunctionLibrary.h"
 #include "Camera/CameraComponent.h"
 #include "Components/BoxComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -19,6 +21,7 @@
 #include "MultiplayerShooter/Components/LagCompensationComponent.h"
 #include "MultiplayerShooter/Controller/BasePlayerController.h"
 #include "MultiplayerShooter/GameMode/ShooterGameMode.h"
+#include "MultiplayerShooter/GameState/ShooterGameState.h"
 #include "MultiplayerShooter/PlayerState/BasePlayerState.h"
 #include "MultiplayerShooter/Weapon/Weapon.h"
 #include "Net/UnrealNetwork.h"
@@ -196,8 +199,6 @@ void ABaseCharacter::BeginPlay()
 	AttachedGrenade->SetVisibility(false);
 	SpawnDefaultWeapon();
 	UpdateHUDAmmo();
-
-	// Head->AttachToComponent(GetMesh(), FAttachmentTransformRules(EAttachmentRule::KeepRelative, true), FName("head"));
 }
 
 void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -246,6 +247,12 @@ void ABaseCharacter::PollInit()
 		{
 			CharacterPlayerState->AddToScore(0.f);
 			CharacterPlayerState->AddToDefeats(0.f);
+
+			const AShooterGameState* ShooterGameState = Cast<AShooterGameState>(UGameplayStatics::GetGameState(this));
+			if (ShooterGameState && ShooterGameState->TopScoringPlayers.Contains(CharacterPlayerState))
+			{
+				MulticastGainedTheLead();
+			}
 		}
 	}
 }
@@ -288,6 +295,36 @@ void ABaseCharacter::Destroyed()
 	if (CombatComponent && CombatComponent->EquippedWeapon && bMatchNotInProgress)
 	{
 		CombatComponent->EquippedWeapon->Destroy();
+	}
+}
+
+void ABaseCharacter::MulticastGainedTheLead_Implementation()
+{
+	if (!CrownSystem) { return; }
+
+	if (!CrownComponent)
+	{
+		CrownComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(
+			CrownSystem,
+			GetCapsuleComponent(),
+			FName(),
+			GetActorLocation() + FVector(0, 0, 110),
+			GetActorRotation(),
+			EAttachLocation::KeepWorldPosition,
+			false
+		);
+	}
+	else
+	{
+		CrownComponent->Activate();
+	}
+}
+
+void ABaseCharacter::MulticastLostTheLead_Implementation()
+{
+	if (CrownComponent)
+	{
+		CrownComponent->DestroyComponent();
 	}
 }
 
@@ -682,6 +719,11 @@ void ABaseCharacter::MulticastEliminate_Implementation(bool bPlayerLeftGame)
 	if (IsLocallyControlled() && CombatComponent && CombatComponent->bAiming && CombatComponent->EquippedWeapon && CombatComponent->EquippedWeapon->GetWeaponType() == EWeaponType::EWT_SniperRifle)
 	{
 		ToggleSniperScopeWidget(false);
+	}
+
+	if (CrownComponent)
+	{
+		CrownComponent->DestroyComponent();
 	}
 
 	GetWorldTimerManager().SetTimer(

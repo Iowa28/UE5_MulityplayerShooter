@@ -47,7 +47,6 @@ void ULagCompensationComponent::UpdateFrameHistory()
 	FFramePackage ThisFrame;
 	SaveFramePackage(ThisFrame);
 	FrameHistory.AddHead(ThisFrame);
-	// ShowFramePackage(ThisFrame, FColor::Magenta);
 }
 
 void ULagCompensationComponent::ShowFramePackage(const FFramePackage& Package, FColor Color)
@@ -278,13 +277,6 @@ FServerSideRewindResult ULagCompensationComponent::ConfirmHit(const FFramePackag
 	);
 	if (ConfirmHitResult.bBlockingHit)
 	{
-		if (ConfirmHitResult.Component.IsValid())
-		{
-			if (UBoxComponent* Box = Cast<UBoxComponent>(ConfirmHitResult.Component))
-			{
-				DrawDebugBox(World, Box->GetComponentLocation(), Box->GetScaledBoxExtent(), Box->GetComponentRotation().Quaternion(), FColor::Red, false, 8.f);
-			}
-		}
 		ResetHitBoxes(HitCharacter, CurrentFrame);
 		EnableCharacterMeshCollision(HitCharacter, ECollisionEnabled::QueryAndPhysics);
 		Result.bHitConfirmed = true;
@@ -308,13 +300,6 @@ FServerSideRewindResult ULagCompensationComponent::ConfirmHit(const FFramePackag
 		);
 		if (ConfirmHitResult.bBlockingHit)
 		{
-			if (ConfirmHitResult.Component.IsValid())
-			{
-				if (UBoxComponent* Box = Cast<UBoxComponent>(ConfirmHitResult.Component))
-				{
-					DrawDebugBox(World, Box->GetComponentLocation(), Box->GetScaledBoxExtent(), Box->GetComponentRotation().Quaternion(), FColor::Blue, false, 8.f);
-				}
-			}
 			ResetHitBoxes(HitCharacter, CurrentFrame);
 			EnableCharacterMeshCollision(HitCharacter, ECollisionEnabled::QueryAndPhysics);
 			Result.bHitConfirmed = true;
@@ -351,21 +336,12 @@ FServerSideRewindResult ULagCompensationComponent::ProjectileConfirmHit(const FF
 	PathParams.ProjectileRadius = 5.f;
 	PathParams.TraceChannel = ECC_HitBox;
 	PathParams.ActorsToIgnore.Add(GetOwner());
-	PathParams.DrawDebugTime = 5.f;
-	PathParams.DrawDebugType = EDrawDebugTrace::ForDuration;
 
 	FPredictProjectilePathResult PathResult;
 	UGameplayStatics::PredictProjectilePath(GetWorld(), PathParams, PathResult);
 
 	if (PathResult.HitResult.bBlockingHit)
 	{
-		if (PathResult.HitResult.Component.IsValid())
-		{
-			if (UBoxComponent* Box = Cast<UBoxComponent>(PathResult.HitResult.Component))
-			{
-				DrawDebugBox(GetWorld(), Box->GetComponentLocation(), Box->GetScaledBoxExtent(), Box->GetComponentRotation().Quaternion(), FColor::Red, false, 8.f);
-			}
-		}
 		ResetHitBoxes(HitCharacter, CurrentFrame);
 		EnableCharacterMeshCollision(HitCharacter, ECollisionEnabled::QueryAndPhysics);
 		Result.bHitConfirmed = true;
@@ -384,13 +360,6 @@ FServerSideRewindResult ULagCompensationComponent::ProjectileConfirmHit(const FF
 		UGameplayStatics::PredictProjectilePath(GetWorld(), PathParams, PathResult);
 		if (PathResult.HitResult.bBlockingHit)
 		{
-			if (PathResult.HitResult.Component.IsValid())
-			{
-				if (UBoxComponent* Box = Cast<UBoxComponent>(PathResult.HitResult.Component))
-				{
-					DrawDebugBox(GetWorld(), Box->GetComponentLocation(), Box->GetScaledBoxExtent(), Box->GetComponentRotation().Quaternion(), FColor::Blue, false, 8.f);
-				}
-			}
 			ResetHitBoxes(HitCharacter, CurrentFrame);
 			EnableCharacterMeshCollision(HitCharacter, ECollisionEnabled::QueryAndPhysics);
 			Result.bHitConfirmed = true;
@@ -440,22 +409,6 @@ FShotgunServerSideRewindResult ULagCompensationComponent::ShotgunConfirmHit(cons
 		);
 		if (ABaseCharacter* HitCharacter = Cast<ABaseCharacter>(ConfirmHitResult.GetActor()))
 		{
-			if (ConfirmHitResult.Component.IsValid())
-			{
-				if (UBoxComponent* Box = Cast<UBoxComponent>(ConfirmHitResult.Component))
-				{
-					DrawDebugBox(
-						World,
-						Box->GetComponentLocation(),
-						Box->GetScaledBoxExtent(),
-						Box->GetComponentRotation().Quaternion(),
-						FColor::Red,
-						false,
-						8.f
-					);
-				}
-			}
-			
 			if (ShotgunResult.HeadShots.Contains(HitCharacter))
 			{
 				ShotgunResult.HeadShots[HitCharacter]++;
@@ -496,22 +449,6 @@ FShotgunServerSideRewindResult ULagCompensationComponent::ShotgunConfirmHit(cons
 		);
 		if (ABaseCharacter* HitCharacter = Cast<ABaseCharacter>(ConfirmHitResult.GetActor()))
 		{
-			if (ConfirmHitResult.Component.IsValid())
-			{
-				if (UBoxComponent* Box = Cast<UBoxComponent>(ConfirmHitResult.Component))
-				{
-					DrawDebugBox(
-						World,
-						Box->GetComponentLocation(),
-						Box->GetScaledBoxExtent(),
-						Box->GetComponentRotation().Quaternion(),
-						FColor::Blue,
-						false,
-						8.f
-					);
-				}
-			}
-			
 			if (ShotgunResult.BodyShots.Contains(HitCharacter))
 			{
 				ShotgunResult.BodyShots[HitCharacter]++;
