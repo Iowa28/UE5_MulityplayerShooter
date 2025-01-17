@@ -34,8 +34,12 @@ public:
 	UPROPERTY()
 	class UAnnouncement* Announcement;
 
+	// UPROPERTY()
+	// class UEliminationAnnouncement* EliminationAnnouncement;
+
 	void AddCharacterOverlay();
 	void AddAnnouncement();
+	void AddEliminationAnnouncement(FString AttackerName, FString VictimName);
 
 protected:
 	virtual void BeginPlay() override;
@@ -46,9 +50,15 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Announcements")
 	TSubclassOf<UUserWidget> AnnouncementClass;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Announcements")
+	TSubclassOf<class UEliminationAnnouncement> EliminationAnnouncementClass;
 	
 	UPROPERTY(EditDefaultsOnly)
 	float CrosshairSpreadMax = 16.f;
+
+	UPROPERTY()
+	APlayerController* OwningPlayer;
 	
 	FHUDPackage HUDPackage;
 

@@ -4,6 +4,7 @@
 #include "BaseHUD.h"
 #include "Announcement.h"
 #include "CharacterOverlay.h"
+#include "EliminationAnnouncement.h"
 
 void ABaseHUD::BeginPlay()
 {
@@ -44,6 +45,20 @@ void ABaseHUD::AddAnnouncement()
 	{
 		Announcement = CreateWidget<UAnnouncement>(GetWorld(), AnnouncementClass);
 		Announcement->AddToViewport();
+	}
+}
+
+void ABaseHUD::AddEliminationAnnouncement(FString AttackerName, FString VictimName)
+{
+	OwningPlayer = OwningPlayer ? OwningPlayer : GetOwningPlayerController();
+	
+	if (OwningPlayer && EliminationAnnouncementClass)
+	{
+		if (UEliminationAnnouncement* EliminationAnnouncement = CreateWidget<UEliminationAnnouncement>(OwningPlayer, EliminationAnnouncementClass))
+		{
+			EliminationAnnouncement->SetAnnouncementText(AttackerName, VictimName);
+			EliminationAnnouncement->AddToViewport();
+		}
 	}
 }
 

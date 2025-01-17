@@ -107,6 +107,42 @@ void ABasePlayerController::PollInit()
 	}
 }
 
+#pragma region EliminationAnnouncement
+void ABasePlayerController::BroadcastElimination(APlayerState* Attacker, APlayerState* Victim)
+{
+	ClientEliminationAnnouncement(Attacker, Victim);
+}
+
+void ABasePlayerController::ClientEliminationAnnouncement_Implementation(APlayerState* Attacker, APlayerState* Victim)
+{
+	const APlayerState* Self = GetPlayerState<APlayerState>();
+	BaseHUD = BaseHUD ? BaseHUD : Cast<ABaseHUD>(GetHUD());
+	if (Attacker && Victim && Self && BaseHUD)
+	{
+		if (Attacker == Self && Victim != Self)
+		{
+			BaseHUD->AddEliminationAnnouncement("You", Victim->GetPlayerName());
+		}
+		else if (Victim == Self && Attacker != Self)
+		{
+			BaseHUD->AddEliminationAnnouncement(Attacker->GetPlayerName(), "you");
+		}
+		else if (Attacker == Victim && Attacker == Self)
+		{
+			BaseHUD->AddEliminationAnnouncement("You", "yourself kek");
+		}
+		else if (Attacker == Victim && Attacker != Self)
+		{
+			BaseHUD->AddEliminationAnnouncement(Attacker->GetPlayerName(), "themselves kek");
+		}
+		else
+		{
+			BaseHUD->AddEliminationAnnouncement(Attacker->GetPlayerName(), Victim->GetPlayerName());
+		}
+	}
+}
+#pragma endregion EliminationAnnouncement
+
 #pragma region HUD
 void ABasePlayerController::SetHUDHealth(float Health, float MaxHealth)
 {

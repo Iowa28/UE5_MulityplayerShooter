@@ -116,6 +116,17 @@ void AShooterGameMode::PlayerEliminated(ABaseCharacter* EliminatedCharacter, ABa
 	{
 		EliminatedCharacter->Eliminate(false);
 	}
+
+	if (AttackerPlayerState && VictimPlayerState)
+	{
+		for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
+		{
+			if (ABasePlayerController* PlayerController = Cast<ABasePlayerController>(*It))
+			{
+				PlayerController->BroadcastElimination(AttackerPlayerState, VictimPlayerState);
+			}
+		}
+	}
 }
 
 void AShooterGameMode::RequestRespawn(ACharacter* EliminatedCharacter, AController* EliminatedController)

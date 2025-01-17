@@ -38,6 +38,8 @@ public:
 
 	FHighPingDelegate HighPingDelegate;
 
+	void BroadcastElimination(APlayerState* Attacker, APlayerState* Victim);
+
 protected:
 	virtual void BeginPlay() override;
 	
@@ -75,6 +77,9 @@ protected:
 	void  StopHighPingWarning();
 
 	void ShowReturnToMainMenu();
+
+	UFUNCTION(Client, Reliable)
+	void ClientEliminationAnnouncement(APlayerState* Attacker, APlayerState* Victim);
 
 private:
 	UPROPERTY()
