@@ -5,6 +5,9 @@
 #include "Announcement.h"
 #include "CharacterOverlay.h"
 #include "EliminationAnnouncement.h"
+#include "Blueprint/WidgetLayoutLibrary.h"
+#include "Components/CanvasPanelSlot.h"
+#include "Components/HorizontalBox.h"
 
 void ABaseHUD::BeginPlay()
 {
@@ -58,6 +61,32 @@ void ABaseHUD::AddEliminationAnnouncement(FString AttackerName, FString VictimNa
 		{
 			EliminationAnnouncement->SetAnnouncementText(AttackerName, VictimName);
 			EliminationAnnouncement->AddToViewport();
+
+			for (UEliminationAnnouncement* Message : EliminationMessages)
+			{
+				if (Message && Message->AnnouncementBox)
+				{
+					UCanvasPanelSlot* CanvasSlot = UWidgetLayoutLibrary::SlotAsCanvasSlot(Message->AnnouncementBox);
+					if (CanvasSlot)
+					{
+						const FVector2D Position = CanvasSlot->GetPosition();
+						const FVector2D NewPosition = FVector2D(Position.X, Position.Y - CanvasSlot->GetSize().Y);
+						CanvasSlot->SetPosition(NewPosition);
+					}
+				}
+			}
+
+			EliminationMessages.Add(EliminationAnnouncement);
+
+			FTimerHandle EliminationMessageTimer;
+			FTimerDelegate EliminationMessageDelegate;
+			EliminationMessageDelegate.BindUFunction(this, FName("EliminationAnnouncementTimerFinished"), EliminationAnnouncement);
+			GetWorldTimerManager().SetTimer(
+				EliminationMessageTimer,
+				EliminationMessageDelegate,
+				EliminationAnnouncementTime,
+				false
+			);
 		}
 	}
 }
@@ -85,4 +114,12 @@ void ABaseHUD::DrawCrosshair(UTexture2D* Crosshair, const FVector2D ViewportCent
 		1,
 		HUDPackage.CrosshairColor
 	);
+}
+
+void ABaseHUD::EliminationAnnouncementTimerFinished(UEliminationAnnouncement* MessageToRemove)
+{
+	if (MessageToRemove)
+	{
+		MessageToRemove->RemoveFromParent();
+	}
 }

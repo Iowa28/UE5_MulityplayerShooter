@@ -64,6 +64,15 @@ private:
 
 	void DrawCrosshair(UTexture2D* Crosshair, FVector2D ViewportCenter, FVector2D Spread);
 
+	UPROPERTY(EditDefaultsOnly, Category = "Announcements")
+	float EliminationAnnouncementTime = 2.5f;
+
+	UPROPERTY()
+	TArray<UEliminationAnnouncement*> EliminationMessages;
+
+	UFUNCTION()
+	void EliminationAnnouncementTimerFinished(UEliminationAnnouncement* MessageToRemove);
+
 public:
 	FORCEINLINE void SetHUDPackage(const FHUDPackage& Package) { HUDPackage = Package; }
 };
