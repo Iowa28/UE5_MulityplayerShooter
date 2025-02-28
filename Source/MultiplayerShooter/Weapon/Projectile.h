@@ -16,8 +16,12 @@ public:
 	
 	virtual void Tick(float DeltaTime) override;
 	virtual void Destroyed() override;
-	
+
+	UPROPERTY(EditDefaultsOnly)
 	float Damage = 20.f;
+	
+	UPROPERTY(EditDefaultsOnly)
+	float HeadShotDamage = 40.f;
 
 	bool bUseServerSideRewind = false;
 	FVector_NetQuantize TraceStart;
