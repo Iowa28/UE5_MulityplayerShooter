@@ -516,7 +516,6 @@ void ABasePlayerController::CheckPing(float DeltaSeconds)
 			const float Ping = PlayerState->GetCompressedPing() * 4;
 			if (GetPawn() && GetPawn()->IsLocallyControlled())
 			{
-				GEngine->AddOnScreenDebugMessage(-1,15.f,FColor::Red, FString::Printf(TEXT("Ping: %f"), Ping));
 			}
 			if (Ping > HighPingThreshold)
 			{

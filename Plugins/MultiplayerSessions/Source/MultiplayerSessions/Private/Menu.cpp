@@ -95,11 +95,11 @@ void UMenu::OnFindSessions(const TArray<FOnlineSessionSearchResult>& SessionResu
 
 	if (bWasSuccessful)
 	{
-		GEngine->AddOnScreenDebugMessage(-1,15.f,FColor::Yellow, FString::Printf(TEXT("Found sessions: %d"), SessionResults.Num()));
+		GEngine->AddOnScreenDebugMessage(-1,15.f, FColor::Yellow, FString::Printf(TEXT("Found sessions: %d"), SessionResults.Num()));
 	}
 	else
 	{
-		GEngine->AddOnScreenDebugMessage(-1,15.f,FColor::Red, TEXT("Sessions not found"));
+		GEngine->AddOnScreenDebugMessage(-1,15.f, FColor::Red, TEXT("Sessions not found"));
 	}
 
 	for (auto Result : SessionResults)
@@ -108,15 +108,15 @@ void UMenu::OnFindSessions(const TArray<FOnlineSessionSearchResult>& SessionResu
 		Result.Session.SessionSettings.Get(FName("MatchType"), SettingsValue);
 		if (!Result.IsValid())
 		{
-			GEngine->AddOnScreenDebugMessage(-1,15.f,FColor::Red, TEXT("Session is not valid"));
+			GEngine->AddOnScreenDebugMessage(-1,15.f, FColor::Red, TEXT("Session is not valid"));
 		}
 		if (SettingsValue == MatchType)
 		{
-			GEngine->AddOnScreenDebugMessage(-1,15.f,FColor::Green, FString::Printf(TEXT("Joining to: %s"), *Result.Session.OwningUserName));
+			GEngine->AddOnScreenDebugMessage(-1,15.f, FColor::Green, FString::Printf(TEXT("Joining to: %s"), *Result.Session.OwningUserName));
 			MultiplayerSessionsSubsystem->JoinSession(Result);
 			return;
 		}
-		GEngine->AddOnScreenDebugMessage(-1,15.f,FColor::Red, FString::Printf(TEXT("Couldn't join to: %s"), *Result.Session.OwningUserName));
+		GEngine->AddOnScreenDebugMessage(-1,15.f, FColor::Red, FString::Printf(TEXT("Couldn't join to: %s"), *Result.Session.OwningUserName));
 	}
 	
 	JoinButton->SetIsEnabled(true);

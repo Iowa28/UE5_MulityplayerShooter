@@ -570,6 +570,7 @@ void UCombatComponent::LocalShotgunFire(const TArray<FVector_NetQuantize>& Trace
 
 	if (CombatState == ECombatState::ECS_Reloading || CombatState == ECombatState::ECS_Unoccupied)
 	{
+		bLocallyReloading = false;
 		Character->PlayFireMontage(bAiming);
 		Shotgun->ShotgunFire(TraceHitTargets);
 		CombatState = ECombatState::ECS_Unoccupied;
@@ -640,8 +641,12 @@ void UCombatComponent::HandleReload()
 void UCombatComponent::FinishReloading()
 {
 	bLocallyReloading = false;
-	CombatState = ECombatState::ECS_Unoccupied;
-	UpdateAmmoValues();
+	// CombatState = ECombatState::ECS_Unoccupied;
+	if (Character && Character->HasAuthority())
+	{
+		CombatState = ECombatState::ECS_Unoccupied;
+		UpdateAmmoValues();
+	}
 	if (bFireButtonPressed)
 	{
 		Fire();
@@ -674,13 +679,12 @@ void UCombatComponent::UpdateAmmoValues()
 		CarriedAmmoMap[EquippedWeapon->GetWeaponType()] -= ReloadAmount;
 		CarriedAmmo = CarriedAmmoMap[EquippedWeapon->GetWeaponType()];
 	}
-	EquippedWeapon->AddAmmo(ReloadAmount);
-
 	Controller = Controller ? Controller : Cast<ABasePlayerController>(Character->GetController());
 	if (Controller)
 	{
 		Controller->SetHUDCarriedAmmo(CarriedAmmo);
 	}
+	EquippedWeapon->AddAmmo(ReloadAmount);
 }
 
 void UCombatComponent::UpdateShotgunAmmoValues()

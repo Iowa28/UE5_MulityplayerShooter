@@ -576,8 +576,8 @@ void ABaseCharacter::ReceiveDamage(AActor* DamagedActor, float Damage, const UDa
 		}
 		else
 		{
-			Shield = 0.f;
 			DamageToHealth = FMath::Min(DamageToHealth - Shield, Damage);
+			Shield = 0.f;
 		}
 		UpdateHUDShield();
 	}
