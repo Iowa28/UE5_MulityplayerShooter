@@ -91,7 +91,10 @@ void AWeapon::OnRep_Owner()
 
 void AWeapon::OnHighPing(bool bHighPing)
 {
-	bUseServerSideRewind = !bHighPing;
+	if (bHighPing)
+	{
+		bUseServerSideRewind = false;
+	}
 }
 
 #pragma region WeaponState

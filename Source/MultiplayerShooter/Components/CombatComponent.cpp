@@ -478,12 +478,16 @@ void UCombatComponent::FireProjectileWeapon()
 
 void UCombatComponent::FireHitScanWeapon()
 {
+	if (!Character) { return; }
 	HitTarget = EquippedWeapon->bUseScatter ? EquippedWeapon->TraceEndWithScatter(HitTarget) : HitTarget;
-	if (Character && !Character->HasAuthority())
+	if (!Character->HasAuthority())
 	{
 		LocalFire(HitTarget);
 	}
-	ServerFire(HitTarget, EquippedWeapon->GetFireDelay());
+	else
+	{
+		ServerFire(HitTarget, EquippedWeapon->GetFireDelay());
+	}
 }
 
 void UCombatComponent::FireShotgun()

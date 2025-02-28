@@ -100,6 +100,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly)
 	float Damage = 20.f;
 
+	UPROPERTY(EditDefaultsOnly)
+	float HeadShotDamage = 40.f;
+
 	UPROPERTY(EditAnywhere, Replicated)
 	bool bUseServerSideRewind = false;
 	
@@ -207,5 +210,5 @@ public:
 	FORCEINLINE int32 GetAmmo() const { return Ammo; }
 	FORCEINLINE int32 GetMagCapacity() const { return MagCapacity; }
 	FORCEINLINE float GetDamage() const { return Damage; }
-	FORCEINLINE float GetHeadShotDamage() const { return Damage; }
+	FORCEINLINE float GetHeadShotDamage() const { return HeadShotDamage; }
 };

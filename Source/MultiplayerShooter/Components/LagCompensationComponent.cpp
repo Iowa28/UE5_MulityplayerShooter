@@ -90,9 +90,10 @@ void ULagCompensationComponent::ServerScoreRequest_Implementation(ABaseCharacter
 	
 	if (HitCharacter && DamageCauser && Character && Confirm.bHitConfirmed)
 	{
+		const float DamageToCause = Confirm.bHeadshot ? DamageCauser->GetHeadShotDamage() : DamageCauser->GetDamage();
 		UGameplayStatics::ApplyDamage(
 			HitCharacter,
-			DamageCauser->GetDamage(),
+			DamageToCause,
 			Character->Controller,
 			DamageCauser,
 			UDamageType::StaticClass()
@@ -127,11 +128,11 @@ void ULagCompensationComponent::ShotgunServerScoreRequest_Implementation(const T
 		if (!HitCharacter || !HitCharacter->GetEquippedWeapon() || !Character) { continue; }
 
 		float TotalDamage = 0.f;
-		if (Confirm.HeadShots.Contains(HitCharacter))
-		{
-			const float HeadShotDamage = Confirm.HeadShots[HitCharacter] * HitCharacter->GetEquippedWeapon()->GetHeadShotDamage();
-			TotalDamage += HeadShotDamage;
-		}
+		// if (Confirm.HeadShots.Contains(HitCharacter))
+		// {
+		// 	const float HeadShotDamage = Confirm.HeadShots[HitCharacter] * HitCharacter->GetEquippedWeapon()->GetHeadShotDamage();
+		// 	TotalDamage += HeadShotDamage;
+		// }
 		if (Confirm.BodyShots.Contains(HitCharacter))
 		{
 			const float BodyShotDamage = Confirm.BodyShots[HitCharacter] * HitCharacter->GetEquippedWeapon()->GetDamage();
@@ -303,6 +304,7 @@ FServerSideRewindResult ULagCompensationComponent::ConfirmHit(const FFramePackag
 			ResetHitBoxes(HitCharacter, CurrentFrame);
 			EnableCharacterMeshCollision(HitCharacter, ECollisionEnabled::QueryAndPhysics);
 			Result.bHitConfirmed = true;
+			Result.bHeadshot = false;
 		}
 	}
 	

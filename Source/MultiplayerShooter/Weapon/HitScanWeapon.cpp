@@ -15,72 +15,68 @@ void AHitScanWeapon::Fire(const FVector& HitTarget)
 	Super::Fire(HitTarget);
 
 	APawn* OwnerPawn = Cast<APawn>(GetOwner());
-	if (!OwnerPawn) { return; }
-	AController* InstigatorController = OwnerPawn->GetController();
-	if (const USkeletalMeshSocket* MuzzleFlashSocket = GetWeaponMesh()->GetSocketByName("MuzzleFlash"))
+	const USkeletalMeshSocket* MuzzleFlashSocket = GetWeaponMesh()->GetSocketByName("MuzzleFlash");
+	if (!OwnerPawn || !MuzzleFlashSocket) { return; }
+	
+	const FTransform SocketTransform = MuzzleFlashSocket->GetSocketTransform(GetWeaponMesh());
+	const FVector Start = SocketTransform.GetLocation();
+	FHitResult FireHit;
+	WeaponTraceHit(Start, HitTarget, FireHit);
+	if (FireHit.bBlockingHit)
 	{
-		const FTransform SocketTransform = MuzzleFlashSocket->GetSocketTransform(GetWeaponMesh());
-		const FVector Start = SocketTransform.GetLocation();
-		FHitResult FireHit;
-		WeaponTraceHit(Start, HitTarget, FireHit);
-		if (FireHit.bBlockingHit)
+		AController* InstigatorController = OwnerPawn->GetController();
+		ABaseCharacter* Character = Cast<ABaseCharacter>(FireHit.GetActor());
+		if (Character && InstigatorController)
 		{
-			ABaseCharacter* Character = Cast<ABaseCharacter>(FireHit.GetActor());
-			if (Character && InstigatorController)
+			const bool bCauseAuthDamage = !bUseServerSideRewind || OwnerPawn->IsLocallyControlled();
+			if (HasAuthority() && bCauseAuthDamage)
 			{
-				bool bCauseAuthDamage = !bUseServerSideRewind || OwnerPawn->IsLocallyControlled();
-				if (HasAuthority() && bCauseAuthDamage)
-				{
-					UGameplayStatics::ApplyDamage(
-						Character,
-						Damage,
-						InstigatorController,
-						this,
-						UDamageType::StaticClass()
-					);
-				}
-				else
-				{
-					OwnerCharacter = OwnerCharacter ? OwnerCharacter : Cast<ABaseCharacter>(OwnerPawn);
-					OwnerController = OwnerController ? OwnerController : Cast<ABasePlayerController>(InstigatorController);
-					if (OwnerCharacter && OwnerController && OwnerCharacter->GetLagCompensationComponent() && OwnerCharacter->IsLocallyControlled())
-					{
-						OwnerCharacter->GetLagCompensationComponent()->ServerScoreRequest(
-							Character,
-							Start,
-							HitTarget,
-							OwnerController->GetServerTime() - OwnerController->SingleTripTime,
-							this
-						);
-					}
-				}
-			}
-			if (ImpactParticles)
-			{
-				UGameplayStatics::SpawnEmitterAtLocation(
-					GetWorld(),
-					ImpactParticles,
-					FireHit.ImpactPoint,
-					FireHit.ImpactNormal.Rotation()
+				const float DamageToCause = FireHit.BoneName.ToString() == FString("head") ? HeadShotDamage : Damage;
+				UGameplayStatics::ApplyDamage(
+					Character,
+					DamageToCause,
+					InstigatorController,
+					this,
+					UDamageType::StaticClass()
 				);
 			}
-			if (HitSound)
+			else
 			{
-				UGameplayStatics::PlaySoundAtLocation(this, HitSound, FireHit.ImpactPoint);
+				OwnerCharacter = OwnerCharacter ? OwnerCharacter : Cast<ABaseCharacter>(OwnerPawn);
+				OwnerController = OwnerController ? OwnerController : Cast<ABasePlayerController>(InstigatorController);
+				if (OwnerCharacter && OwnerController && OwnerCharacter->GetLagCompensationComponent() && OwnerCharacter->IsLocallyControlled())
+				{
+					OwnerCharacter->GetLagCompensationComponent()->ServerScoreRequest(
+						Character,
+						Start,
+						HitTarget,
+						OwnerController->GetServerTime() - OwnerController->SingleTripTime,
+						this
+					);
+				}
 			}
 		}
-		if (MuzzleFlash)
+		if (ImpactParticles)
 		{
 			UGameplayStatics::SpawnEmitterAtLocation(
 				GetWorld(),
-				MuzzleFlash,
-				SocketTransform
+				ImpactParticles,
+				FireHit.ImpactPoint,
+				FireHit.ImpactNormal.Rotation()
 			);
 		}
-		if (FireSound)
+		if (HitSound)
 		{
-			UGameplayStatics::PlaySoundAtLocation(this, FireSound, GetActorLocation());
+			UGameplayStatics::PlaySoundAtLocation(this, HitSound, FireHit.ImpactPoint);
 		}
+	}
+	if (MuzzleFlash)
+	{
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), MuzzleFlash, SocketTransform);
+	}
+	if (FireSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, FireSound, GetActorLocation());
 	}
 }
 
@@ -96,6 +92,10 @@ void AHitScanWeapon::WeaponTraceHit(const FVector& TraceStart, const FVector& Hi
 	if (OutHit.bBlockingHit)
 	{
 		BeamEnd = OutHit.ImpactPoint;
+	}
+	else
+	{
+		OutHit.ImpactPoint = End;
 	}
 
 	if (BeamParticles)
