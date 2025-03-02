@@ -87,6 +87,7 @@ protected:
 	void Look(const FInputActionValue& Value);
 
 	void EquipButtonPressed();
+	void SwapButtonPressed();
 	
 	void DuckButtonPressed();
 	void DuckButtonReleased();
@@ -209,6 +210,9 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
 	UInputAction* ThrowGrenadeAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
+	UInputAction* SwapAction;
 	
 #pragma endregion Actions
 
@@ -232,6 +236,9 @@ private:
 
 	UFUNCTION(Server, Reliable)
 	void ServerEquipButtonPressed();
+
+	UFUNCTION(Server, Reliable)
+	void ServerSwapButtonPressed();
 
 	float AimOffsetYaw;
 	float InterpAimOffsetYaw;

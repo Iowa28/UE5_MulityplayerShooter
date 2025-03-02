@@ -214,6 +214,7 @@ void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ThisClass::Look);
 		
 		EnhancedInputComponent->BindAction(EquipAction, ETriggerEvent::Started, this, &ThisClass::EquipButtonPressed);
+		EnhancedInputComponent->BindAction(SwapAction, ETriggerEvent::Started, this, &ThisClass::SwapButtonPressed);
 
 		EnhancedInputComponent->BindAction(DuckAction, ETriggerEvent::Started, this, &ThisClass::DuckButtonPressed);
 		EnhancedInputComponent->BindAction(DuckAction, ETriggerEvent::Completed, this, &ThisClass::DuckButtonReleased);
@@ -893,6 +894,26 @@ void ABaseCharacter::EquipButtonPressed()
 	}
 }
 
+void ABaseCharacter::SwapButtonPressed()
+{
+	if (CombatComponent && !bDisableGameplay)
+	{
+		if (CombatComponent->CombatState == ECombatState::ECS_Unoccupied)
+		{
+			ServerSwapButtonPressed();
+		}
+		const bool bSwap = CombatComponent->ShouldSwapWeapons()
+			&& !HasAuthority()
+			&& CombatComponent->CombatState == ECombatState::ECS_Unoccupied;
+		if (bSwap)
+		{
+			PlaySwapWeaponMontage();
+			CombatComponent->CombatState = ECombatState::ECS_SwappingWeapons;
+			bFinishedSwapping = false;
+		}
+	}
+}
+
 void ABaseCharacter::ServerEquipButtonPressed_Implementation()
 {
 	if (!CombatComponent) { return; }
@@ -902,6 +923,14 @@ void ABaseCharacter::ServerEquipButtonPressed_Implementation()
 		CombatComponent->EquipWeapon(OverlappingWeapon);
 	}
 	else if (CombatComponent->ShouldSwapWeapons())
+	{
+		CombatComponent->SwapWeapons();
+	}
+}
+
+void ABaseCharacter::ServerSwapButtonPressed_Implementation()
+{
+	if (CombatComponent && CombatComponent->ShouldSwapWeapons())
 	{
 		CombatComponent->SwapWeapons();
 	}

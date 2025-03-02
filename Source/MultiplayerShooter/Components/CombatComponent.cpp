@@ -478,16 +478,12 @@ void UCombatComponent::FireProjectileWeapon()
 
 void UCombatComponent::FireHitScanWeapon()
 {
-	if (!Character) { return; }
 	HitTarget = EquippedWeapon->bUseScatter ? EquippedWeapon->TraceEndWithScatter(HitTarget) : HitTarget;
-	if (!Character->HasAuthority())
+	if (Character && !Character->HasAuthority())
 	{
 		LocalFire(HitTarget);
 	}
-	else
-	{
-		ServerFire(HitTarget, EquippedWeapon->GetFireDelay());
-	}
+	ServerFire(HitTarget, EquippedWeapon->GetFireDelay());
 }
 
 void UCombatComponent::FireShotgun()
@@ -672,7 +668,8 @@ void UCombatComponent::JumpToShotgunEnd()
 void UCombatComponent::UpdateAmmoValues()
 {
 	if (!Character || !EquippedWeapon) { return; }
-	
+
+	UE_LOG(LogTemp, Warning, TEXT("Reload finished, ammo: %d"), EquippedWeapon->GetAmmo());
 	const int32 ReloadAmount = AmountToReload();
 	if (CarriedAmmoMap.Contains(EquippedWeapon->GetWeaponType()))
 	{
