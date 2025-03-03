@@ -249,6 +249,7 @@ void ABaseCharacter::PollInit()
 		{
 			CharacterPlayerState->AddToScore(0.f);
 			CharacterPlayerState->AddToDefeats(0.f);
+			SetTeamColor(CharacterPlayerState->GetTeam());
 
 			const AShooterGameState* ShooterGameState = Cast<AShooterGameState>(UGameplayStatics::GetGameState(this));
 			if (ShooterGameState && ShooterGameState->TopScoringPlayers.Contains(CharacterPlayerState))
@@ -297,6 +298,27 @@ void ABaseCharacter::Destroyed()
 	if (CombatComponent && CombatComponent->EquippedWeapon && bMatchNotInProgress)
 	{
 		CombatComponent->EquippedWeapon->Destroy();
+	}
+}
+
+void ABaseCharacter::SetTeamColor(const ETeam Team)
+{
+	if (!GetMesh() || !DefaultMaterial || !BlueMaterial || !RedMaterial) { return; }
+	
+	switch (Team)
+	{
+	case ETeam::ET_NoTeam:
+		GetMesh()->SetMaterial(0, DefaultMaterial);
+		DissolveMaterialInstance = BlueDissolveMaterialInstance;
+		break;
+	case ETeam::ET_BlueTeam:
+		GetMesh()->SetMaterial(0, BlueMaterial);
+		DissolveMaterialInstance = BlueDissolveMaterialInstance;
+		break;
+	case ETeam::ET_RedTeam:
+		GetMesh()->SetMaterial(0, RedMaterial);
+		DissolveMaterialInstance = RedDissolveMaterialInstance;
+		break;
 	}
 }
 

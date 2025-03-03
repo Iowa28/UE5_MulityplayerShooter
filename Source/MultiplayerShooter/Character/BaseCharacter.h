@@ -7,6 +7,7 @@
 #include "GameFramework/Character.h"
 #include "MultiplayerShooter/Interfaces/CrosshairInteractInterface.h"
 #include "MultiplayerShooter/Types/CombatState.h"
+#include "MultiplayerShooter/Types/Team.h"
 #include "MultiplayerShooter/Types/TurningInPlace.h"
 #include "BaseCharacter.generated.h"
 
@@ -17,7 +18,7 @@ struct FInputActionValue;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLeftGame);
 
-UCLASS(meta = (PrioritizeCategories ="Ammo Combat Input Elimination"))
+UCLASS(meta = (PrioritizeCategories ="Elimination Combat"))
 class MULTIPLAYERSHOOTER_API ABaseCharacter : public ACharacter, public ICrosshairInteractInterface
 {
 	GENERATED_BODY()
@@ -78,6 +79,8 @@ public:
 
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastLostTheLead();
+
+	void SetTeamColor(const ETeam Team);
 
 protected:
 	virtual void BeginPlay() override;
@@ -331,8 +334,23 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "Elimination")
 	UMaterialInstanceDynamic* DynamicDissolveMaterialInstance;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Elimination")
+	UPROPERTY(VisibleAnywhere, Category = "Elimination")
 	UMaterialInstance* DissolveMaterialInstance;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "Elimination")
+	UMaterialInstance* DefaultMaterial;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Elimination")
+	UMaterialInstance* RedMaterial;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Elimination")
+	UMaterialInstance* RedDissolveMaterialInstance;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Elimination")
+	UMaterialInstance* BlueMaterial;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Elimination")
+	UMaterialInstance* BlueDissolveMaterialInstance;
 
 	UFUNCTION()
 	void UpdateDissolveMaterial(float DissolveValue);

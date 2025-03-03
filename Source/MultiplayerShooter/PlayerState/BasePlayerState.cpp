@@ -2,7 +2,6 @@
 
 
 #include "BasePlayerState.h"
-
 #include "MultiplayerShooter/Character/BaseCharacter.h"
 #include "MultiplayerShooter/Controller/BasePlayerController.h"
 #include "Net/UnrealNetwork.h"
@@ -70,5 +69,22 @@ void ABasePlayerState::OnRep_Defeats()
 		{
 			Controller->SetHUDDefeats(Defeats);
 		}
+	}
+}
+
+void ABasePlayerState::OnRep_Team()
+{
+	if (ABaseCharacter* BaseCharacter = Cast<ABaseCharacter>(GetPawn()))
+	{
+		BaseCharacter->SetTeamColor(Team);
+	}
+}
+
+void ABasePlayerState::SetTeam(const ETeam TeamToSet)
+{
+	Team = TeamToSet;
+	if (ABaseCharacter* BaseCharacter = Cast<ABaseCharacter>(GetPawn()))
+	{
+		BaseCharacter->SetTeamColor(Team);
 	}
 }
