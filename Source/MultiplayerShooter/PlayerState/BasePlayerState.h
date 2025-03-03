@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerState.h"
+#include "MultiplayerShooter/Types/Team.h"
 #include "BasePlayerState.generated.h"
 
 UCLASS()
@@ -31,4 +32,11 @@ private:
 
 	UPROPERTY(ReplicatedUsing = OnRep_Defeats)
 	int32 Defeats;
+
+	UPROPERTY(Replicated)
+	ETeam Team = ETeam::ET_NoTeam;
+
+public:
+	FORCEINLINE ETeam GetTeam() const { return Team; }
+	FORCEINLINE void SetTeam(const ETeam TeamToSet) { Team = TeamToSet; }
 };
