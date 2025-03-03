@@ -273,7 +273,7 @@ private:
 	UPROPERTY(EditDefaultsOnly)
 	float CameraThreshold = 200.f;
 	
-	void HideCameraIfCharacterClose();
+	void HideCharacterIfCameraIsClose();
 
 	bool bRotateRootBone;
 	float TurnThreshold = 1.f;

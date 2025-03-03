@@ -236,7 +236,7 @@ void ABaseCharacter::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	RotateInPlace(DeltaTime);
-	HideCameraIfCharacterClose();
+	HideCharacterIfCameraIsClose();
 	PollInit();
 }
 
@@ -308,7 +308,7 @@ void ABaseCharacter::MulticastGainedTheLead_Implementation()
 	{
 		CrownComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(
 			CrownSystem,
-			GetCapsuleComponent(),
+			GetMesh(),
 			FName(),
 			GetActorLocation() + FVector(0, 0, 110),
 			GetActorRotation(),
@@ -377,7 +377,7 @@ void ABaseCharacter::Jump()
 	Super::Jump();
 }
 
-void ABaseCharacter::HideCameraIfCharacterClose()
+void ABaseCharacter::HideCharacterIfCameraIsClose()
 {
 	if (!IsLocallyControlled()) { return; }
 
@@ -388,6 +388,10 @@ void ABaseCharacter::HideCameraIfCharacterClose()
 		{
 			CombatComponent->EquippedWeapon->GetWeaponMesh()->bOwnerNoSee = true;
 		}
+		if (CombatComponent && CombatComponent->SecondaryWeapon && CombatComponent->SecondaryWeapon->GetWeaponMesh())
+		{
+			CombatComponent->SecondaryWeapon->GetWeaponMesh()->bOwnerNoSee = true;
+		}
 	}
 	else
 	{
@@ -395,6 +399,10 @@ void ABaseCharacter::HideCameraIfCharacterClose()
 		if (CombatComponent && CombatComponent->EquippedWeapon && CombatComponent->EquippedWeapon->GetWeaponMesh())
 		{
 			CombatComponent->EquippedWeapon->GetWeaponMesh()->bOwnerNoSee = false;
+		}
+		if (CombatComponent && CombatComponent->SecondaryWeapon && CombatComponent->SecondaryWeapon->GetWeaponMesh())
+		{
+			CombatComponent->SecondaryWeapon->GetWeaponMesh()->bOwnerNoSee = false;
 		}
 	}
 }
@@ -697,6 +705,7 @@ void ABaseCharacter::MulticastEliminate_Implementation(bool bPlayerLeftGame)
 	}
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	AttachedGrenade->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	if (EliminationEffect)
 	{
@@ -711,11 +720,7 @@ void ABaseCharacter::MulticastEliminate_Implementation(bool bPlayerLeftGame)
 	}
 	if (EliminationSound)
 	{
-		UGameplayStatics::SpawnSoundAtLocation(
-			this,
-			EliminationSound,
-			GetActorLocation()
-		);
+		UGameplayStatics::SpawnSoundAtLocation(this, EliminationSound, GetActorLocation());
 	}
 	
 	if (IsLocallyControlled() && CombatComponent && CombatComponent->bAiming && CombatComponent->EquippedWeapon && CombatComponent->EquippedWeapon->GetWeaponType() == EWeaponType::EWT_SniperRifle)
@@ -728,12 +733,7 @@ void ABaseCharacter::MulticastEliminate_Implementation(bool bPlayerLeftGame)
 		CrownComponent->DestroyComponent();
 	}
 
-	GetWorldTimerManager().SetTimer(
-		EliminationTimer,
-		this,
-		&ThisClass::EliminationTimerFinished,
-		EliminationDelay
-	);
+	GetWorldTimerManager().SetTimer(EliminationTimer, this, &ThisClass::EliminationTimerFinished,EliminationDelay);
 }
 
 void ABaseCharacter::EliminationTimerFinished()
