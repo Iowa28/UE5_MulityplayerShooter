@@ -42,6 +42,8 @@ public:
 	virtual float CalculateDamage(AController* Attacker, AController* Victim, float BaseDamage);
 
 protected:
+	bool bTeamsMatch = false;
+	
 	virtual void BeginPlay() override;
 
 	virtual void OnMatchStateSet() override;

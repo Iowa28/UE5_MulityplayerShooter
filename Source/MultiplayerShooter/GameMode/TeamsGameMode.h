@@ -12,6 +12,8 @@ class MULTIPLAYERSHOOTER_API ATeamsGameMode : public AShooterGameMode
 	GENERATED_BODY()
 
 public:
+	ATeamsGameMode();
+	
 	virtual void PostLogin(APlayerController* NewPlayer) override;
 
 	virtual void Logout(AController* Exiting) override;

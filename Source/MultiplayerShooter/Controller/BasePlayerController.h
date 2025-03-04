@@ -27,12 +27,16 @@ public:
 	void SetHUDMatchCountdown(float CountdownTime);
 	void SetHUDAnnouncementCountdown(float CountdownTime);
 	void SetHUDGrenades(int32 Grenades);
+	void HideTeamScores();
+	void InitTeamScores();
+	void SetHUDRedTeamScore(int32 RedScore);
+	void SetHUDBlueTeamScore(int32 BlueScore);
 
 	float GetServerTime() const;
 
 	virtual void ReceivedPlayer() override;
 
-	void OnMatchStateSet(FName State);
+	void OnMatchStateSet(FName State, bool bTeamsMatch = false);
 
 	float SingleTripTime = 0.f;
 
@@ -44,18 +48,15 @@ protected:
 	virtual void BeginPlay() override;
 	
 	virtual void OnPossess(APawn* aPawn) override;
-
 	virtual void SetupInputComponent() override;
 
 	void SetHUDTime();
-
 	void PollInit();
 
 	UPROPERTY(EditDefaultsOnly, Category = "Time")
 	float TimeSyncFrequency = 5.f;
 
 	float TimeSyncRunningTime = 0.f;
-	
 	float ClientServerDelta = 0.f;
 
 	UFUNCTION(Server, Reliable)
@@ -64,7 +65,7 @@ protected:
 	UFUNCTION(Client, Reliable)
 	void ClientReportServerTime(float TimeOfClientRequest, float TimeServerReceivedClientRequest);
 
-	void HandleMatchHasStarted();
+	void HandleMatchHasStarted(bool bTeamsMatch = false);
 
 	UFUNCTION(Server, Reliable)
 	void ServerCheckMatchState();
@@ -73,13 +74,18 @@ protected:
 	void ClientJoinMidGame(FName StateOfMatch, float Warmup, float Match, float StartingTime, float Cooldown);
 
 	void CheckPing(float DeltaSeconds);
-	void  StartHighPingWarning();
-	void  StopHighPingWarning();
-
+	void StartHighPingWarning();
+	void StopHighPingWarning();
 	void ShowReturnToMainMenu();
 
 	UFUNCTION(Client, Reliable)
 	void ClientEliminationAnnouncement(APlayerState* Attacker, APlayerState* Victim);
+
+	UPROPERTY(ReplicatedUsing = OnRep_ShowTeamScores)
+	bool bShowTeamScores = false;
+
+	UFUNCTION()
+	void OnRep_ShowTeamScores();
 
 private:
 	UPROPERTY()

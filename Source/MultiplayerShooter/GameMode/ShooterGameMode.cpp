@@ -65,7 +65,7 @@ void AShooterGameMode::OnMatchStateSet()
 	{
 		if (ABasePlayerController* PlayerController = Cast<ABasePlayerController>(*It))
 		{
-			PlayerController->OnMatchStateSet(MatchState);
+			PlayerController->OnMatchStateSet(MatchState, bTeamsMatch);
 		}
 	}
 }

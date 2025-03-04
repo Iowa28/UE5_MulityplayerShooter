@@ -55,6 +55,7 @@ void ABasePlayerController::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ABasePlayerController, MatchState);
+	DOREPLIFETIME(ABasePlayerController, bShowTeamScores);
 }
 
 void ABasePlayerController::Tick(float DeltaSeconds)
@@ -103,6 +104,25 @@ void ABasePlayerController::PollInit()
 			{
 				SetHUDGrenades(CombatComponent->GetGrenades());
 			}
+		}
+	}
+}
+
+void ABasePlayerController::ShowReturnToMainMenu()
+{
+	if (!ReturnToMainMenuWidget) { return; }
+
+	ReturnToMainMenu = ReturnToMainMenu ? ReturnToMainMenu : CreateWidget<UReturnToMainMenu>(this, ReturnToMainMenuWidget);
+	if (ReturnToMainMenu)
+	{
+		bReturnToMainMenuOpen = !bReturnToMainMenuOpen;
+		if (bReturnToMainMenuOpen)
+		{
+			ReturnToMainMenu->MenuSetup();
+		}
+		else
+		{
+			ReturnToMainMenu->MenuTearDown();
 		}
 	}
 }
@@ -405,13 +425,13 @@ void ABasePlayerController::ClientJoinMidGame_Implementation(FName StateOfMatch,
 	}
 }
 
-void ABasePlayerController::OnMatchStateSet(FName State)
+void ABasePlayerController::OnMatchStateSet(FName State, bool bTeamsMatch)
 {
 	MatchState = State;
 
 	if (MatchState == MatchState::InProgress)
 	{
-		HandleMatchHasStarted();
+		HandleMatchHasStarted(bTeamsMatch);
 	}
 	else if (MatchState == MatchState::Cooldown)
 	{
@@ -431,7 +451,7 @@ void ABasePlayerController::OnRep_MatchState()
 	}
 }
 
-void ABasePlayerController::HandleMatchHasStarted()
+void ABasePlayerController::HandleMatchHasStarted(bool bTeamsMatch)
 {
 	BaseHUD = BaseHUD ? BaseHUD : Cast<ABaseHUD>(GetHUD());
 	if (BaseHUD)
@@ -443,6 +463,19 @@ void ABasePlayerController::HandleMatchHasStarted()
 		if (BaseHUD->Announcement)
 		{
 			BaseHUD->Announcement->SetVisibility(ESlateVisibility::Hidden);
+		}
+	}
+
+	if (HasAuthority())
+	{
+		bShowTeamScores = bTeamsMatch;
+		if (bShowTeamScores)
+		{
+			InitTeamScores();
+		}
+		else
+		{
+			HideTeamScores();
 		}
 	}
 }
@@ -574,21 +607,68 @@ void ABasePlayerController::StopHighPingWarning()
 }
 #pragma endregion Ping
 
-void ABasePlayerController::ShowReturnToMainMenu()
-{
-	if (!ReturnToMainMenuWidget) { return; }
+#pragma region TeamScore
 
-	ReturnToMainMenu = ReturnToMainMenu ? ReturnToMainMenu : CreateWidget<UReturnToMainMenu>(this, ReturnToMainMenuWidget);
-	if (ReturnToMainMenu)
+void ABasePlayerController::HideTeamScores()
+{
+	BaseHUD = BaseHUD ? BaseHUD : Cast<ABaseHUD>(GetHUD());
+	if (!BaseHUD || !BaseHUD->CharacterOverlay || !BaseHUD->CharacterOverlay->RedTeamScore || !BaseHUD->CharacterOverlay->BlueTeamScore || !BaseHUD->CharacterOverlay->ScoreSpacer)
 	{
-		bReturnToMainMenuOpen = !bReturnToMainMenuOpen;
-		if (bReturnToMainMenuOpen)
-		{
-			ReturnToMainMenu->MenuSetup();
-		}
-		else
-		{
-			ReturnToMainMenu->MenuTearDown();
-		}
+		return;
+	}
+	
+	BaseHUD->CharacterOverlay->RedTeamScore->SetText(FText());
+	BaseHUD->CharacterOverlay->BlueTeamScore->SetText(FText());
+	BaseHUD->CharacterOverlay->ScoreSpacer->SetText(FText());
+}
+
+void ABasePlayerController::InitTeamScores()
+{
+	BaseHUD = BaseHUD ? BaseHUD : Cast<ABaseHUD>(GetHUD());
+	if (!BaseHUD || !BaseHUD->CharacterOverlay || !BaseHUD->CharacterOverlay->RedTeamScore || !BaseHUD->CharacterOverlay->BlueTeamScore || !BaseHUD->CharacterOverlay->ScoreSpacer)
+	{
+		return;
+	}
+	
+	BaseHUD->CharacterOverlay->RedTeamScore->SetText(FText::FromString(FString("0")));
+	BaseHUD->CharacterOverlay->BlueTeamScore->SetText(FText::FromString(FString("0")));
+	BaseHUD->CharacterOverlay->ScoreSpacer->SetText(FText::FromString(FString("|")));
+}
+
+void ABasePlayerController::SetHUDRedTeamScore(int32 RedScore)
+{
+	BaseHUD = BaseHUD ? BaseHUD : Cast<ABaseHUD>(GetHUD());
+	if (!BaseHUD || !BaseHUD->CharacterOverlay || !BaseHUD->CharacterOverlay->RedTeamScore)
+	{
+		return;
+	}
+
+	const FString ScoreText = FString::Printf(TEXT("%d"), RedScore);
+	BaseHUD->CharacterOverlay->RedTeamScore->SetText(FText::FromString(ScoreText));
+}
+
+void ABasePlayerController::SetHUDBlueTeamScore(int32 BlueScore)
+{
+	BaseHUD = BaseHUD ? BaseHUD : Cast<ABaseHUD>(GetHUD());
+	if (!BaseHUD || !BaseHUD->CharacterOverlay || !BaseHUD->CharacterOverlay->BlueTeamScore)
+	{
+		return;
+	}
+
+	const FString ScoreText = FString::Printf(TEXT("%d"), BlueScore);
+	BaseHUD->CharacterOverlay->BlueTeamScore->SetText(FText::FromString(ScoreText));
+}
+
+void ABasePlayerController::OnRep_ShowTeamScores()
+{
+	if (bShowTeamScores)
+	{
+		InitTeamScores();
+	}
+	else
+	{
+		HideTeamScores();
 	}
 }
+
+#pragma endregion TeamScore

@@ -6,6 +6,11 @@
 #include "MultiplayerShooter/GameState/ShooterGameState.h"
 #include "MultiplayerShooter/PlayerState/BasePlayerState.h"
 
+ATeamsGameMode::ATeamsGameMode()
+{
+	bTeamsMatch = true;
+}
+
 void ATeamsGameMode::PostLogin(APlayerController* NewPlayer)
 {
 	Super::PostLogin(NewPlayer);
