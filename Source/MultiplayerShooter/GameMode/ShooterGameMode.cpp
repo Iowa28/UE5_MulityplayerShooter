@@ -70,6 +70,11 @@ void AShooterGameMode::OnMatchStateSet()
 	}
 }
 
+float AShooterGameMode::CalculateDamage(AController* Attacker, AController* Victim, float BaseDamage)
+{
+	return BaseDamage;
+}
+
 void AShooterGameMode::PlayerEliminated(ABaseCharacter* EliminatedCharacter, ABasePlayerController* VictimController,
                                         ABasePlayerController* AttackerController)
 {

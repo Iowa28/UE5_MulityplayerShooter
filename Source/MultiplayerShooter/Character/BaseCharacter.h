@@ -385,6 +385,9 @@ private:
 
 	void UpdateHUDAmmo();
 
+	UPROPERTY()
+	class AShooterGameMode* GameMode;
+
 public:
 	void SetOverlappingWeapon(AWeapon* Weapon);
 

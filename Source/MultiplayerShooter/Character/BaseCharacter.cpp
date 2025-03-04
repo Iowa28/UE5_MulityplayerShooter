@@ -293,7 +293,7 @@ void ABaseCharacter::Destroyed()
 		EliminationComponent->DestroyComponent();
 	}
 
-	const AShooterGameMode* GameMode = Cast<AShooterGameMode>(UGameplayStatics::GetGameMode(this));
+	GameMode = GameMode ? GameMode : GetWorld()->GetAuthGameMode<AShooterGameMode>();
 	const bool bMatchNotInProgress = GameMode && GameMode->GetMatchState() != MatchState::InProgress;
 	if (CombatComponent && CombatComponent->EquippedWeapon && bMatchNotInProgress)
 	{
@@ -595,9 +595,11 @@ void ABaseCharacter::TurnInPlace(float DeltaTime)
 void ABaseCharacter::ReceiveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType,
                                    AController* InstigatorController, AActor* DamageCauser)
 {
-	if (bEliminated) { return; }
+	GameMode = GameMode ? GameMode : GetWorld()->GetAuthGameMode<AShooterGameMode>();
+	if (bEliminated || !GameMode) { return; }
 
-	float DamageToHealth = Damage;
+	float DamageToHealth = GameMode->CalculateDamage(InstigatorController, Controller, Damage);
+	
 	if (Shield > 0.f)
 	{
 		if (Shield >= Damage)
@@ -619,12 +621,9 @@ void ABaseCharacter::ReceiveDamage(AActor* DamagedActor, float Damage, const UDa
 
 	if (FMath::IsNearlyEqual(Health, 0))
 	{
-		if (AShooterGameMode* ShooterGameMode = GetWorld()->GetAuthGameMode<AShooterGameMode>())
-		{
-			BasePlayerController = BasePlayerController ? BasePlayerController : Cast<ABasePlayerController>(GetController());
-			ABasePlayerController* AttackerController = Cast<ABasePlayerController>(InstigatorController);
-			ShooterGameMode->PlayerEliminated(this, BasePlayerController, AttackerController);
-		}
+		BasePlayerController = BasePlayerController ? BasePlayerController : Cast<ABasePlayerController>(GetController());
+		ABasePlayerController* AttackerController = Cast<ABasePlayerController>(InstigatorController);
+		GameMode->PlayerEliminated(this, BasePlayerController, AttackerController);
 	}
 }
 
@@ -760,10 +759,10 @@ void ABaseCharacter::MulticastEliminate_Implementation(bool bPlayerLeftGame)
 
 void ABaseCharacter::EliminationTimerFinished()
 {
-	AShooterGameMode* ShooterGameMode = GetWorld()->GetAuthGameMode<AShooterGameMode>();
-	if (ShooterGameMode && !bLeftGame)
+	GameMode = GameMode ? GameMode : GetWorld()->GetAuthGameMode<AShooterGameMode>();
+	if (GameMode && !bLeftGame)
 	{
-		ShooterGameMode->RequestRespawn(this, GetController());
+		GameMode->RequestRespawn(this, GetController());
 	}
 	if (bLeftGame && IsLocallyControlled())
 	{
@@ -805,11 +804,11 @@ void ABaseCharacter::StartDissolve()
 
 void ABaseCharacter::ServerLeaveGame_Implementation()
 {
-	AShooterGameMode* ShooterGameMode = GetWorld()->GetAuthGameMode<AShooterGameMode>();
+	GameMode = GameMode ? GameMode : GetWorld()->GetAuthGameMode<AShooterGameMode>();
 	CharacterPlayerState = CharacterPlayerState ? CharacterPlayerState : GetPlayerState<ABasePlayerState>();
-	if (ShooterGameMode && CharacterPlayerState)
+	if (GameMode && CharacterPlayerState)
 	{
-		ShooterGameMode->PlayerLeftGame(CharacterPlayerState);
+		GameMode->PlayerLeftGame(CharacterPlayerState);
 	}
 }
 #pragma endregion Elimination
@@ -1022,9 +1021,9 @@ void ABaseCharacter::PlayThrowGrenadeMontage()
 
 void ABaseCharacter::SpawnDefaultWeapon()
 {
-	const AShooterGameMode* ShooterGameMode = Cast<AShooterGameMode>(UGameplayStatics::GetGameMode(this));
+	GameMode = GameMode ? GameMode : GetWorld()->GetAuthGameMode<AShooterGameMode>();
 	UWorld* World = GetWorld();
-	if (ShooterGameMode && World && !bEliminated && DefaultWeaponClass && CombatComponent)
+	if (GameMode && World && !bEliminated && DefaultWeaponClass && CombatComponent)
 	{
 		AWeapon* StartingWeapon = World->SpawnActor<AWeapon>(DefaultWeaponClass);
 		StartingWeapon->bDestroyWeapon = true;
