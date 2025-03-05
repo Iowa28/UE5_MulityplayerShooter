@@ -17,6 +17,7 @@
 #include "MultiplayerShooter/HUD/CharacterOverlay.h"
 #include "MultiplayerShooter/HUD/ReturnToMainMenu.h"
 #include "MultiplayerShooter/PlayerState/BasePlayerState.h"
+#include "MultiplayerShooter/Types/Announcement.h"
 #include "Net/UnrealNetwork.h"
 
 void ABasePlayerController::BeginPlay()
@@ -490,36 +491,12 @@ void ABasePlayerController::HandleCooldown()
 		if (BaseHUD->Announcement && BaseHUD->Announcement->AnnouncementText && BaseHUD->Announcement->InfoText)
 		{
 			BaseHUD->Announcement->SetVisibility(ESlateVisibility::Visible);
-			const FString AnnouncementText = FString("New match starts in:");
-			BaseHUD->Announcement->AnnouncementText->SetText(FText::FromString(AnnouncementText));
-
-			const AShooterGameState* GameState = Cast<AShooterGameState>(UGameplayStatics::GetGameState(this));
-			const ABasePlayerState* ThisPlayerState = GetPlayerState<ABasePlayerState>();
-			if (GameState && ThisPlayerState)
+			BaseHUD->Announcement->AnnouncementText->SetText(FText::FromString(Announcement::NewMatchStartsIn));
+			
+			if (const AShooterGameState* GameState = Cast<AShooterGameState>(UGameplayStatics::GetGameState(this)))
 			{
-				TArray<ABasePlayerState*> TopPlayers = GameState->TopScoringPlayers;
-				FString InfoTextString;
-				if (TopPlayers.Num() <= 0)
-				{
-					InfoTextString = FString("Nobody won.");
-				}
-				else if (TopPlayers.Num() == 1 && TopPlayers[0] == ThisPlayerState)
-				{
-					InfoTextString = FString("You won!");
-				}
-				else if (TopPlayers.Num() == 1)
-				{
-					InfoTextString = FString::Printf(TEXT("%s won."), *TopPlayers[0]->GetPlayerName());
-				}
-				else if (TopPlayers.Num() > 1)
-				{
-					InfoTextString = FString("Winners:\n");
-					for (const ABasePlayerState* TopPlayer : TopPlayers)
-					{
-						InfoTextString.Append(FString::Printf(TEXT("%s\n"), *TopPlayer->GetPlayerName()));
-					}
-				}
-				
+				const TArray<ABasePlayerState*> TopPlayers = GameState->TopScoringPlayers;
+				const FString InfoTextString = bShowTeamScores ? GetTeamsInfoText(GameState) : GetInfoText(TopPlayers);
 				BaseHUD->Announcement->InfoText->SetText(FText::FromString(InfoTextString));
 			}
 		}
@@ -533,6 +510,59 @@ void ABasePlayerController::HandleCooldown()
 			BaseCharacter->GetCombatComponent()->FireButtonPressed(false);
 		}
 	}
+}
+
+FString ABasePlayerController::GetInfoText(const TArray<ABasePlayerState*>& Players) const
+{
+	FString InfoTextString;
+	
+	const ABasePlayerState* ThisPlayerState = GetPlayerState<ABasePlayerState>();
+	if (!ThisPlayerState) { return InfoTextString; }
+	
+	if (Players.Num() <= 0)
+	{
+		InfoTextString = Announcement::NobodyWon;
+	}
+	else if (Players.Num() == 1 && Players[0] == ThisPlayerState)
+	{
+		InfoTextString = Announcement::YouWon;
+	}
+	else if (Players.Num() == 1)
+	{
+		InfoTextString = FString::Printf(TEXT("%s won."), *Players[0]->GetPlayerName());
+	}
+	else if (Players.Num() > 1)
+	{
+		InfoTextString = Announcement::Winners;
+		InfoTextString.Append(FString(""));
+		for (const ABasePlayerState* TopPlayer : Players)
+		{
+			InfoTextString.Append(FString::Printf(TEXT("%s\n"), *TopPlayer->GetPlayerName()));
+		}
+	}
+
+	return InfoTextString;
+}
+
+FString ABasePlayerController::GetTeamsInfoText(const AShooterGameState* ShooterGameState) const
+{
+	FString TeamsInfoText;
+	const int32 RedTeamScore = ShooterGameState->RedTeamScore;
+	const int32 BlueTeamScore = ShooterGameState->BlueTeamScore;
+	if (RedTeamScore > BlueTeamScore)
+	{
+		TeamsInfoText = Announcement::RedTeamWon;
+	}
+	else if (RedTeamScore < BlueTeamScore)
+	{
+		TeamsInfoText = Announcement::BlueTeamWon;
+	}
+	else
+	{
+		TeamsInfoText = Announcement::NobodyWon;
+	}
+
+	return TeamsInfoText;
 }
 
 #pragma endregion Match

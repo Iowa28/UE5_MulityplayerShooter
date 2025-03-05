@@ -138,6 +138,8 @@ private:
 	bool bInitializeCarriedAmmo = false;
 
 	void HandleCooldown();
+	FString GetInfoText(const TArray<class ABasePlayerState*>& Players) const;
+	FString GetTeamsInfoText(const class AShooterGameState* ShooterGameState) const;
 
 	float HighPingRunningTime = 0.f;
 	
