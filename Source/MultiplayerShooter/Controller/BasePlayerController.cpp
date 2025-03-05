@@ -453,6 +453,10 @@ void ABasePlayerController::OnRep_MatchState()
 
 void ABasePlayerController::HandleMatchHasStarted(bool bTeamsMatch)
 {
+	if (HasAuthority())
+	{
+		bShowTeamScores = bTeamsMatch;
+	}
 	BaseHUD = BaseHUD ? BaseHUD : Cast<ABaseHUD>(GetHUD());
 	if (BaseHUD)
 	{
@@ -466,17 +470,14 @@ void ABasePlayerController::HandleMatchHasStarted(bool bTeamsMatch)
 		}
 	}
 
-	if (HasAuthority())
+	if (!HasAuthority()) { return; }
+	if (bTeamsMatch)
 	{
-		bShowTeamScores = bTeamsMatch;
-		if (bShowTeamScores)
-		{
-			InitTeamScores();
-		}
-		else
-		{
-			HideTeamScores();
-		}
+		InitTeamScores();
+	}
+	else
+	{
+		HideTeamScores();
 	}
 }
 

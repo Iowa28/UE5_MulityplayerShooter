@@ -39,4 +39,7 @@ public:
 
 private:
 	float TopScore = 0.f;
+
+	UPROPERTY()
+	class ABasePlayerController* Controller;
 };

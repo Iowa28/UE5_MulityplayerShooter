@@ -2,6 +2,7 @@
 
 
 #include "ShooterGameState.h"
+#include "MultiplayerShooter/Controller/BasePlayerController.h"
 #include "MultiplayerShooter/PlayerState/BasePlayerState.h"
 #include "Net/UnrealNetwork.h"
 
@@ -33,22 +34,42 @@ void AShooterGameState::UpdateTopScore(ABasePlayerState* ScoringPlayer)
 	}
 }
 
-void AShooterGameState::OnRep_RedTeamScore()
-{
-	
-}
-
-void AShooterGameState::OnRep_BlueTeamScore()
-{
-	
-}
-
 void AShooterGameState::RedTeamScores()
 {
-	++RedTeamScore;
+	RedTeamScore++;
+	
+	Controller = Controller ? Controller : Cast<ABasePlayerController>(GetWorld()->GetFirstPlayerController());
+	if (Controller)
+	{
+		Controller->SetHUDRedTeamScore(RedTeamScore);
+	}
+}
+
+void AShooterGameState::OnRep_RedTeamScore()
+{
+	Controller = Controller ? Controller : Cast<ABasePlayerController>(GetWorld()->GetFirstPlayerController());
+	if (Controller)
+	{
+		Controller->SetHUDRedTeamScore(RedTeamScore);
+	}
 }
 
 void AShooterGameState::BlueTeamScores()
 {
-	++BlueTeamScore;
+	BlueTeamScore++;
+
+	Controller = Controller ? Controller : Cast<ABasePlayerController>(GetWorld()->GetFirstPlayerController());
+	if (Controller)
+	{
+		Controller->SetHUDBlueTeamScore(BlueTeamScore);
+	}
+}
+
+void AShooterGameState::OnRep_BlueTeamScore()
+{
+	Controller = Controller ? Controller : Cast<ABasePlayerController>(GetWorld()->GetFirstPlayerController());
+	if (Controller)
+	{
+		Controller->SetHUDBlueTeamScore(BlueTeamScore);
+	}
 }
