@@ -189,6 +189,7 @@ public:
 
 	FORCEINLINE USphereComponent* GerAreaSphere() const { return AreaSphere; }
 	FORCEINLINE USkeletalMeshComponent* GetWeaponMesh() const { return WeaponMesh; }
+	FORCEINLINE UWidgetComponent* GetPickupWidget() const { return PickupWidget; }
 	
 	FORCEINLINE UTexture2D* GetCrosshairCenter() const { return CrosshairCenter; }
 	FORCEINLINE UTexture2D* GetCrosshairLeft() const { return CrosshairLeft; }

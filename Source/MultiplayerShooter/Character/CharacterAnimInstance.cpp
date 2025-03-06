@@ -38,6 +38,7 @@ void UCharacterAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	TurningInPlace = Character->GetTurningInPlace();
 	bRotateRootBone = Character->ShouldRotateRootBone();
 	bEliminated = Character->IsEliminated();
+	bHoldingTheFlag = Character->IsHoldingTheFlag();
 
 	const FRotator AimRotation = Character->GetBaseAimRotation();
 	const FRotator MovementRotation = UKismetMathLibrary::MakeRotFromX(Character->GetVelocity());

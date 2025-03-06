@@ -236,6 +236,8 @@ private:
 	void UpdateAmmoValues();
 	void UpdateShotgunAmmoValues();
 
+	bool bHoldingTheFlag;
+
 public:
 	FORCEINLINE int32 GetGrenades() const { return Grenades; }
 

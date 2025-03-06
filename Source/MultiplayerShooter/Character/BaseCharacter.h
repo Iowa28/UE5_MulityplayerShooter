@@ -391,38 +391,28 @@ private:
 public:
 	void SetOverlappingWeapon(AWeapon* Weapon);
 
+	AWeapon* GetEquippedWeapon() const;
+	FVector GetHitTarget() const;
+	ECombatState GetCombatState() const;
+
 	bool IsWeaponEquipped() const;
-	
 	bool IsAiming() const;
+	bool IsLocallyReloading() const;
+	bool IsHoldingTheFlag() const;
 
 	FORCEINLINE float GetAimOffsetYaw() const { return AimOffsetYaw; }
 	FORCEINLINE float GetAimOffsetPitch() const { return AimOffsetPitch; }
-
-	AWeapon* GetEquippedWeapon() const;
-
 	FORCEINLINE ETurningInPlace GetTurningInPlace() const { return TurningInPlace; }
-
-	FVector GetHitTarget() const;
-
 	FORCEINLINE UCameraComponent* GetFollowCamera() const { return FollowCamera; }
-
 	FORCEINLINE bool ShouldRotateRootBone() const { return bRotateRootBone; }
-	
 	FORCEINLINE bool IsEliminated() const { return bEliminated; }
-	
 	FORCEINLINE float GetMaxHealth() const { return MaxHealth; }
 	FORCEINLINE float GetHealth() const { return Health; }
 	FORCEINLINE void SetHealth(const float Amount) { Health = Amount; }
 	FORCEINLINE float GetMaxShield() const { return MaxShield; }
 	FORCEINLINE float GetShield() const { return Shield; }
 	FORCEINLINE void SetShield(const float Amount) { Shield = Amount; }
-
-	ECombatState GetCombatState() const;
-
 	FORCEINLINE UCombatComponent* GetCombatComponent() const { return CombatComponent; }
 	FORCEINLINE ULagCompensationComponent* GetLagCompensationComponent() const { return LagCompensationComponent; }
-	
 	FORCEINLINE UStaticMeshComponent* GetAttachedGrenade() const { return AttachedGrenade; }
-
-	bool IsLocallyReloading();
 };

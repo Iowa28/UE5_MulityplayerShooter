@@ -1070,9 +1070,14 @@ ECombatState ABaseCharacter::GetCombatState() const
 	return CombatComponent ? CombatComponent->CombatState : ECombatState::ECS_MAX;
 }
 
-bool ABaseCharacter::IsLocallyReloading()
+bool ABaseCharacter::IsLocallyReloading() const
 {
 	return CombatComponent && CombatComponent->bLocallyReloading;
+}
+
+bool ABaseCharacter::IsHoldingTheFlag() const
+{
+	return CombatComponent && CombatComponent->bHoldingTheFlag;
 }
 
 #pragma endregion Getters
