@@ -1075,6 +1075,16 @@ ECombatState ABaseCharacter::GetCombatState() const
 	return CombatComponent ? CombatComponent->CombatState : ECombatState::ECS_MAX;
 }
 
+ETeam ABaseCharacter::GetTeam()
+{
+	CharacterPlayerState = CharacterPlayerState ? CharacterPlayerState : GetPlayerState<ABasePlayerState>();
+	if (!CharacterPlayerState)
+	{
+		return ETeam::ET_NoTeam;
+	}
+	return CharacterPlayerState->GetTeam();
+}
+
 bool ABaseCharacter::IsLocallyReloading() const
 {
 	return CombatComponent && CombatComponent->bLocallyReloading;

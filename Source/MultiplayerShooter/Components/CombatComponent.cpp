@@ -366,7 +366,6 @@ void UCombatComponent::AttachFlagToLeftHand(AWeapon* Flag)
 	
 	if (const USkeletalMeshSocket* HandSocket = Character->GetMesh()->GetSocketByName(FName("FlagSocket")))
 	{
-		GEngine->AddOnScreenDebugMessage(-1,3.f, FColor::Red, TEXT("AttachFlagToLeftHand"));
 		HandSocket->AttachActor(Flag, Character->GetMesh());
 	}
 }

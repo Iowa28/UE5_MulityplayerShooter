@@ -394,6 +394,7 @@ public:
 	AWeapon* GetEquippedWeapon() const;
 	FVector GetHitTarget() const;
 	ECombatState GetCombatState() const;
+	ETeam GetTeam();
 
 	bool IsWeaponEquipped() const;
 	bool IsAiming() const;

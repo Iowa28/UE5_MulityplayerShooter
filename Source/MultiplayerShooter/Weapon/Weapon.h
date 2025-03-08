@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "MultiplayerShooter/Types/Team.h"
 #include "MultiplayerShooter/Types/WeaponTypes.h"
 #include "Weapon.generated.h"
 
@@ -183,6 +184,9 @@ private:
 
 	UPROPERTY(EditDefaultsOnly)
 	EWeaponType WeaponType;
+
+	UPROPERTY(EditDefaultsOnly)
+	ETeam Team;
 
 public:
 	void SetWeaponState(EWeaponState State);
