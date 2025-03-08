@@ -470,6 +470,13 @@ void ABaseCharacter::RotateInPlace(float DeltaTime)
 		TurningInPlace = ETurningInPlace::ETIP_NotTurning;
 		return;
 	}
+	if (CombatComponent && CombatComponent->bHoldingTheFlag)
+	{
+		bUseControllerRotationYaw = false;
+		GetCharacterMovement()->bOrientRotationToMovement = true;
+		TurningInPlace = ETurningInPlace::ETIP_NotTurning;
+		return;
+	}
 	
 	if (GetLocalRole() > ROLE_SimulatedProxy && IsLocallyControlled())
 	{
