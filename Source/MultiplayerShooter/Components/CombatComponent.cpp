@@ -25,6 +25,7 @@ void UCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 
 	DOREPLIFETIME(UCombatComponent, EquippedWeapon);
 	DOREPLIFETIME(UCombatComponent, SecondaryWeapon);
+	DOREPLIFETIME(UCombatComponent, TheFlag);
 	DOREPLIFETIME(UCombatComponent, bAiming);
 	DOREPLIFETIME_CONDITION(UCombatComponent, CarriedAmmo, COND_OwnerOnly);
 	DOREPLIFETIME(UCombatComponent, CombatState);
@@ -249,11 +250,7 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 
 	if (WeaponToEquip->GetWeaponType() == EWeaponType::EWT_Flag)
 	{
-		Character->Crouch();
-		bHoldingTheFlag = true;
-		AttachFlagToLeftHand(WeaponToEquip);
-		WeaponToEquip->SetWeaponState(EWeaponState::EWS_Equipped);
-		WeaponToEquip->SetOwner(Character);
+		EquipFlag(WeaponToEquip);
 		return;
 	}
 
@@ -292,6 +289,16 @@ void UCombatComponent::EquipSecondaryWeapon(AWeapon* WeaponToEquip)
 	PlayEquippedWeaponSound(SecondaryWeapon);
 }
 
+void UCombatComponent::EquipFlag(AWeapon* Flag)
+{
+	Character->Crouch();
+	bHoldingTheFlag = true;
+	TheFlag = Flag;
+	TheFlag->SetWeaponState(EWeaponState::EWS_Equipped);
+	AttachFlagToLeftHand(TheFlag);
+	TheFlag->SetOwner(Character);
+}
+
 void UCombatComponent::OnRep_PrimaryWeapon()
 {
 	if (!EquippedWeapon || !Character) { return; }
@@ -311,6 +318,14 @@ void UCombatComponent::OnRep_SecondaryWeapon()
 	SecondaryWeapon->SetWeaponState(EWeaponState::EWS_EquippedSecondary);
 	AttachWeaponToBackpack(SecondaryWeapon);
 	PlayEquippedWeaponSound(SecondaryWeapon);
+}
+
+void UCombatComponent::OnRep_Flag()
+{
+	if (!TheFlag || !Character) { return; }
+
+	TheFlag->SetWeaponState(EWeaponState::EWS_Equipped);
+	AttachFlagToLeftHand(TheFlag);
 }
 
 void UCombatComponent::DropEquippedWeapon()
@@ -351,6 +366,7 @@ void UCombatComponent::AttachFlagToLeftHand(AWeapon* Flag)
 	
 	if (const USkeletalMeshSocket* HandSocket = Character->GetMesh()->GetSocketByName(FName("FlagSocket")))
 	{
+		GEngine->AddOnScreenDebugMessage(-1,3.f, FColor::Red, TEXT("AttachFlagToLeftHand"));
 		HandSocket->AttachActor(Flag, Character->GetMesh());
 	}
 }

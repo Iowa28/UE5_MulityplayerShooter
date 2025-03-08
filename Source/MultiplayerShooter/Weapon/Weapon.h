@@ -42,7 +42,7 @@ public:
 
 	virtual void Fire(const FVector& HitTarget);
 
-	void Dropped();
+	virtual void Dropped();
 
 	void SetHUDAmmo();
 
@@ -187,7 +187,7 @@ private:
 public:
 	void SetWeaponState(EWeaponState State);
 
-	FORCEINLINE USphereComponent* GerAreaSphere() const { return AreaSphere; }
+	FORCEINLINE USphereComponent* GetAreaSphere() const { return AreaSphere; }
 	FORCEINLINE USkeletalMeshComponent* GetWeaponMesh() const { return WeaponMesh; }
 	FORCEINLINE UWidgetComponent* GetPickupWidget() const { return PickupWidget; }
 	

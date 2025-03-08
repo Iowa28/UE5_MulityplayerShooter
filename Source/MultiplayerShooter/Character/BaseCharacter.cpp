@@ -205,28 +205,21 @@ void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 {
 	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent)) 
 	{
-		
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &ThisClass::Jump);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
 
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ThisClass::Move);
-
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ThisClass::Look);
 		
 		EnhancedInputComponent->BindAction(EquipAction, ETriggerEvent::Started, this, &ThisClass::EquipButtonPressed);
 		EnhancedInputComponent->BindAction(SwapAction, ETriggerEvent::Started, this, &ThisClass::SwapButtonPressed);
-
 		EnhancedInputComponent->BindAction(DuckAction, ETriggerEvent::Started, this, &ThisClass::DuckButtonPressed);
 		EnhancedInputComponent->BindAction(DuckAction, ETriggerEvent::Completed, this, &ThisClass::DuckButtonReleased);
-
 		EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Started, this, &ThisClass::AimButtonPressed);
 		EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Completed, this, &ThisClass::AimButtonReleased);
-
 		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &ThisClass::FireButtonPressed);
 		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Completed, this, &ThisClass::FireButtonReleased);
-
 		EnhancedInputComponent->BindAction(ReloadAction, ETriggerEvent::Started, this, &ThisClass::ReloadButtonPressed);
-		
 		EnhancedInputComponent->BindAction(ThrowGrenadeAction, ETriggerEvent::Started, this, &ThisClass::ThrowGrenadeButtonPressed);
 	}
 }
@@ -389,7 +382,7 @@ void ABaseCharacter::Look(const FInputActionValue& Value)
 
 void ABaseCharacter::Jump()
 {
-	if (bDisableGameplay) { return; }
+	if (bDisableGameplay || IsHoldingTheFlag()) { return; }
 	
 	if (bIsCrouched)
 	{
@@ -439,6 +432,7 @@ void ABaseCharacter::DuckButtonPressed()
 
 void ABaseCharacter::DuckButtonReleased()
 {
+	if (IsHoldingTheFlag()) { return; }
 	UnCrouch();
 }
 #pragma endregion Duck
@@ -446,7 +440,7 @@ void ABaseCharacter::DuckButtonReleased()
 #pragma region Aiming
 void ABaseCharacter::AimButtonPressed()
 {
-	if (CombatComponent && !bDisableGameplay)
+	if (!bDisableGameplay && !IsHoldingTheFlag())
 	{
 		CombatComponent->SetAiming(true);
 	}
@@ -470,7 +464,7 @@ void ABaseCharacter::RotateInPlace(float DeltaTime)
 		TurningInPlace = ETurningInPlace::ETIP_NotTurning;
 		return;
 	}
-	if (CombatComponent && CombatComponent->bHoldingTheFlag)
+	if (!bDisableGameplay && !IsHoldingTheFlag())
 	{
 		bUseControllerRotationYaw = false;
 		GetCharacterMovement()->bOrientRotationToMovement = true;
@@ -700,6 +694,10 @@ void ABaseCharacter::Eliminate(bool bPlayerLeftGame)
 	{
 		DropOrDestroyWeapon(CombatComponent->EquippedWeapon);
 		DropOrDestroyWeapon(CombatComponent->SecondaryWeapon);
+		if (CombatComponent->TheFlag)
+		{
+			CombatComponent->TheFlag->Dropped();
+		}
 	}
 	MulticastEliminate(bPlayerLeftGame);
 }
@@ -823,7 +821,7 @@ void ABaseCharacter::ServerLeaveGame_Implementation()
 #pragma region Fire
 void ABaseCharacter::FireButtonPressed()
 {
-	if (CombatComponent && !bDisableGameplay)
+	if (!bDisableGameplay && !IsHoldingTheFlag())
 	{
 		CombatComponent->FireButtonPressed(true);
 	}
@@ -854,7 +852,7 @@ void ABaseCharacter::PlayFireMontage(bool bAiming)
 #pragma region Reload
 void ABaseCharacter::ReloadButtonPressed()
 {
-	if (CombatComponent && !bDisableGameplay)
+	if (!bDisableGameplay && !IsHoldingTheFlag())
 	{
 		CombatComponent->Reload();
 	}
@@ -903,7 +901,7 @@ void ABaseCharacter::PlayReloadMontage()
 #pragma region Equipment
 void ABaseCharacter::EquipButtonPressed()
 {
-	if (CombatComponent && !bDisableGameplay)
+	if (!bDisableGameplay && !IsHoldingTheFlag())
 	{
 		if (CombatComponent->CombatState == ECombatState::ECS_Unoccupied)
 		{
@@ -1008,7 +1006,7 @@ void ABaseCharacter::SetOverlappingWeapon(AWeapon* Weapon)
 #pragma region ThrowGrenade
 void ABaseCharacter::ThrowGrenadeButtonPressed()
 {
-	if (CombatComponent)
+	if (!bDisableGameplay && !IsHoldingTheFlag())
 	{
 		CombatComponent->ThrowGrenade();
 	}

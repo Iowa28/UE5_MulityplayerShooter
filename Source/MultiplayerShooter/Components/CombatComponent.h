@@ -71,8 +71,12 @@ protected:
 	UFUNCTION()
 	void OnRep_SecondaryWeapon();
 
+	UFUNCTION()
+	void OnRep_Flag();
+
 	void EquipPrimaryWeapon(AWeapon* WeaponToEquip);
 	void EquipSecondaryWeapon(AWeapon* WeaponToEquip);
+	void EquipFlag(AWeapon* Flag);
 
 	void DropEquippedWeapon();
 	void AttachWeaponToRightHand(AWeapon* WeaponToAttach);
@@ -136,6 +140,9 @@ private:
 
 	UPROPERTY(ReplicatedUsing = OnRep_SecondaryWeapon)
 	AWeapon* SecondaryWeapon;
+
+	UPROPERTY(ReplicatedUsing = OnRep_Flag)
+	AWeapon* TheFlag;
 
 	UPROPERTY(ReplicatedUsing = OnRep_Aiming)
 	bool bAiming;
