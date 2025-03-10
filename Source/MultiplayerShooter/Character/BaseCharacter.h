@@ -80,7 +80,9 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastLostTheLead();
 
+	void OnPlayerStateInitialized();
 	void SetTeamColor(const ETeam Team);
+	void SetSpawnPoint();
 
 protected:
 	virtual void BeginPlay() override;

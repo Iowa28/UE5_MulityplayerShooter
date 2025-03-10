@@ -7,6 +7,7 @@
 #include "InputActionValue.h"
 #include "NiagaraComponent.h"
 #include "NiagaraFunctionLibrary.h"
+#include "TeamPlayerStart.h"
 #include "Camera/CameraComponent.h"
 #include "Components/BoxComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -240,15 +241,44 @@ void ABaseCharacter::PollInit()
 		CharacterPlayerState = GetPlayerState<ABasePlayerState>();
 		if (CharacterPlayerState)
 		{
-			CharacterPlayerState->AddToScore(0.f);
-			CharacterPlayerState->AddToDefeats(0.f);
-			SetTeamColor(CharacterPlayerState->GetTeam());
+			OnPlayerStateInitialized();
 
 			const AShooterGameState* ShooterGameState = Cast<AShooterGameState>(UGameplayStatics::GetGameState(this));
 			if (ShooterGameState && ShooterGameState->TopScoringPlayers.Contains(CharacterPlayerState))
 			{
 				MulticastGainedTheLead();
 			}
+		}
+	}
+}
+
+void ABaseCharacter::OnPlayerStateInitialized()
+{
+	CharacterPlayerState->AddToScore(0.f);
+	CharacterPlayerState->AddToDefeats(0.f);
+	SetTeamColor(CharacterPlayerState->GetTeam());
+	SetSpawnPoint();
+}
+
+void ABaseCharacter::SetSpawnPoint()
+{
+	if (HasAuthority() && CharacterPlayerState->GetTeam() != ETeam::ET_NoTeam)
+	{
+		TArray<AActor*> PlayerStarts;
+		UGameplayStatics::GetAllActorsOfClass(this, ATeamPlayerStart::StaticClass(), PlayerStarts);
+		TArray<ATeamPlayerStart*> TeamPlayerStarts;
+		for (AActor* Start : PlayerStarts)
+		{
+			ATeamPlayerStart* TeamStart = Cast<ATeamPlayerStart>(Start);
+			if (TeamStart && TeamStart->Team == CharacterPlayerState->GetTeam())
+			{
+				TeamPlayerStarts.Add(TeamStart);
+			}
+		}
+		if (!TeamPlayerStarts.IsEmpty())
+		{
+			const ATeamPlayerStart* ChosenPlayerStart = TeamPlayerStarts[FMath::RandRange(0, TeamPlayerStarts.Num() - 1)];
+			SetActorLocationAndRotation(ChosenPlayerStart->GetActorLocation(), ChosenPlayerStart->GetActorRotation());
 		}
 	}
 }
