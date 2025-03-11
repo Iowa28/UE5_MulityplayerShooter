@@ -211,6 +211,7 @@ public:
 	FORCEINLINE bool IsFull() const { return Ammo == MagCapacity; }
 
 	FORCEINLINE EWeaponType GetWeaponType() const { return WeaponType; }
+	FORCEINLINE ETeam GetTeam() const { return Team; }
 
 	FORCEINLINE int32 GetAmmo() const { return Ammo; }
 	FORCEINLINE int32 GetMagCapacity() const { return MagCapacity; }

@@ -4,6 +4,7 @@
 #include "Flag.h"
 #include "Components/SphereComponent.h"
 #include "Components/WidgetComponent.h"
+#include "MultiplayerShooter/Character/BaseCharacter.h"
 
 AFlag::AFlag()
 {
@@ -13,6 +14,13 @@ AFlag::AFlag()
 	FlagMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetAreaSphere()->SetupAttachment(FlagMesh);
 	GetPickupWidget()->SetupAttachment(FlagMesh);
+}
+
+void AFlag::BeginPlay()
+{
+	Super::BeginPlay();
+
+	InitialTransform = GetActorTransform();
 }
 
 void AFlag::Dropped()
@@ -51,4 +59,28 @@ void AFlag::OnDropped()
 	FlagMesh->SetCustomDepthStencilValue(CUSTOM_DEPTH_BLUE);
 	FlagMesh->MarkRenderStateDirty();
 	EnableCustomDepth(true);
+}
+
+void AFlag::ResetFlag()
+{
+	if (ABaseCharacter* FlagBearer = Cast<ABaseCharacter>(GetOwner()))
+	{
+		FlagBearer->SetHoldingTheFlag(false);
+		FlagBearer->SetOverlappingWeapon(nullptr);
+		FlagBearer->UnCrouch();
+	}
+
+	if (!HasAuthority()) { return; }
+	
+	SetWeaponState(EWeaponState::EWS_Initial);
+	const FDetachmentTransformRules DetachRules = FDetachmentTransformRules(EDetachmentRule::KeepWorld, true);
+	FlagMesh->DetachFromComponent(DetachRules);
+	SetOwner(nullptr);
+	OwnerCharacter = nullptr;
+	OwnerController = nullptr;
+	
+	GetAreaSphere()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	GetAreaSphere()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
+
+	SetActorTransform(InitialTransform);
 }

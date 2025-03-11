@@ -392,6 +392,7 @@ private:
 
 public:
 	void SetOverlappingWeapon(AWeapon* Weapon);
+	void SetHoldingTheFlag(const bool bHolding);
 
 	AWeapon* GetEquippedWeapon() const;
 	FVector GetHitTarget() const;

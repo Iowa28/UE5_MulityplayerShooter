@@ -488,16 +488,22 @@ void ABaseCharacter::AimButtonReleased()
 #pragma region AimOffset
 void ABaseCharacter::RotateInPlace(float DeltaTime)
 {
-	if (bDisableGameplay)
-	{
-		bUseControllerRotationYaw = false;
-		TurningInPlace = ETurningInPlace::ETIP_NotTurning;
-		return;
-	}
-	if (!bDisableGameplay && !IsHoldingTheFlag())
+	if (IsHoldingTheFlag())
 	{
 		bUseControllerRotationYaw = false;
 		GetCharacterMovement()->bOrientRotationToMovement = true;
+		TurningInPlace = ETurningInPlace::ETIP_NotTurning;
+		return;
+	}
+	if (IsWeaponEquipped())
+	{
+		bUseControllerRotationYaw = true;
+		GetCharacterMovement()->bOrientRotationToMovement = false;
+	}
+	
+	if (bDisableGameplay)
+	{
+		bUseControllerRotationYaw = false;
 		TurningInPlace = ETurningInPlace::ETIP_NotTurning;
 		return;
 	}
@@ -998,6 +1004,14 @@ void ABaseCharacter::PlaySwapWeaponMontage()
 	if (AnimInstance && SwapWeaponsMontage)
 	{
 		AnimInstance->Montage_Play(SwapWeaponsMontage);
+	}
+}
+
+void ABaseCharacter::SetHoldingTheFlag(const bool bHolding)
+{
+	if (CombatComponent)
+	{
+		CombatComponent->bHoldingTheFlag = bHolding;
 	}
 }
 #pragma endregion Equipment
