@@ -199,6 +199,11 @@ void UCombatComponent::TraceUnderCrosshair(FHitResult& TraceHitResult)
 		TraceHitResult.ImpactPoint = End;
 	}
 
+	// HUDPackage.CrosshairColor = FLinearColor::White;
+	// if (TraceHitResult.GetActor() && TraceHitResult.GetActor()->Implements<UCrosshairInteractInterface>())
+	// {
+	// 	HUDPackage.CrosshairColor = FLinearColor::Red;
+	// }
 	HUDPackage.CrosshairColor = TraceHitResult.GetActor() && TraceHitResult.GetActor()->Implements<UCrosshairInteractInterface>() ? FLinearColor::Red : FLinearColor::White;
 }
 #pragma endregion Crosshair
