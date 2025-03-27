@@ -15,6 +15,12 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void MenuSetup(int32 NumberOfPublicConnections = 4, FString TypeOfMatch = FString(TEXT("FreeForAll")), FString LobbyPath = FString(TEXT("/Game/Maps/Lobby")));
 
+	UFUNCTION(BlueprintCallable)
+	void HostButtonClicked();
+
+	UFUNCTION(BlueprintCallable)
+	void JoinButtonClicked();
+
 protected:
 	virtual bool Initialize() override;
 	virtual void NativeDestruct() override;
@@ -35,12 +41,6 @@ private:
 	UPROPERTY(meta = (BindWidget))
 	UButton* JoinButton;
 
-	UFUNCTION()
-	void HostButtonClicked();
-
-	UFUNCTION()
-	void JoinButtonClicked();
-
 	void MenuTearDown();
 
 	UPROPERTY()
@@ -48,6 +48,9 @@ private:
 
 	UPROPERTY(BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	FString MatchType = TEXT("FreeForAll");
-	int32 NumPublicConnections = 4;
+
+	UPROPERTY(BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	int32 NumPublicConnections = 2;
+	
 	FString PathToLobby = TEXT("");
 };

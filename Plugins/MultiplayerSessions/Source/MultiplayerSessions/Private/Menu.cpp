@@ -51,14 +51,14 @@ bool UMenu::Initialize()
 		return false;
 	}
 
-	if (HostButton)
-	{
-		HostButton->OnClicked.AddDynamic(this, &ThisClass::HostButtonClicked);
-	}
-	if (JoinButton)
-	{
-		JoinButton->OnClicked.AddDynamic(this, &ThisClass::JoinButtonClicked);
-	}
+	// if (HostButton)
+	// {
+	// 	HostButton->OnClicked.AddDynamic(this, &ThisClass::HostButtonClicked);
+	// }
+	// if (JoinButton)
+	// {
+	// 	JoinButton->OnClicked.AddDynamic(this, &ThisClass::JoinButtonClicked);
+	// }
 
 	return true;
 }
