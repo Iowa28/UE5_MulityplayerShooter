@@ -31,6 +31,7 @@ public:
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 	virtual void PostInitializeComponents() override;
 	virtual void Destroyed() override;
+	void PossessedBy(AController* NewController) override;
 
 	virtual void Jump() override;
 

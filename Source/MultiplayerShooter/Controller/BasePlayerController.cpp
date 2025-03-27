@@ -2,7 +2,6 @@
 
 
 #include "BasePlayerController.h"
-#include "EnhancedInputComponent.h"
 #include "Components/Image.h"
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
@@ -51,8 +50,8 @@ void ABasePlayerController::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
-	CheckTimeSync(DeltaSeconds);
 	SetHUDTime();
+	CheckTimeSync(DeltaSeconds);
 	PollInit();
 	CheckPing(DeltaSeconds);
 }
@@ -453,6 +452,10 @@ void ABasePlayerController::HandleMatchHasStarted(bool bTeamsMatch)
 		{
 			BaseHUD->AddCharacterOverlay();
 		}
+		if (!BaseHUD->Announcement)
+		{
+			BaseHUD->AddAnnouncement();
+		}
 		if (BaseHUD->Announcement)
 		{
 			BaseHUD->Announcement->SetVisibility(ESlateVisibility::Hidden);
@@ -630,6 +633,7 @@ void ABasePlayerController::StopHighPingWarning()
 
 void ABasePlayerController::HideTeamScores()
 {
+	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Red, TEXT("HideTeamScores"));
 	BaseHUD = BaseHUD ? BaseHUD : Cast<ABaseHUD>(GetHUD());
 	if (!BaseHUD || !BaseHUD->CharacterOverlay || !BaseHUD->CharacterOverlay->RedTeamScore || !BaseHUD->CharacterOverlay->BlueTeamScore || !BaseHUD->CharacterOverlay->ScoreSpacer)
 	{
@@ -643,6 +647,7 @@ void ABasePlayerController::HideTeamScores()
 
 void ABasePlayerController::InitTeamScores()
 {
+	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Red, TEXT("InitTeamScores"));
 	BaseHUD = BaseHUD ? BaseHUD : Cast<ABaseHUD>(GetHUD());
 	if (!BaseHUD || !BaseHUD->CharacterOverlay || !BaseHUD->CharacterOverlay->RedTeamScore || !BaseHUD->CharacterOverlay->BlueTeamScore || !BaseHUD->CharacterOverlay->ScoreSpacer)
 	{
