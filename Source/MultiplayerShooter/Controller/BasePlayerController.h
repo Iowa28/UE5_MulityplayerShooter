@@ -133,6 +133,7 @@ private:
 	bool bInitializeWeaponAmmo = false;
 	int32 HUDCarriedAmmo;
 	bool bInitializeCarriedAmmo = false;
+	bool bInitializeTeamScores = false;
 
 	void HandleCooldown();
 	FString GetInfoText(const TArray<class ABasePlayerState*>& Players) const;

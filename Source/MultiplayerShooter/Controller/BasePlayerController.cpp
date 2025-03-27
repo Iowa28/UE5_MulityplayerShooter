@@ -85,6 +85,10 @@ void ABasePlayerController::PollInit()
 		{
 			SetHUDCarriedAmmo(HUDCarriedAmmo);
 		}
+		if (bInitializeTeamScores)
+		{
+			InitTeamScores();
+		}
 
 		if (bInitializeGrenades && GetPawn())
 		{
@@ -633,13 +637,14 @@ void ABasePlayerController::StopHighPingWarning()
 
 void ABasePlayerController::HideTeamScores()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Red, TEXT("HideTeamScores"));
 	BaseHUD = BaseHUD ? BaseHUD : Cast<ABaseHUD>(GetHUD());
 	if (!BaseHUD || !BaseHUD->CharacterOverlay || !BaseHUD->CharacterOverlay->RedTeamScore || !BaseHUD->CharacterOverlay->BlueTeamScore || !BaseHUD->CharacterOverlay->ScoreSpacer)
 	{
+		bInitializeTeamScores = true;
 		return;
 	}
-	
+
+	bInitializeTeamScores = false;
 	BaseHUD->CharacterOverlay->RedTeamScore->SetText(FText());
 	BaseHUD->CharacterOverlay->BlueTeamScore->SetText(FText());
 	BaseHUD->CharacterOverlay->ScoreSpacer->SetText(FText());
@@ -647,13 +652,14 @@ void ABasePlayerController::HideTeamScores()
 
 void ABasePlayerController::InitTeamScores()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Red, TEXT("InitTeamScores"));
 	BaseHUD = BaseHUD ? BaseHUD : Cast<ABaseHUD>(GetHUD());
 	if (!BaseHUD || !BaseHUD->CharacterOverlay || !BaseHUD->CharacterOverlay->RedTeamScore || !BaseHUD->CharacterOverlay->BlueTeamScore || !BaseHUD->CharacterOverlay->ScoreSpacer)
 	{
+		bInitializeTeamScores = true;
 		return;
 	}
-	
+
+	bInitializeTeamScores = false;
 	BaseHUD->CharacterOverlay->RedTeamScore->SetText(FText::FromString(FString("0")));
 	BaseHUD->CharacterOverlay->BlueTeamScore->SetText(FText::FromString(FString("0")));
 	BaseHUD->CharacterOverlay->ScoreSpacer->SetText(FText::FromString(FString("|")));
