@@ -95,11 +95,11 @@ void UMenu::OnFindSessions(const TArray<FOnlineSessionSearchResult>& SessionResu
 
 	if (bWasSuccessful)
 	{
-		GEngine->AddOnScreenDebugMessage(-1,3.f, FColor::Yellow, FString::Printf(TEXT("Found sessions: %d"), SessionResults.Num()));
+		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Yellow, FString::Printf(TEXT("Found sessions: %d"), SessionResults.Num()));
 	}
 	else
 	{
-		GEngine->AddOnScreenDebugMessage(-1,3.f, FColor::Red, TEXT("Sessions not found"));
+		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Red, TEXT("Sessions not found"));
 	}
 
 	for (auto Result : SessionResults)

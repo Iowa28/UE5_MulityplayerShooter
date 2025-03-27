@@ -39,18 +39,6 @@ void ABasePlayerController::OnPossess(APawn* aPawn)
 	}
 }
 
-void ABasePlayerController::SetupInputComponent()
-{
-	Super::SetupInputComponent();
-
-	if (!InputComponent) { return; }
-
-	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(InputComponent))
-	{
-		EnhancedInputComponent->BindAction(QuitAction, ETriggerEvent::Started, this, &ThisClass::ShowReturnToMainMenu);
-	}
-}
-
 void ABasePlayerController::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);

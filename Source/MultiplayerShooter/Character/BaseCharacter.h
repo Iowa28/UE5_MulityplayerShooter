@@ -117,6 +117,8 @@ protected:
 
 	void PollInit();
 
+	void ShowReturnToMainMenu();
+
 	/**
 	 * Hit boxes used for server-side rewind
 	 */
@@ -218,6 +220,9 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
 	UInputAction* SwapAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
+	UInputAction* QuitAction;
 	
 #pragma endregion Actions
 

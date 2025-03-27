@@ -222,6 +222,7 @@ void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Completed, this, &ThisClass::FireButtonReleased);
 		EnhancedInputComponent->BindAction(ReloadAction, ETriggerEvent::Started, this, &ThisClass::ReloadButtonPressed);
 		EnhancedInputComponent->BindAction(ThrowGrenadeAction, ETriggerEvent::Started, this, &ThisClass::ThrowGrenadeButtonPressed);
+		EnhancedInputComponent->BindAction(QuitAction, ETriggerEvent::Started, this, &ThisClass::ShowReturnToMainMenu);
 	}
 }
 
@@ -249,6 +250,15 @@ void ABaseCharacter::PollInit()
 				MulticastGainedTheLead();
 			}
 		}
+	}
+}
+
+void ABaseCharacter::ShowReturnToMainMenu()
+{
+	BasePlayerController = BasePlayerController ? BasePlayerController : Cast<ABasePlayerController>(GetController());
+	if (BasePlayerController)
+	{
+		BasePlayerController->ShowReturnToMainMenu();
 	}
 }
 

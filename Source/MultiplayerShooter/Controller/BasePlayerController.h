@@ -44,11 +44,12 @@ public:
 
 	void BroadcastElimination(APlayerState* Attacker, APlayerState* Victim);
 
+	void ShowReturnToMainMenu();
+
 protected:
 	virtual void BeginPlay() override;
 	
 	virtual void OnPossess(APawn* aPawn) override;
-	virtual void SetupInputComponent() override;
 
 	void SetHUDTime();
 	void PollInit();
@@ -76,7 +77,6 @@ protected:
 	void CheckPing(float DeltaSeconds);
 	void StartHighPingWarning();
 	void StopHighPingWarning();
-	void ShowReturnToMainMenu();
 
 	UFUNCTION(Client, Reliable)
 	void ClientEliminationAnnouncement(APlayerState* Attacker, APlayerState* Victim);
@@ -96,9 +96,6 @@ private:
 
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<UUserWidget> ReturnToMainMenuWidget;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	class UInputAction* QuitAction;
 
 	UPROPERTY()
 	class UReturnToMainMenu* ReturnToMainMenu;
