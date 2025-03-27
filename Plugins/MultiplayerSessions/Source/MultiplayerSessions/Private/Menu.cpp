@@ -51,15 +51,6 @@ bool UMenu::Initialize()
 		return false;
 	}
 
-	// if (HostButton)
-	// {
-	// 	HostButton->OnClicked.AddDynamic(this, &ThisClass::HostButtonClicked);
-	// }
-	// if (JoinButton)
-	// {
-	// 	JoinButton->OnClicked.AddDynamic(this, &ThisClass::JoinButtonClicked);
-	// }
-
 	return true;
 }
 
@@ -138,6 +129,10 @@ void UMenu::OnJoinSession(EOnJoinSessionCompleteResult::Type Result)
 			{
 				PlayerController->ClientTravel(Address, ETravelType::TRAVEL_Absolute);
 			}
+		}
+		if (!SessionInterface.IsValid() || Result == EOnJoinSessionCompleteResult::UnknownError)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Red, TEXT("Could not join to session"));
 		}
 	}
 }

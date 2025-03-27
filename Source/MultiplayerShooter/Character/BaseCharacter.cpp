@@ -874,6 +874,15 @@ void ABaseCharacter::ServerLeaveGame_Implementation()
 	{
 		GameMode->PlayerLeftGame(CharacterPlayerState);
 	}
+	else
+	{
+		OnLeftGame.Broadcast();
+		// if (UWorld* World = GetWorld())
+		// {
+		// 	World->ServerTravel(FString("/Game/Maps/ShooterMap?listen"));
+		// }
+		UGameplayStatics::OpenLevel(this, FName("/Game/Maps/StartupMap"), true);
+	}
 }
 #pragma endregion Elimination
 

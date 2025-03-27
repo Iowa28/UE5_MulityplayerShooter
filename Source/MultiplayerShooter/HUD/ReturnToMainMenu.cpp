@@ -101,8 +101,7 @@ void UReturnToMainMenu::ReturnButtonClicked()
 	{
 		if (const APlayerController* FirstPlayerController = World->GetFirstPlayerController())
 		{
-			ABaseCharacter* BaseCharacter = Cast<ABaseCharacter>(FirstPlayerController->GetPawn());
-			if (BaseCharacter)
+			if (ABaseCharacter* BaseCharacter = Cast<ABaseCharacter>(FirstPlayerController->GetPawn()))
 			{
 				BaseCharacter->ServerLeaveGame();
 				BaseCharacter->OnLeftGame.AddDynamic(this, &ThisClass::OnPlayerLeftGame);

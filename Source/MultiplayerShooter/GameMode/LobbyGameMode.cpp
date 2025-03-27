@@ -9,13 +9,15 @@ void ALobbyGameMode::PostLogin(APlayerController* NewPlayer)
 {
 	Super::PostLogin(NewPlayer);
 
-	const int32 NumberOfPlayers = GameState.Get()->PlayerArray.Num();
-
 	const UGameInstance* GameInstance = GetGameInstance();
 	if (!GameInstance) { return; }
-	
+
 	const UMultiplayerSessionsSubsystem* Subsystem = GameInstance->GetSubsystem<UMultiplayerSessionsSubsystem>();
 	check(Subsystem);
+
+	const int32 NumberOfPlayers = GameState.Get()->PlayerArray.Num();
+	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Yellow, FString::Printf(TEXT("NumberOfPlayers: %d"), NumberOfPlayers));
+	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Yellow, FString::Printf(TEXT("DesiredNumPublicConnections: %d"), Subsystem->DesiredNumPublicConnections));
 	
 	if (NumberOfPlayers == Subsystem->DesiredNumPublicConnections)
 	{
