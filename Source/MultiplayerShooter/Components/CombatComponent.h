@@ -253,5 +253,5 @@ private:
 public:
 	FORCEINLINE int32 GetGrenades() const { return Grenades; }
 
-	bool ShouldSwapWeapons() const { return EquippedWeapon && SecondaryWeapon; };
+	bool ShouldSwapWeapons() const;
 };

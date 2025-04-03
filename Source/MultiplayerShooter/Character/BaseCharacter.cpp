@@ -877,12 +877,8 @@ void ABaseCharacter::ServerLeaveGame_Implementation()
 	else
 	{
 		OnLeftGame.Broadcast();
-		// if (UWorld* World = GetWorld())
-		// {
-		// 	World->ServerTravel(FString("/Game/Maps/ShooterMap?listen"));
-		// }
-		UGameplayStatics::OpenLevel(this, FName("/Game/Maps/StartupMap"), true);
 	}
+	UGameplayStatics::OpenLevel(this, FName("/Game/Maps/StartupMap"), true);
 }
 #pragma endregion Elimination
 
@@ -969,7 +965,7 @@ void ABaseCharacter::PlayReloadMontage()
 #pragma region Equipment
 void ABaseCharacter::EquipButtonPressed()
 {
-	if (!bDisableGameplay && !IsHoldingTheFlag())
+	if (!bDisableGameplay)
 	{
 		if (CombatComponent->CombatState == ECombatState::ECS_Unoccupied)
 		{
@@ -1024,7 +1020,9 @@ void ABaseCharacter::ServerEquipButtonPressed_Implementation()
 
 void ABaseCharacter::ServerSwapButtonPressed_Implementation()
 {
-	if (CombatComponent && CombatComponent->ShouldSwapWeapons())
+	if (!CombatComponent) { return; }
+
+	if (CombatComponent->ShouldSwapWeapons() || IsHoldingTheFlag())
 	{
 		CombatComponent->SwapWeapons();
 	}

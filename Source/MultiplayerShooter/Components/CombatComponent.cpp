@@ -455,18 +455,37 @@ void UCombatComponent::FinishSwap()
 
 void UCombatComponent::FinishSwapAttachWeapons()
 {
+	if (bHoldingTheFlag)
+	{
+		bHoldingTheFlag = false;
+		if (Character)
+		{
+			Character->UnCrouch();
+		}
+		TheFlag->Dropped();
+		TheFlag = nullptr;
+		AttachWeaponToRightHand(EquippedWeapon);
+		return;
+	}
+	
 	AWeapon* TempWeapon = EquippedWeapon;
 	EquippedWeapon = SecondaryWeapon;
 	SecondaryWeapon = TempWeapon;
-	
-	EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
-	AttachWeaponToRightHand(EquippedWeapon);
-	EquippedWeapon->SetHUDAmmo();
-	UpdateCarriedAmmo();
-	PlayEquippedWeaponSound(EquippedWeapon);
-	
-	SecondaryWeapon->SetWeaponState(EWeaponState::EWS_EquippedSecondary);
-	AttachWeaponToBackpack(SecondaryWeapon);
+
+	if (EquippedWeapon)
+	{
+		EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
+		AttachWeaponToRightHand(EquippedWeapon);
+		EquippedWeapon->SetHUDAmmo();
+		UpdateCarriedAmmo();
+		PlayEquippedWeaponSound(EquippedWeapon);
+	}
+
+	if (SecondaryWeapon)
+	{
+		SecondaryWeapon->SetWeaponState(EWeaponState::EWS_EquippedSecondary);
+		AttachWeaponToBackpack(SecondaryWeapon);
+	}
 }
 
 #pragma endregion Swap
@@ -879,4 +898,9 @@ void UCombatComponent::OnRep_HoldingTheFlag()
 	{
 		Character->Crouch();
 	}
+}
+
+bool UCombatComponent::ShouldSwapWeapons() const
+{
+	return EquippedWeapon && SecondaryWeapon; 
 }

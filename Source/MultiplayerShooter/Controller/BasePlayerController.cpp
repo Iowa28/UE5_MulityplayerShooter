@@ -89,6 +89,10 @@ void ABasePlayerController::PollInit()
 		{
 			InitTeamScores();
 		}
+		if (bInitializeCountdown)
+		{
+			SetHUDMatchCountdown(HUDCountdownTime);
+		}
 
 		if (bInitializeGrenades && GetPawn())
 		{
@@ -255,14 +259,20 @@ void ABasePlayerController::SetHUDCarriedAmmo(int32 Ammo)
 void ABasePlayerController::SetHUDMatchCountdown(float CountdownTime)
 {
 	BaseHUD = BaseHUD ? BaseHUD : Cast<ABaseHUD>(GetHUD());
-	if (!BaseHUD || !BaseHUD->CharacterOverlay || !BaseHUD->CharacterOverlay->MatchCountdownText) { return; }
-
+	if (!BaseHUD || !BaseHUD->CharacterOverlay || !BaseHUD->CharacterOverlay->MatchCountdownText)
+	{
+		HUDCountdownTime = CountdownTime;
+		// bInitializeCountdown = true;
+		return;
+	}
+	
 	if (CountdownTime < 0.f)
 	{
 		BaseHUD->CharacterOverlay->MatchCountdownText->SetText(FText());
 		return;
 	}
 
+	bInitializeCountdown = false;
 	const int32 Minutes = FMath::FloorToInt(CountdownTime / 60.f);
 	const int32 Seconds = CountdownTime - Minutes * 60;
 	
@@ -273,7 +283,10 @@ void ABasePlayerController::SetHUDMatchCountdown(float CountdownTime)
 void ABasePlayerController::SetHUDAnnouncementCountdown(float CountdownTime)
 {
 	BaseHUD = BaseHUD ? BaseHUD : Cast<ABaseHUD>(GetHUD());
-	if (!BaseHUD || !BaseHUD->Announcement || !BaseHUD->Announcement->WarmupTime) { return; }
+	if (!BaseHUD || !BaseHUD->Announcement || !BaseHUD->Announcement->WarmupTime)
+	{
+		return;
+	}
 
 	if (CountdownTime < 0.f)
 	{
@@ -483,6 +496,10 @@ void ABasePlayerController::HandleCooldown()
 	if (BaseHUD)
 	{
 		BaseHUD->CharacterOverlay->RemoveFromParent();
+		if (!BaseHUD->Announcement)
+		{
+			BaseHUD->AddAnnouncement();
+		}
 		if (BaseHUD->Announcement && BaseHUD->Announcement->AnnouncementText && BaseHUD->Announcement->InfoText)
 		{
 			BaseHUD->Announcement->SetVisibility(ESlateVisibility::Visible);

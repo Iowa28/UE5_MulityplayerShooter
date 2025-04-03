@@ -37,6 +37,14 @@ void UMultiplayerSessionsSubsystem::CreateSession(int32 NumPublicConnections, FS
 
 	CreateSessionCompleteDelegateHandle = SessionInterface->AddOnCreateSessionCompleteDelegate_Handle(CreateSessionCompleteDelegate);
 
+	if (!IOnlineSubsystem::Get()->GetSubsystemName().IsValid() || IOnlineSubsystem::Get()->GetSubsystemName().IsNone() || IOnlineSubsystem::Get()->GetSubsystemName() == "NULL")
+	{
+		if (GEngine)
+		{
+			GEngine->AddOnScreenDebugMessage(-1,3.f, FColor::Red, TEXT("Steam subsystem is null! Enabling LAN match!"));
+		}
+	}
+
 	LastSessionSettings = MakeShareable(new FOnlineSessionSettings());
 	LastSessionSettings->bIsLANMatch = IOnlineSubsystem::Get()->GetSubsystemName() == "NULL";
 	//LastSessionSettings->bIsLANMatch = true;
@@ -67,6 +75,14 @@ void UMultiplayerSessionsSubsystem::FindSessions(int32 MaxSearchResults)
 	}
 
 	FindSessionsCompleteDelegateHandle = SessionInterface->AddOnFindSessionsCompleteDelegate_Handle(FindSessionsCompleteDelegate);
+
+	if (!IOnlineSubsystem::Get()->GetSubsystemName().IsValid() || IOnlineSubsystem::Get()->GetSubsystemName().IsNone() || IOnlineSubsystem::Get()->GetSubsystemName() == "NULL")
+	{
+		if (GEngine)
+		{
+			GEngine->AddOnScreenDebugMessage(-1,3.f, FColor::Red, TEXT("Steam subsystem is null! Searching LAN match!"));
+		}
+	}
 
 	LastSessionSearch = MakeShareable(new FOnlineSessionSearch());
 	LastSessionSearch->MaxSearchResults = MaxSearchResults;

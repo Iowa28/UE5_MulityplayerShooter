@@ -78,22 +78,19 @@ void UMenu::OnCreateSession(bool bWasSuccessful)
 
 void UMenu::OnFindSessions(const TArray<FOnlineSessionSearchResult>& SessionResults, bool bWasSuccessful)
 {
-	if (MultiplayerSessionsSubsystem == nullptr)
+	if (!MultiplayerSessionsSubsystem)
 	{
 		JoinButton->SetIsEnabled(true);
 		return;
 	}
 
-	if (bWasSuccessful)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Yellow, FString::Printf(TEXT("Found sessions: %d"), SessionResults.Num()));
-	}
-	else
+	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Yellow, FString::Printf(TEXT("Active sessions: %d"), SessionResults.Num()));
+	if (!bWasSuccessful)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Red, TEXT("Sessions not found"));
 	}
 
-	for (auto Result : SessionResults)
+	for (FOnlineSessionSearchResult Result : SessionResults)
 	{
 		FString SettingsValue;
 		Result.Session.SessionSettings.Get(FName("MatchType"), SettingsValue);
@@ -101,13 +98,13 @@ void UMenu::OnFindSessions(const TArray<FOnlineSessionSearchResult>& SessionResu
 		{
 			GEngine->AddOnScreenDebugMessage(-1,3.f, FColor::Red, TEXT("Session is not valid"));
 		}
-		if (SettingsValue == MatchType)
+		if (SettingsValue == "FreeForAll" || SettingsValue == "Teams" || SettingsValue == "Flags")
 		{
 			GEngine->AddOnScreenDebugMessage(-1,3.f, FColor::Green, FString::Printf(TEXT("Joining to: %s"), *Result.Session.OwningUserName));
 			MultiplayerSessionsSubsystem->JoinSession(Result);
 			return;
 		}
-		GEngine->AddOnScreenDebugMessage(-1,3.f, FColor::Red, FString::Printf(TEXT("Couldn't join to: %s"), *Result.Session.OwningUserName));
+		GEngine->AddOnScreenDebugMessage(-1,3.f, FColor::Red, FString::Printf(TEXT("Couldn't join to: %s with match type %s"), *Result.Session.OwningUserName, *SettingsValue));
 	}
 	
 	JoinButton->SetIsEnabled(true);
@@ -127,22 +124,24 @@ void UMenu::OnJoinSession(EOnJoinSessionCompleteResult::Type Result)
 			APlayerController* PlayerController = GetGameInstance()->GetFirstLocalPlayerController();
 			if (PlayerController)
 			{
-				PlayerController->ClientTravel(Address, ETravelType::TRAVEL_Absolute);
+				PlayerController->ClientTravel(Address, TRAVEL_Absolute);
 			}
 		}
 		if (!SessionInterface.IsValid() || Result == EOnJoinSessionCompleteResult::UnknownError)
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Red, TEXT("Could not join to session"));
+			GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Red, TEXT("Could not join to session. Unknown error."));
 		}
 	}
 }
 
 void UMenu::OnDestroySession(bool bWasSuccessful)
 {
+	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Yellow, TEXT("Session was destroyed."));
 }
 
 void UMenu::OnStartSession(bool bWasSuccessful)
 {
+	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Yellow, TEXT("Started new session."));
 }
 
 void UMenu::HostButtonClicked()
@@ -166,13 +165,12 @@ void UMenu::JoinButtonClicked()
 void UMenu::MenuTearDown()
 {
 	RemoveFromParent();
-	UWorld* World = GetWorld();
-	if (World)
+	if (const UWorld* World = GetWorld())
 	{
 		APlayerController* PlayerController = World->GetFirstPlayerController();
 		if (PlayerController)
 		{
-			FInputModeGameOnly InputModeData;
+			const FInputModeGameOnly InputModeData;
 			PlayerController->SetInputMode(InputModeData);
 			PlayerController->SetShowMouseCursor(false);
 		}
