@@ -31,6 +31,7 @@ public:
 	void InitTeamScores();
 	void SetHUDRedTeamScore(int32 RedScore);
 	void SetHUDBlueTeamScore(int32 BlueScore);
+	void SetHUDTime();
 
 	float GetServerTime() const;
 
@@ -51,7 +52,6 @@ protected:
 	
 	virtual void OnPossess(APawn* aPawn) override;
 
-	void SetHUDTime();
 	void PollInit();
 
 	UPROPERTY(EditDefaultsOnly, Category = "Time")

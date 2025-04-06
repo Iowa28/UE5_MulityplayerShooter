@@ -172,9 +172,6 @@ private:
 	float CurrentFOV;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Combat")
-	float ZoomedFOV = 30.f;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Combat")
 	float ZoomInterpSpeed = 20.f;
 
 	void InterpFOV(float DeltaTime);

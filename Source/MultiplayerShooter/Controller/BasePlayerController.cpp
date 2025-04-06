@@ -50,7 +50,7 @@ void ABasePlayerController::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
-	SetHUDTime();
+	//SetHUDTime();
 	CheckTimeSync(DeltaSeconds);
 	PollInit();
 	CheckPing(DeltaSeconds);
@@ -91,7 +91,7 @@ void ABasePlayerController::PollInit()
 		}
 		if (bInitializeCountdown)
 		{
-			SetHUDMatchCountdown(HUDCountdownTime);
+			//SetHUDMatchCountdown(HUDCountdownTime);
 		}
 
 		if (bInitializeGrenades && GetPawn())
@@ -236,6 +236,11 @@ void ABasePlayerController::SetHUDWeaponAmmo(int32 Ammo)
 		return;
 	}
 
+	if (const ABaseCharacter* BaseCharacter = Cast<ABaseCharacter>(GetPawn()))
+	{
+		FString PlayerName = BaseCharacter->GetName();
+		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Yellow, FString::Printf(TEXT("SetHUDWeaponAmmo. Player: %s"), *PlayerName));
+	}
 	bInitializeWeaponAmmo = false;
 	const FString AmmoText = FString::FromInt(Ammo);
 	BaseHUD->CharacterOverlay->WeaponAmmoAmount->SetText(FText::FromString(AmmoText));
@@ -258,11 +263,37 @@ void ABasePlayerController::SetHUDCarriedAmmo(int32 Ammo)
 
 void ABasePlayerController::SetHUDMatchCountdown(float CountdownTime)
 {
+	// FString PlayerName;
+	// if (const ABaseCharacter* BaseCharacter = Cast<ABaseCharacter>(GetPawn()))
+	// {
+	// 	PlayerName = BaseCharacter->GetName();
+	// }
+	// if (!GetHUD())
+	// {
+	// 	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Yellow, FString::Printf(TEXT("GetHUD() is null. Player: %s"), *PlayerName));
+	// }
+	// else
+	// {
+	// 	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Yellow, FString::Printf(TEXT("GetHUD() is OK. Player: %s"), *PlayerName));
+	// }
 	BaseHUD = BaseHUD ? BaseHUD : Cast<ABaseHUD>(GetHUD());
 	if (!BaseHUD || !BaseHUD->CharacterOverlay || !BaseHUD->CharacterOverlay->MatchCountdownText)
 	{
+		// if (!BaseHUD)
+		// {
+		// 	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Red, TEXT("Can't set match countdown because of BaseHUD"));
+		// }
+		// else if (!BaseHUD->CharacterOverlay)
+		// {
+		// 	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Red, TEXT("Can't set match countdown because of BaseHUD->CharacterOverlay"));
+		// }
+		// else if (!BaseHUD->CharacterOverlay->MatchCountdownText)
+		// {
+		// 	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Red, TEXT("Can't set match countdown because of BaseHUD->CharacterOverlay->MatchCountdownText"));
+		// }
+		
 		HUDCountdownTime = CountdownTime;
-		// bInitializeCountdown = true;
+		bInitializeCountdown = true;
 		return;
 	}
 	
@@ -282,18 +313,51 @@ void ABasePlayerController::SetHUDMatchCountdown(float CountdownTime)
 
 void ABasePlayerController::SetHUDAnnouncementCountdown(float CountdownTime)
 {
+	// FString PlayerName;
+	// if (const ABaseCharacter* BaseCharacter = Cast<ABaseCharacter>(GetPawn()))
+	// {
+	// 	PlayerName = BaseCharacter->GetName();
+	// }
+	// if (!GetHUD())
+	// {
+	// 	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Yellow, FString::Printf(TEXT("GetHUD() is null. Player: %s"), *PlayerName));
+	// }
+	// else
+	// {
+	// 	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Yellow, FString::Printf(TEXT("GetHUD() is OK. Player: %s"), *PlayerName));
+	// }
 	BaseHUD = BaseHUD ? BaseHUD : Cast<ABaseHUD>(GetHUD());
 	if (!BaseHUD || !BaseHUD->Announcement || !BaseHUD->Announcement->WarmupTime)
 	{
+		// if (!BaseHUD)
+		// {
+		// 	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Red, TEXT("Can't set announcement countdown because of BaseHUD"));
+		// }
+		// else if (!BaseHUD->Announcement)
+		// {
+		// 	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Red, TEXT("Can't set announcement countdown because of BaseHUD->Announcement"));
+		// }
+		// else if (!BaseHUD->Announcement->WarmupTime)
+		// {
+		// 	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Red, TEXT("Can't set announcement countdown because of BaseHUD->Announcement->WarmupTime"));
+		// }
 		return;
+	}
+
+	if (const ABaseCharacter* BaseCharacter = Cast<ABaseCharacter>(GetPawn()))
+	{
+		FString PlayerName = BaseCharacter->GetName();
+		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Yellow, FString::Printf(TEXT("SetHUDWeaponAmmo. Player: %s"), *PlayerName));
 	}
 
 	if (CountdownTime < 0.f)
 	{
+		GEngine->AddOnScreenDebugMessage(-1,3.f, FColor::Red, TEXT("CountdownTime<=0, hiding announcement..."));
 		BaseHUD->Announcement->WarmupTime->SetText(FText());
 		return;
 	}
 
+	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Yellow, FString::Printf(TEXT("SetHUDAnnouncementCountdown: %f"), CountdownTime));
 	const int32 Minutes = FMath::FloorToInt(CountdownTime / 60.f);
 	const int32 Seconds = CountdownTime - Minutes * 60;
 	
@@ -475,6 +539,7 @@ void ABasePlayerController::HandleMatchHasStarted(bool bTeamsMatch)
 		}
 		if (BaseHUD->Announcement)
 		{
+			GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Yellow, TEXT("Hiding Announcement."));
 			BaseHUD->Announcement->SetVisibility(ESlateVisibility::Hidden);
 		}
 	}
@@ -502,6 +567,7 @@ void ABasePlayerController::HandleCooldown()
 		}
 		if (BaseHUD->Announcement && BaseHUD->Announcement->AnnouncementText && BaseHUD->Announcement->InfoText)
 		{
+			GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Yellow, TEXT("Showing Announcement."));
 			BaseHUD->Announcement->SetVisibility(ESlateVisibility::Visible);
 			BaseHUD->Announcement->AnnouncementText->SetText(FText::FromString(Announcement::NewMatchStartsIn));
 			

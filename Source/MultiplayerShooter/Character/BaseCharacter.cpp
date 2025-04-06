@@ -246,6 +246,12 @@ void ABaseCharacter::Tick(float DeltaTime)
 	RotateInPlace(DeltaTime);
 	HideCharacterIfCameraIsClose();
 	PollInit();
+
+	BasePlayerController = BasePlayerController ? BasePlayerController : Cast<ABasePlayerController>(GetController());
+	if (BasePlayerController)
+	{
+		BasePlayerController->SetHUDTime();
+	}
 }
 
 void ABaseCharacter::PollInit()
@@ -428,8 +434,8 @@ void ABaseCharacter::Look(const FInputActionValue& Value)
 	if (Controller)
 	{
 		const FVector2D LookAxisVector = Value.Get<FVector2D>();
-		AddControllerYawInput(LookAxisVector.X);
-		AddControllerPitchInput(LookAxisVector.Y);
+		AddControllerYawInput(LookAxisVector.X * MouseSensitivity);
+		AddControllerPitchInput(LookAxisVector.Y * MouseSensitivity);
 	}
 }
 
@@ -495,6 +501,12 @@ void ABaseCharacter::AimButtonPressed()
 {
 	if (!bDisableGameplay && !IsHoldingTheFlag())
 	{
+		const AWeapon* Weapon = GetEquippedWeapon();
+		if (Weapon && FollowCamera)
+		{
+			const float SensitivityMultiplier = Weapon->GetZoomedFOV() / FollowCamera->FieldOfView;
+			MouseSensitivity = SensitivityMultiplier;
+		}
 		CombatComponent->SetAiming(true);
 	}
 }
@@ -503,6 +515,7 @@ void ABaseCharacter::AimButtonReleased()
 {
 	if (CombatComponent)
 	{
+		MouseSensitivity = DefaultMouseSensitivity;
 		CombatComponent->SetAiming(false);
 	}
 }

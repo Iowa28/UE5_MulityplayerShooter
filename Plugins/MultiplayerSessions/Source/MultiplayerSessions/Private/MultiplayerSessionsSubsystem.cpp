@@ -37,17 +37,14 @@ void UMultiplayerSessionsSubsystem::CreateSession(int32 NumPublicConnections, FS
 
 	CreateSessionCompleteDelegateHandle = SessionInterface->AddOnCreateSessionCompleteDelegate_Handle(CreateSessionCompleteDelegate);
 
-	if (!IOnlineSubsystem::Get()->GetSubsystemName().IsValid() || IOnlineSubsystem::Get()->GetSubsystemName().IsNone() || IOnlineSubsystem::Get()->GetSubsystemName() == "NULL")
+	const bool bSessionIsInvalid = !IOnlineSubsystem::Get()->GetSubsystemName().IsValid() || IOnlineSubsystem::Get()->GetSubsystemName().IsNone() || IOnlineSubsystem::Get()->GetSubsystemName() == "NULL";
+	if (bSessionIsInvalid && GEngine)
 	{
-		if (GEngine)
-		{
-			GEngine->AddOnScreenDebugMessage(-1,3.f, FColor::Red, TEXT("Steam subsystem is null! Enabling LAN match!"));
-		}
+		GEngine->AddOnScreenDebugMessage(-1,3.f, FColor::Red, TEXT("Steam subsystem is null! Creating LAN match!"));
 	}
 
 	LastSessionSettings = MakeShareable(new FOnlineSessionSettings());
-	LastSessionSettings->bIsLANMatch = IOnlineSubsystem::Get()->GetSubsystemName() == "NULL";
-	//LastSessionSettings->bIsLANMatch = true;
+	LastSessionSettings->bIsLANMatch = bSessionIsInvalid;
 	LastSessionSettings->NumPublicConnections = NumPublicConnections;
 	LastSessionSettings->bAllowJoinInProgress = true;
 	LastSessionSettings->bAllowJoinViaPresence = true;
@@ -76,20 +73,17 @@ void UMultiplayerSessionsSubsystem::FindSessions(int32 MaxSearchResults)
 
 	FindSessionsCompleteDelegateHandle = SessionInterface->AddOnFindSessionsCompleteDelegate_Handle(FindSessionsCompleteDelegate);
 
-	if (!IOnlineSubsystem::Get()->GetSubsystemName().IsValid() || IOnlineSubsystem::Get()->GetSubsystemName().IsNone() || IOnlineSubsystem::Get()->GetSubsystemName() == "NULL")
+	const bool bSessionIsInvalid = !IOnlineSubsystem::Get()->GetSubsystemName().IsValid() || IOnlineSubsystem::Get()->GetSubsystemName().IsNone() || IOnlineSubsystem::Get()->GetSubsystemName() == "NULL";
+	if (bSessionIsInvalid && GEngine)
 	{
-		if (GEngine)
-		{
-			GEngine->AddOnScreenDebugMessage(-1,3.f, FColor::Red, TEXT("Steam subsystem is null! Searching LAN match!"));
-		}
+		GEngine->AddOnScreenDebugMessage(-1,3.f, FColor::Red, TEXT("Steam subsystem is null! Searching LAN match!"));
 	}
 
 	LastSessionSearch = MakeShareable(new FOnlineSessionSearch());
 	LastSessionSearch->MaxSearchResults = MaxSearchResults;
-	LastSessionSearch->bIsLanQuery = IOnlineSubsystem::Get()->GetSubsystemName() == "NULL";
-	//LastSessionSearch->bIsLanQuery = true;
+	LastSessionSearch->bIsLanQuery = bSessionIsInvalid;
 	LastSessionSearch->QuerySettings.Set(SEARCH_PRESENCE, true, EOnlineComparisonOp::Equals);
-	LastSessionSearch->TimeoutInSeconds = 10000.f;
+	LastSessionSearch->TimeoutInSeconds = 20000.f;
 
 	const ULocalPlayer* LocalPlayer = GetWorld()->GetFirstLocalPlayerFromController();
 	
@@ -103,6 +97,11 @@ void UMultiplayerSessionsSubsystem::FindSessions(int32 MaxSearchResults)
 
 void UMultiplayerSessionsSubsystem::JoinSession(const FOnlineSessionSearchResult& SessionResult)
 {
+	if (const auto ExistingSession = SessionInterface->GetNamedSession(NAME_GameSession); ExistingSession != nullptr)
+	{
+		DestroySession();
+	}
+	
 	if (!SessionInterface.IsValid())
 	{
 		MultiplayerOnJoinSessionComplete.Broadcast(EOnJoinSessionCompleteResult::UnknownError);

@@ -111,6 +111,10 @@ void UReturnToMainMenu::ReturnButtonClicked()
 				ReturnButton->SetIsEnabled(true);
 			}
 		}
+		else
+		{
+			ReturnButton->SetIsEnabled(true);
+		}
 	}
 }
 

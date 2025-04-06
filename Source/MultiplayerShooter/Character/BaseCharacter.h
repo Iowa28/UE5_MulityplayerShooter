@@ -256,6 +256,10 @@ private:
 	float AimOffsetPitch;
 	FRotator StartingAimRotation;
 
+	float DefaultMouseSensitivity = 1.f;
+	float AimMouseSensitivity = 0.5f;
+	float MouseSensitivity = 1.f;
+
 	ETurningInPlace TurningInPlace;
 
 	void TurnInPlace(float DeltaTime);
